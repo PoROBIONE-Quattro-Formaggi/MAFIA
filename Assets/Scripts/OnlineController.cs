@@ -1,9 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
 public class OnlineController : NetworkBehaviour
 {
+    [SerializeField] private GameObject objToSpawn;
+
     private readonly NetworkVariable<int> _someNumber = new(0, NetworkVariableReadPermission.Everyone,
         NetworkVariableWritePermission.Owner);
 
@@ -19,7 +22,7 @@ public class OnlineController : NetworkBehaviour
     {
         public int Int;
         public bool Bool;
-        public string String;
+        public FixedString128Bytes String; // Cannot use normal string because of the memory allocation
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -51,5 +54,21 @@ public class OnlineController : NetworkBehaviour
     public void StartClient()
     {
         NetworkManager.Singleton.StartClient();
+    }
+
+    // Both functions are used for network objects to synchronize between clients
+    // Only server can spawn/despawn objects - if client wants to do that use ServerRpc
+    public void SpawnObject()
+    {
+        var spawnedGameObject = Instantiate(objToSpawn);
+        spawnedGameObject.GetComponent<NetworkObject>().Spawn(true);
+    }
+
+    public void DespawnObject(GameObject obj)
+    {
+        // Has to be the NetworkObject
+        obj.GetComponent<NetworkObject>().Despawn();
+        // OR
+        Destroy(obj); // Should work too, because NetworkObject handles despawning on destroy automatically
     }
 }
