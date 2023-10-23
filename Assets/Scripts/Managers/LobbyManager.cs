@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataStorage;
@@ -11,14 +12,26 @@ namespace Managers
 {
     public class LobbyManager : MonoBehaviour
     {
-        public TextMeshProUGUI debug;
+        public static LobbyManager Instance { get; private set; }
         public TMP_InputField codeInputField;
+        public TMP_InputField townName;
+        public TMP_InputField maxPlayers;
+        public GameObject lobbyButtonsParent;
 
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
+        private bool _isPrivate = true;
+        private readonly List<GameObject> _lobbyButtons = new();
 
         private void Start()
         {
+            Instance = this;
+            foreach (Transform lobbyButtonTransform in lobbyButtonsParent.transform)
+            {
+                if (!lobbyButtonTransform.gameObject.name.Contains("Lobby")) continue;
+                Debug.Log(lobbyButtonTransform.gameObject.name);
+                _lobbyButtons.Add(lobbyButtonTransform.gameObject);
+            }
             InvokeRepeating(nameof(HandleLobbyHeartbeat), 0f, 15f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 1.1f);
         }
@@ -48,10 +61,26 @@ namespace Managers
             return AuthenticationService.Instance.PlayerId == _joinedLobby.HostId;
         }
 
-        public async void CreateLobby(
+        public void CreateLobby()
+        {
+            var maxPlayersInt = 5;
+            try
+            {
+                maxPlayersInt = int.Parse(maxPlayers.text);
+            }
+            catch (Exception)
+            {
+                Debug.Log("Can't convert to int");
+            }
+            CreateLobbyAsync("Narrator", townName.text, maxPlayersInt, _isPrivate, "");
+        }
+        
+        
+
+        private async void CreateLobbyAsync(
             string playerName,
             string lobbyName,
-            int maxPlayers,
+            int maxPlayersInt,
             bool isPrivate,
             string cityName
         )
@@ -96,20 +125,46 @@ namespace Managers
             };
             try
             {
-                _hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayers, createLobbyOptions);
+                _hostLobby = await LobbyService.Instance.CreateLobbyAsync(lobbyName, maxPlayersInt, createLobbyOptions);
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
                 return;
             }
 
             _joinedLobby = _hostLobby; //Because creator automatically joins the lobby
-            debug.text +=
-                $"\nLobby '{_hostLobby.Name}' Created. Max players: {_hostLobby.MaxPlayers}. Code: {_hostLobby.LobbyCode}";
+            var message = $"\nLobby '{_hostLobby.Name}' Created. Max players: {_hostLobby.MaxPlayers}. Code: {_hostLobby.LobbyCode}. Private: {_hostLobby.IsPrivate}";
+            Debug.Log(message);
         }
 
-        public async Task<List<Lobby>> GetLobbiesList()
+        public void SetPublic()
+        {
+            _isPrivate = false;
+        }
+
+        public void SetPrivate()
+        {
+            _isPrivate = true;
+        }
+
+        public async void AssignLobbiesToButtons()
+        {
+            var lobbies = await GetLobbiesList();
+            for (var i = 0; i < lobbies.Count; i++)
+            {
+                var tmpObj = _lobbyButtons[i].GetComponentInChildren<TextMeshPro>();
+                tmpObj.text = tmpObj.gameObject.name switch
+                {
+                    "CityName" => lobbies[i].Name,
+                    "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
+                    _ => tmpObj.text
+                };
+                _lobbyButtons[i].SetActive(true);
+            }
+        }
+        
+        private static async Task<List<Lobby>> GetLobbiesList()
         {
             var filters = new List<QueryFilter>
             {
@@ -121,7 +176,7 @@ namespace Managers
             };
             var queryLobbiesOptions = new QueryLobbiesOptions
             {
-                Count = 25,
+                Count = 6,
                 Filters = filters,
                 Order = order
             };
@@ -132,11 +187,11 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
                 return new List<Lobby>();
             }
 
-            debug.text += $"\nNum of lobbies: {queryResponse.Results.Count}";
+            Debug.Log($"\nNum of lobbies: {queryResponse.Results.Count}");
             return queryResponse.Results;
         }
 
@@ -164,11 +219,11 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
                 return;
             }
 
-            debug.text += $"\nJoined '{_joinedLobby.Name}' lobby.";
+            Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
         }
 
         public List<Player> GetPlayersListInLobby()
@@ -186,7 +241,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
             }
         }
 
@@ -201,7 +256,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
             }
 
             PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
@@ -227,7 +282,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                debug.text += $"\n{e}";
+                Debug.Log(e);
             }
 
             _joinedLobby = null;
