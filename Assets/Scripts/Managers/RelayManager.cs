@@ -35,7 +35,7 @@ namespace Managers
             if (_instance == null)
             {
                 _instance = this;
-                //TODO make it root object
+                transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
             }
             else

@@ -12,8 +12,8 @@ namespace Managers
         private async void Start()
         {
             await UnityServices.InitializeAsync();
-            AuthenticationService.Instance.SignedIn += OnPlayerSignIn;
             await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            AuthenticationService.Instance.SignedIn += OnPlayerSignIn;
         }
 
         private void OnPlayerSignIn()
