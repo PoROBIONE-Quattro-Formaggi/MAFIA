@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataStorage;
 using TMPro;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
@@ -11,17 +11,14 @@ namespace Managers
 {
     public class LobbyManager : MonoBehaviour
     {
-        public static LobbyManager Instance { get; private set; }
         public TextMeshProUGUI debug;
         public TMP_InputField codeInputField;
 
-        private const string KeyStartGame = "KEY_START_GAME";
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
 
-        private async void Start()
+        private void Start()
         {
-            Instance = this;
             InvokeRepeating(nameof(HandleLobbyHeartbeat), 0f, 15f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 1.1f);
         }
@@ -36,11 +33,14 @@ namespace Managers
         {
             if (_joinedLobby == null) return;
             _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
-            if (_joinedLobby.Data[KeyStartGame].Value == "0") return;
-            if (!IsLobbyHost())
-            {
-                // TODO join relay game room here
-            }
+            if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
+            if (IsLobbyHost()) return;
+            var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
+            _joinedLobby = null;
+            PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
+            PlayerPrefs.SetInt(PpKeys.KeyIsHost, 0);
+            PlayerPrefs.Save();
+            SceneChanger.ChangeToGameScene();
         }
 
         private bool IsLobbyHost()
@@ -79,13 +79,15 @@ namespace Managers
                     )
                 },
                 {
-                    KeyStartGame,
+                    PpKeys.KeyStartGame,
                     new DataObject(
                         DataObject.VisibilityOptions.Member,
                         "0"
                     )
                 }
             };
+            PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
+            PlayerPrefs.Save();
             var createLobbyOptions = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
@@ -159,7 +161,6 @@ namespace Managers
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByCodeAsync(code, joinLobbyByCodeOptions);
-                var sfs = Lobbies.Instance.GetJoinedLobbiesAsync();
             }
             catch (LobbyServiceException e)
             {
@@ -192,12 +193,24 @@ namespace Managers
         public async void StartGame()
         {
             if (!IsLobbyHost()) return;
-            // TODO call relay function to get relay code
-            var relayCode = "";
+            var relayCode = "0";
+            var maxClientsNum = _hostLobby.Players.Count - 1;
+            try
+            {
+                relayCode = await RelayManager.Instance.GetRelayCode(maxClientsNum);
+            }
+            catch (LobbyServiceException e)
+            {
+                debug.text += $"\n{e}";
+            }
+
+            PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
+            PlayerPrefs.SetInt(PpKeys.KeyIsHost, 1);
+            PlayerPrefs.Save();
             var data = new Dictionary<string, DataObject>
             {
                 {
-                    KeyStartGame,
+                    PpKeys.KeyStartGame,
                     new DataObject(
                         DataObject.VisibilityOptions.Member,
                         relayCode
@@ -210,12 +223,16 @@ namespace Managers
             };
             try
             {
-                _joinedLobby = await Lobbies.Instance.UpdateLobbyAsync(_joinedLobby.Id, updateLobbyOption);
+                await Lobbies.Instance.UpdateLobbyAsync(_joinedLobby.Id, updateLobbyOption);
             }
             catch (LobbyServiceException e)
             {
                 debug.text += $"\n{e}";
             }
+
+            _joinedLobby = null;
+            _hostLobby = null;
+            SceneChanger.ChangeToGameScene();
         }
     }
 }

@@ -9,12 +9,8 @@ using UnityEngine;
 
 public class TestRelay : MonoBehaviour
 {
-    // TODO Unity Services like in lobby - maybe make one class or sum
-    public static TestRelay Instance { get; private set; }
-
     private async void Start()
     {
-        Instance = this;
         await UnityServices.InitializeAsync();
         AuthenticationService.Instance.SignedIn += OnSignedIn;
         await AuthenticationService.Instance.SignInAnonymouslyAsync();
