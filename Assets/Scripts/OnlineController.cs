@@ -56,10 +56,10 @@ public class OnlineController : NetworkBehaviour
         NetworkManager.Singleton.StartClient();
     }
 
-    // Both functions are used for network objects to synchronize between clients
-    // Only server can spawn/despawn objects - if client wants to do that use ServerRpc
     public void SpawnObject()
     {
+        // Both functions are used for network objects to synchronize between clients
+        // Only server can spawn/despawn objects - if client wants to do that use ServerRpc
         var spawnedGameObject = Instantiate(objToSpawn);
         spawnedGameObject.GetComponent<NetworkObject>().Spawn(true);
     }
