@@ -12,26 +12,53 @@ namespace Managers
 {
     public class LobbyManager : MonoBehaviour
     {
-        public static LobbyManager Instance { get; private set; }
+        public static LobbyManager Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = FindObjectOfType<LobbyManager>();
+                }
+
+                return _instance;
+            }
+        }
+
         public TMP_InputField codeInputField;
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
         public GameObject lobbyButtonsParent;
 
+        private static LobbyManager _instance;
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
         private bool _isPrivate = true;
+        private float _lastLobbyServiceCall;
         private readonly List<GameObject> _lobbyButtons = new();
+
+        private void Awake()
+        {
+            if (_instance == null)
+            {
+                _instance = this;
+                transform.SetParent(null);
+                DontDestroyOnLoad(gameObject);
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
 
         private void Start()
         {
-            Instance = this;
-            foreach (Transform lobbyButtonTransform in lobbyButtonsParent.transform)
+            foreach (var lobbyButtonTransform in lobbyButtonsParent.GetComponentsInChildren<Transform>(true))
             {
                 if (!lobbyButtonTransform.gameObject.name.Contains("Lobby")) continue;
-                Debug.Log(lobbyButtonTransform.gameObject.name);
                 _lobbyButtons.Add(lobbyButtonTransform.gameObject);
             }
+
             InvokeRepeating(nameof(HandleLobbyHeartbeat), 0f, 15f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 1.1f);
         }
@@ -40,11 +67,13 @@ namespace Managers
         {
             if (_hostLobby == null) return;
             await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
+            _lastLobbyServiceCall = Time.time;
         }
 
         private async void HandleLobbyPollForUpdates()
         {
             if (_joinedLobby == null) return;
+            if (Time.time - _lastLobbyServiceCall < 1) return;
             _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
             if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
             if (IsLobbyHost()) return;
@@ -72,10 +101,10 @@ namespace Managers
             {
                 Debug.Log("Can't convert to int");
             }
+
             CreateLobbyAsync("Narrator", townName.text, maxPlayersInt, _isPrivate, "");
         }
-        
-        
+
 
         private async void CreateLobbyAsync(
             string playerName,
@@ -134,7 +163,8 @@ namespace Managers
             }
 
             _joinedLobby = _hostLobby; //Because creator automatically joins the lobby
-            var message = $"\nLobby '{_hostLobby.Name}' Created. Max players: {_hostLobby.MaxPlayers}. Code: {_hostLobby.LobbyCode}. Private: {_hostLobby.IsPrivate}";
+            var message =
+                $"\nLobby '{_hostLobby.Name}' Created. Max players: {_hostLobby.MaxPlayers}. Code: {_hostLobby.LobbyCode}. Private: {_hostLobby.IsPrivate}";
             Debug.Log(message);
         }
 
@@ -153,17 +183,20 @@ namespace Managers
             var lobbies = await GetLobbiesList();
             for (var i = 0; i < lobbies.Count; i++)
             {
-                var tmpObj = _lobbyButtons[i].GetComponentInChildren<TextMeshPro>();
-                tmpObj.text = tmpObj.gameObject.name switch
+                foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
                 {
-                    "CityName" => lobbies[i].Name,
-                    "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
-                    _ => tmpObj.text
-                };
+                    lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
+                    {
+                        "CityName" => lobbies[i].Name,
+                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
+                        _ => lobbyButtonChild.text
+                    };
+                }
+
                 _lobbyButtons[i].SetActive(true);
             }
         }
-        
+
         private static async Task<List<Lobby>> GetLobbiesList()
         {
             var filters = new List<QueryFilter>
