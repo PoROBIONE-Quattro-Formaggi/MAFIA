@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 namespace Managers
@@ -8,6 +9,7 @@ namespace Managers
 
         private void Awake()
         {
+            if (FindObjectOfType<NetworkManager>() != null) return;
             Instantiate(networkManager);
         }
     }
