@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataStorage;
 using TMPro;
+using UI;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Managers
 {
@@ -28,6 +30,7 @@ namespace Managers
         public TMP_InputField codeInputField;
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
+        public TMP_InputField inputPlayerName;
         public GameObject lobbyButtonsParent;
 
         private static LobbyManager _instance;
@@ -35,6 +38,7 @@ namespace Managers
         private Lobby _joinedLobby;
         private bool _isPrivate = true;
         private float _lastLobbyServiceCall;
+        private string _lobbyCodeToJoin;
         private readonly List<GameObject> _lobbyButtons = new();
 
         private void Awake()
@@ -193,8 +197,25 @@ namespace Managers
                     };
                 }
 
+                var joinLobbyCode = lobbies[i].LobbyCode;
+                _lobbyButtons[i].GetComponent<Button>().onClick
+                    .AddListener(() => HandleJoinLobbyClicked(joinLobbyCode));
                 _lobbyButtons[i].SetActive(true);
             }
+        }
+
+        private void HandleJoinLobbyClicked(string joinLobbyCode)
+        {
+            _lobbyCodeToJoin = joinLobbyCode;
+            ScreenChanger.Instance.ChangeToSetNameScreen();
+        }
+
+        public void PlayerNameEntered()
+        {
+            var code = _lobbyCodeToJoin;
+            var nickname = inputPlayerName.text;
+            JoinLobbyByCode(code, nickname);
+            // ScreenChanger.Instance.ChangeToLobbyScreen //TODO
         }
 
         private static async Task<List<Lobby>> GetLobbiesList()
