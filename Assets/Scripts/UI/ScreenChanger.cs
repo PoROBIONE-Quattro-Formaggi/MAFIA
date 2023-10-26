@@ -1,3 +1,4 @@
+using System;
 using DataStorage;
 using Managers;
 using UnityEngine;
@@ -6,7 +7,13 @@ namespace UI
 {
     public class ScreenChanger : MonoBehaviour
     {
+        public static ScreenChanger Instance { get; private set; }
         public GameObject screensParent;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
 
         private void DisableAll()
         {
