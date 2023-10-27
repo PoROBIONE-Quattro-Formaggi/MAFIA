@@ -38,8 +38,12 @@ namespace Managers
         private Lobby _joinedLobby;
         private bool _isPrivate = true;
         private float _lastLobbyServiceCall;
+        private float _lastHeartbeatSent;
         private string _lobbyToJoinID;
+        private bool _polling;
+        private bool _heartbeating;
         private const float LobbyPollPeriod = 1.1f;
+        private const float HeartbeatPeriod = 15f;
         private readonly List<GameObject> _lobbyButtons = new();
 
         private void Awake()
@@ -64,27 +68,52 @@ namespace Managers
                 _lobbyButtons.Add(lobbyButtonTransform.gameObject);
             }
 
-            InvokeRepeating(nameof(HandleLobbyHeartbeat), 0f, 15f);
+            InvokeRepeating(nameof(HandleLobbyHeartbeatAndHostLobbyPoll), 0f, 0.1f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 0.1f);
         }
 
-        private async void HandleLobbyHeartbeat()
+        private async void HandleLobbyHeartbeatAndHostLobbyPoll()
         {
             if (_hostLobby == null) return;
-            try
+            if (!IsLobbyHost()) return;
+            if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
+            if (Time.time - _lastHeartbeatSent < HeartbeatPeriod)
             {
-                _lastLobbyServiceCall = Time.time;
-                await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
+                if (_polling) return;
+                try
+                {
+                    _lastLobbyServiceCall = Time.time;
+                    _polling = true;
+                    _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+                    _polling = false;
+                }
+                catch (LobbyServiceException e)
+                {
+                    Debug.Log(e);
+                }
             }
-            catch (LobbyServiceException e)
+            else
             {
-                Debug.Log(e);
+                if (_heartbeating) return;
+                try
+                {
+                    _lastLobbyServiceCall = Time.time;
+                    _lastHeartbeatSent = Time.time;
+                    _heartbeating = true;
+                    await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
+                    _heartbeating = false;
+                }
+                catch (LobbyServiceException e)
+                {
+                    Debug.Log(e);
+                }
             }
         }
 
         private async void HandleLobbyPollForUpdates()
         {
             if (_joinedLobby == null) return;
+            if (IsLobbyHost()) return;
             if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
             try
             {
@@ -300,8 +329,6 @@ namespace Managers
                 };
                 JoinLobbyByID(lobbyID, joinLobbyByIdOptions);
             }
-
-            Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
         }
 
         private async void JoinLobbyByCode(string code, JoinLobbyByCodeOptions joinLobbyByCodeOptions)
@@ -309,6 +336,7 @@ namespace Managers
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByCodeAsync(code, joinLobbyByCodeOptions);
+                Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
             }
             catch (LobbyServiceException e)
             {
@@ -321,6 +349,7 @@ namespace Managers
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyID, joinLobbyByIdOptions);
+                Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
             }
             catch (LobbyServiceException e)
             {
