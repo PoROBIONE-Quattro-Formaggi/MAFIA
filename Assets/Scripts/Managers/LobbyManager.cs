@@ -38,7 +38,8 @@ namespace Managers
         private Lobby _joinedLobby;
         private bool _isPrivate = true;
         private float _lastLobbyServiceCall;
-        private string _lobbyCodeToJoin;
+        private string _lobbyToJoinID;
+        private const float LobbyPollPeriod = 1.1f;
         private readonly List<GameObject> _lobbyButtons = new();
 
         private void Awake()
@@ -64,21 +65,38 @@ namespace Managers
             }
 
             InvokeRepeating(nameof(HandleLobbyHeartbeat), 0f, 15f);
-            InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 1.1f);
+            InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 0.1f);
         }
 
         private async void HandleLobbyHeartbeat()
         {
             if (_hostLobby == null) return;
-            await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
-            _lastLobbyServiceCall = Time.time;
+            try
+            {
+                _lastLobbyServiceCall = Time.time;
+                await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
         }
 
         private async void HandleLobbyPollForUpdates()
         {
             if (_joinedLobby == null) return;
-            if (Time.time - _lastLobbyServiceCall < 1) return;
-            _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+            if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
+            try
+            {
+                _lastLobbyServiceCall = Time.time;
+                _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+                return;
+            }
+
             if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
             if (IsLobbyHost()) return;
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
@@ -197,24 +215,26 @@ namespace Managers
                     };
                 }
 
-                var joinLobbyCode = lobbies[i].LobbyCode;
+                var lobbyId = lobbies[i].Id;
                 _lobbyButtons[i].GetComponent<Button>().onClick
-                    .AddListener(() => HandleJoinLobbyClicked(joinLobbyCode));
+                    .AddListener(() => HandleJoinLobbyClicked(lobbyId));
                 _lobbyButtons[i].SetActive(true);
             }
         }
 
-        private void HandleJoinLobbyClicked(string joinLobbyCode)
+        private void HandleJoinLobbyClicked(string lobbyID)
         {
-            _lobbyCodeToJoin = joinLobbyCode;
+            _lobbyToJoinID = lobbyID;
+            Debug.Log($"HandleJoinLobbyClicked: {_lobbyToJoinID}");
             ScreenChanger.Instance.ChangeToSetNameScreen();
         }
 
         public void PlayerNameEntered()
         {
-            var code = _lobbyCodeToJoin;
+            var lobbyID = _lobbyToJoinID;
+            Debug.Log($"PlayerNameEntered: {lobbyID}");
             var nickname = inputPlayerName.text;
-            JoinLobbyByCode(code, nickname);
+            JoinLobby(lobbyID: lobbyID, playerName: nickname);
             // ScreenChanger.Instance.ChangeToLobbyScreen //TODO
         }
 
@@ -249,7 +269,7 @@ namespace Managers
             return queryResponse.Results;
         }
 
-        public async void JoinLobbyByCode(string code, string playerName = "Anonymous")
+        private void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
             var player = new Player
             {
@@ -263,10 +283,29 @@ namespace Managers
                     }
                 }
             };
-            var joinLobbyByCodeOptions = new JoinLobbyByCodeOptions
+
+            if (lobbyID == null && code != null)
             {
-                Player = player
-            };
+                var joinLobbyByCodeOptions = new JoinLobbyByCodeOptions
+                {
+                    Player = player
+                };
+                JoinLobbyByCode(code, joinLobbyByCodeOptions);
+            }
+            else if (lobbyID != null && code == null)
+            {
+                var joinLobbyByIdOptions = new JoinLobbyByIdOptions
+                {
+                    Player = player
+                };
+                JoinLobbyByID(lobbyID, joinLobbyByIdOptions);
+            }
+
+            Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
+        }
+
+        private async void JoinLobbyByCode(string code, JoinLobbyByCodeOptions joinLobbyByCodeOptions)
+        {
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByCodeAsync(code, joinLobbyByCodeOptions);
@@ -274,10 +313,19 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.Log(e);
-                return;
             }
+        }
 
-            Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
+        private async void JoinLobbyByID(string lobbyID, JoinLobbyByIdOptions joinLobbyByIdOptions)
+        {
+            try
+            {
+                _joinedLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyID, joinLobbyByIdOptions);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
         }
 
         public List<Player> GetPlayersListInLobby()
