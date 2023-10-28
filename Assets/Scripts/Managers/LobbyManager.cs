@@ -1,14 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataStorage;
-using TMPro;
-using UI;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Managers
 {
@@ -27,24 +23,16 @@ namespace Managers
             }
         }
 
-        public TMP_InputField codeInputField;
-        public TMP_InputField townName;
-        public TMP_InputField maxPlayers;
-        public TMP_InputField inputPlayerName;
-        public GameObject lobbyButtonsParent;
-
         private static LobbyManager _instance;
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
-        private bool _isPrivate = true;
+        private int _lastPlayersCount;
         private float _lastLobbyServiceCall;
         private float _lastHeartbeatSent;
-        private string _lobbyToJoinID;
         private bool _polling;
-        private bool _heartbeating;
+        private bool _sendingHeartbeat;
         private const float LobbyPollPeriod = 1.1f;
         private const float HeartbeatPeriod = 15f;
-        private readonly List<GameObject> _lobbyButtons = new();
 
         private void Awake()
         {
@@ -62,12 +50,6 @@ namespace Managers
 
         private void Start()
         {
-            foreach (var lobbyButtonTransform in lobbyButtonsParent.GetComponentsInChildren<Transform>(true))
-            {
-                if (!lobbyButtonTransform.gameObject.name.Contains("Lobby")) continue;
-                _lobbyButtons.Add(lobbyButtonTransform.gameObject);
-            }
-
             InvokeRepeating(nameof(HandleLobbyHeartbeatAndHostLobbyPoll), 0f, 0.1f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 0.1f);
         }
@@ -94,14 +76,14 @@ namespace Managers
             }
             else
             {
-                if (_heartbeating) return;
+                if (_sendingHeartbeat) return;
                 try
                 {
                     _lastLobbyServiceCall = Time.time;
                     _lastHeartbeatSent = Time.time;
-                    _heartbeating = true;
+                    _sendingHeartbeat = true;
                     await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
-                    _heartbeating = false;
+                    _sendingHeartbeat = false;
                 }
                 catch (LobbyServiceException e)
                 {
@@ -126,6 +108,7 @@ namespace Managers
                 return;
             }
 
+            CheckIfNewHost();
             if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
             if (IsLobbyHost()) return;
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
@@ -136,28 +119,25 @@ namespace Managers
             SceneChanger.ChangeToGameScene();
         }
 
-        private bool IsLobbyHost()
+        public bool IsLobbyHost()
         {
             return AuthenticationService.Instance.PlayerId == _joinedLobby.HostId;
         }
 
-        public void CreateLobby()
+        private void CheckIfNewHost()
         {
-            var maxPlayersInt = 5;
-            try
+            if (_joinedLobby.Players.Count < _lastPlayersCount)
             {
-                maxPlayersInt = int.Parse(maxPlayers.text);
-            }
-            catch (Exception)
-            {
-                Debug.Log("Can't convert to int");
+                if (IsLobbyHost() && _hostLobby == null)
+                {
+                    _hostLobby = _joinedLobby;
+                }
             }
 
-            CreateLobbyAsync("Narrator", townName.text, maxPlayersInt, _isPrivate, "");
+            _lastPlayersCount = _joinedLobby.Players.Count;
         }
 
-
-        private async void CreateLobbyAsync(
+        public async void CreateLobbyAsync(
             string playerName,
             string lobbyName,
             int maxPlayersInt,
@@ -219,55 +199,7 @@ namespace Managers
             Debug.Log(message);
         }
 
-        public void SetPublic()
-        {
-            _isPrivate = false;
-        }
-
-        public void SetPrivate()
-        {
-            _isPrivate = true;
-        }
-
-        public async void AssignLobbiesToButtons()
-        {
-            var lobbies = await GetLobbiesList();
-            for (var i = 0; i < lobbies.Count; i++)
-            {
-                foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
-                {
-                    lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
-                    {
-                        "CityName" => lobbies[i].Name,
-                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
-                        _ => lobbyButtonChild.text
-                    };
-                }
-
-                var lobbyId = lobbies[i].Id;
-                _lobbyButtons[i].GetComponent<Button>().onClick
-                    .AddListener(() => HandleJoinLobbyClicked(lobbyId));
-                _lobbyButtons[i].SetActive(true);
-            }
-        }
-
-        private void HandleJoinLobbyClicked(string lobbyID)
-        {
-            _lobbyToJoinID = lobbyID;
-            Debug.Log($"HandleJoinLobbyClicked: {_lobbyToJoinID}");
-            ScreenChanger.Instance.ChangeToSetNameScreen();
-        }
-
-        public void PlayerNameEntered()
-        {
-            var lobbyID = _lobbyToJoinID;
-            Debug.Log($"PlayerNameEntered: {lobbyID}");
-            var nickname = inputPlayerName.text;
-            JoinLobby(lobbyID: lobbyID, playerName: nickname);
-            // ScreenChanger.Instance.ChangeToLobbyScreen //TODO
-        }
-
-        private static async Task<List<Lobby>> GetLobbiesList()
+        public static async Task<List<Lobby>> GetLobbiesList()
         {
             var filters = new List<QueryFilter>
             {
@@ -298,7 +230,7 @@ namespace Managers
             return queryResponse.Results;
         }
 
-        private void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
+        public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
             var player = new Player
             {
@@ -368,6 +300,22 @@ namespace Managers
             {
                 await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id,
                     AuthenticationService.Instance.PlayerId);
+                _hostLobby = null;
+                _joinedLobby = null;
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.Log(e);
+            }
+        }
+
+        public async void DeleteLobby()
+        {
+            if (!IsLobbyHost()) return;
+            try
+            {
+                await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
+                _hostLobby = null;
                 _joinedLobby = null;
             }
             catch (LobbyServiceException e)

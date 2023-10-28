@@ -7,5 +7,7 @@ namespace DataStorage
         public const string CreateLobbyScreen = "CreateLobbyScreen";
         public const string EnterCodeScreen = "EnterCodeScreen";
         public const string SetNameScreen = "SetNameScreen";
+        public const string LobbyHostScreen = "LobbyHostScreen";
+        public const string LobbyPlayerScreen = "LobbyPlayerScreen";
     }
 }
