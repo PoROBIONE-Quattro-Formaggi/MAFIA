@@ -1,6 +1,4 @@
-using System;
 using DataStorage;
-using Managers;
 using UnityEngine;
 
 namespace UI
@@ -35,10 +33,10 @@ namespace UI
 
         public void ChangeToJoinLobbyScreen()
         {
-            LobbyManager.Instance.AssignLobbiesToButtons();
+            MainMenuUIManager.Instance.AssignLobbiesToButtons();
             ChangeTo(Screens.JoinLobby);
         }
-        
+
         public void ChangeToMainScreen()
         {
             ChangeTo(Screens.MainScreen);
@@ -57,6 +55,16 @@ namespace UI
         public void ChangeToSetNameScreen()
         {
             ChangeTo(Screens.SetNameScreen);
+        }
+
+        public void ChangeToLobbyHostScreen()
+        {
+            ChangeTo(Screens.LobbyHostScreen);
+        }
+
+        public void ChangeToLobbyPlayerScreen()
+        {
+            ChangeTo(Screens.LobbyPlayerScreen);
         }
     }
 }
