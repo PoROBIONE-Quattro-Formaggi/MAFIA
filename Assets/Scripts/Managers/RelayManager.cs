@@ -1,12 +1,10 @@
 using System.Threading.Tasks;
-using DataStorage;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Managers
 {
@@ -44,25 +42,6 @@ namespace Managers
             }
         }
 
-        private void Start()
-        {
-            if (SceneManager.GetActiveScene().name == Scenes.MainScene) return;
-            var joinCode = PlayerPrefs.GetString(PpKeys.KeyStartGame);
-            var isHost = PlayerPrefs.GetInt(PpKeys.KeyIsHost);
-            if (joinCode == "0") // Error - no join code was registered
-            {
-                SceneChanger.ChangeToMainScene();
-            }
-            else if (isHost == 1)
-            {
-                CreateRelay();
-            }
-            else
-            {
-                JoinRelay(joinCode);
-            }
-        }
-
         public async Task<string> GetRelayCode(int maxClientsNum)
         {
             _createdAllocation = await RelayService.Instance.CreateAllocationAsync(maxClientsNum);
@@ -70,7 +49,7 @@ namespace Managers
             return _joinCode;
         }
 
-        private void CreateRelay()
+        public void CreateRelay()
         {
             try
             {
@@ -84,7 +63,7 @@ namespace Managers
             }
         }
 
-        private static async void JoinRelay(string joinCode)
+        public static async void JoinRelay(string joinCode)
         {
             try
             {
