@@ -110,7 +110,6 @@ namespace Managers
 
             CheckIfNewHost();
             if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
-            if (IsLobbyHost()) return;
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
             _joinedLobby = null;
             PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
