@@ -8,14 +8,23 @@ public class InputCode : MonoBehaviour
 {
     public TMP_InputField input;
 
+    private bool selected;
+
     public void mono()
     {
-        Debug.Log(!input.text.StartsWith("<mspace=2.75em>"));
-        Debug.Log(input.text);
         if (!input.text.StartsWith("<mspace=2.75em>"))
         {
             input.text = "<mspace=2.75em>" + input.text;
-            input.caretPosition = input.text.Length;
+        }
+        input.caretPosition = input.text.Length;
+    }
+
+    public void remmono()
+    {
+        Debug.Log("here queer");
+        if (input.text == "<mspace=2.75em>")
+        {
+            input.text = "";
         }
     }
 }
