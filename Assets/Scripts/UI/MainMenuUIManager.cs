@@ -26,7 +26,12 @@ namespace UI
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
         public TMP_InputField inputPlayerName;
+        
         public GameObject lobbyButtonsParent;
+        public GameObject lobbyButtonRight;
+        public GameObject lobbyButtonLeft;
+
+        public int _debug_lobbyNo;
 
 
         private static MainMenuUIManager _instance;
@@ -47,15 +52,6 @@ namespace UI
             else
             {
                 Destroy(gameObject);
-            }
-        }
-
-        private void Start()
-        {
-            foreach (var lobbyButtonTransform in lobbyButtonsParent.GetComponentsInChildren<Transform>(true))
-            {
-                if (!lobbyButtonTransform.gameObject.name.Contains("Lobby")) continue;
-                _lobbyButtons.Add(lobbyButtonTransform.gameObject);
             }
         }
 
@@ -87,8 +83,15 @@ namespace UI
 
         public async void AssignLobbiesToButtons()
         {
+            // CLEAR LOBBIES LIST BEFORE REFRESH
+            int buttonsDisplayedNo = lobbyButtonsParent.transform.childCount;
+            for (int i = buttonsDisplayedNo - 1; i >= 0; i--)
+            {
+                DestroyImmediate(lobbyButtonsParent.transform.GetChild(i).gameObject);
+            }
+            
             var lobbies = await LobbyManager.GetLobbiesList();
-            for (var i = 0; i < lobbies.Count; i++)
+            /*for (var i = 0; i < lobbies.Count; i++)
             {
                 foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
                 {
@@ -104,6 +107,21 @@ namespace UI
                 _lobbyButtons[i].GetComponent<Button>().onClick
                     .AddListener(() => HandleJoinLobbyClicked(lobbyId));
                 _lobbyButtons[i].SetActive(true);
+            }*/
+
+            for (var i = 0; i < lobbies.Count; i++)
+            {
+                GameObject lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft, lobbyButtonsParent.transform);
+                lobbyButton.GetComponent<Button>().onClick.AddListener(() => ScreenChanger.Instance.ChangeToSetNameScreen());
+                foreach (var lobbyButtonChild in lobbyButton.GetComponentsInChildren<TextMeshProUGUI>(true))
+                {
+                    lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
+                    {
+                        "CityName" => lobbies[i].Name,
+                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
+                        _ => lobbyButtonChild.text
+                    };
+                }
             }
         }
 
