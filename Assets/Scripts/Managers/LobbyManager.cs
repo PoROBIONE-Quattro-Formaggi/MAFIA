@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DataStorage;
 using Unity.Services.Authentication;
@@ -227,6 +228,11 @@ namespace Managers
 
             Debug.Log($"\nNum of lobbies: {queryResponse.Results.Count}");
             return queryResponse.Results;
+        }
+
+        public List<string> GetPlayersNamesInLobby()
+        {
+            return _joinedLobby.Players.Select(player => player.Data["PlayerName"].Value).ToList();
         }
 
         public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
