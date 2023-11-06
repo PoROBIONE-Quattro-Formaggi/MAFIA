@@ -1,46 +1,50 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class RollCredits : MonoBehaviour
+namespace UI
 {
-    public GameObject screen;
-    public float scrollSpeed;
-
-    private float _finY;
-    private float _currentY;
-    private Vector2 _localPosition;
-    private RectTransform _rectTransform;
-    private RectTransform _screenRectTransform;
-    private RectTransform _rectTransform2;
-
-    // Start is called before the first frame update
-    void Start()
+    public class RollCredits : MonoBehaviour
     {
-        _screenRectTransform = screen.GetComponent<RectTransform>();
-        _rectTransform = GetComponent<RectTransform>();
-        _localPosition = GetComponent<RectTransform>().anchoredPosition;
-        _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
+        public GameObject screen;
+        public float scrollSpeed;
 
-        GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
-        
-    }
+        private float _finY;
+        private float _currentY;
+        private RectTransform _rectTransform;
+        private RectTransform _screenRectTransform;
+        private RectTransform _rectTransform2;
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (_currentY < _rectTransform.sizeDelta.y)
+        private void Start()
         {
-            _currentY += 1 * scrollSpeed;
-            
+            _screenRectTransform = screen.GetComponent<RectTransform>();
+            _rectTransform = GetComponent<RectTransform>();
+            _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
+
+            GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
         }
-        else
+
+        private void Update()
         {
-            _currentY = -_screenRectTransform.sizeDelta.y;
+            if (_currentY < _rectTransform.sizeDelta.y)
+            {
+                _currentY += 1 * scrollSpeed;
+            }
+            else
+            {
+                _currentY = -_screenRectTransform.sizeDelta.y;
+            }
+
+            _rectTransform.anchoredPosition = new Vector2(0, _currentY);
         }
-        
-        _rectTransform.anchoredPosition = new Vector2(0, _currentY);
-        
-        
+
+        // FOR LATER USE
+        // GameObject playerName = Instantiate(textPrefab, credits.transform);
+        //     foreach (var text in playerName.GetComponentsInChildren<TextMeshProUGUI>())
+        // {
+        //     if (text.gameObject.name == "Text")
+        //     {
+        //         text.text = input.text;
+        //     }
+        // }
+        // ScreenChanger.Instance.ChangeToLobbyPlayerScreen();
     }
 }

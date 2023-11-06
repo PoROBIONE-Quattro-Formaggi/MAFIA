@@ -31,10 +31,10 @@ namespace UI
             }
         }
 
-        public void ChangeToJoinLobbyScreen()
+        public void ChangeToBrowseLobbiesScreen()
         {
             MainMenuUIManager.Instance.AssignLobbiesToButtons();
-            ChangeTo(Screens.JoinLobby);
+            ChangeTo(Screens.BrowseLobbies);
         }
 
         public void ChangeToMainScreen()

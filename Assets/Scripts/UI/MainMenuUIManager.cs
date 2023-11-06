@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -25,20 +25,23 @@ namespace UI
         public TMP_InputField codeInputField;
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
+        public Button privateLobbyButton;
+        public Button publicLobbyButton;
         public TMP_InputField inputPlayerName;
-        
+        public GameObject confirmNameButton;
+
         public GameObject lobbyButtonsParent;
         public GameObject lobbyButtonRight;
         public GameObject lobbyButtonLeft;
-
-        public int _debug_lobbyNo;
-
 
         private static MainMenuUIManager _instance;
         private string _lobbyToJoinID;
         private string _lobbyToJoinCode;
         private bool _isPrivate = true;
-        private readonly List<GameObject> _lobbyButtons = new();
+        private Image _privateLobbyButtonBg;
+        private Image _publicLobbyButtonBg;
+        private TextMeshProUGUI _privateLobbyButtonText;
+        private TextMeshProUGUI _publicLobbyButtonText;
 
 
         private void Awake()
@@ -53,6 +56,11 @@ namespace UI
             {
                 Destroy(gameObject);
             }
+
+            _privateLobbyButtonBg = privateLobbyButton.GetComponent<Image>();
+            _publicLobbyButtonBg = publicLobbyButton.GetComponent<Image>();
+            _privateLobbyButtonText = privateLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
+            _publicLobbyButtonText = publicLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
         }
 
         public void OnCreateLobbyClicked()
@@ -74,25 +82,33 @@ namespace UI
         public void SetPublic()
         {
             _isPrivate = false;
+            _privateLobbyButtonBg.color = Colours.NightWhite;
+            _privateLobbyButtonText.color = Colours.NightBlack;
+            _publicLobbyButtonBg.color = Colours.NightBlack;
+            _publicLobbyButtonText.color = Colours.NightWhite;
         }
 
         public void SetPrivate()
         {
             _isPrivate = true;
+            _privateLobbyButtonBg.color = Colours.NightBlack;
+            _privateLobbyButtonText.color = Colours.NightWhite;
+            _publicLobbyButtonBg.color = Colours.NightWhite;
+            _publicLobbyButtonText.color = Colours.NightBlack;
         }
 
         public async void AssignLobbiesToButtons()
         {
             // CLEAR LOBBIES LIST BEFORE REFRESH
-            int buttonsDisplayedNo = lobbyButtonsParent.transform.childCount;
-            for (int i = buttonsDisplayedNo - 1; i >= 0; i--)
+            var buttonsDisplayedNo = lobbyButtonsParent.transform.childCount;
+            for (var i = buttonsDisplayedNo - 1; i >= 0; i--)
             {
                 DestroyImmediate(lobbyButtonsParent.transform.GetChild(i).gameObject);
             }
-            
-            
+
+
             var lobbies = await LobbyManager.GetLobbiesList();
-            float parentHeight = lobbyButtonsParent.GetComponent<RectTransform>().sizeDelta.y;
+            var parentHeight = lobbyButtonsParent.GetComponent<RectTransform>().sizeDelta.y;
             /*for (var i = 0; i < lobbies.Count; i++)
             {
                 foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
@@ -111,17 +127,18 @@ namespace UI
                 _lobbyButtons[i].SetActive(true);
             }*/
 
-            Debug.Log(parentHeight/96);
-            for (var i = 1; i < _debug_lobbyNo && i <= parentHeight/96; i++)
+            for (var i = 1; i < lobbies.Count && i <= parentHeight / 96; i++)
             {
-                Debug.Log(i);
-                GameObject lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft, lobbyButtonsParent.transform);
-                lobbyButton.GetComponent<Button>().onClick.AddListener(() => ScreenChanger.Instance.ChangeToSetNameScreen());
+                var lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft,
+                    lobbyButtonsParent.transform);
+                var lobbyId = lobbies[i].Id;
+                lobbyButton.GetComponent<Button>().onClick.AddListener(() => HandleJoinLobbyClicked(lobbyId));
                 foreach (var lobbyButtonChild in lobbyButton.GetComponentsInChildren<TextMeshProUGUI>(true))
                 {
                     lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
                     {
-                        "CityName" => "Town name", "Population" => $"POPULATION XX / XX",
+                        "CityName" => lobbies[i].Name,
+                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
                         _ => lobbyButtonChild.text
                     };
                 }
@@ -136,13 +153,25 @@ namespace UI
 
         public void OnLobbyCodeValueChanged()
         {
-            if (codeInputField.text.Length != 6) return;
+            if (!codeInputField.text.StartsWith("<mspace=2.75em>"))
+            {
+                codeInputField.text = "<mspace=2.75em>" + codeInputField.text;
+            }
+
+            codeInputField.caretPosition = codeInputField.text.Length;
+            if (codeInputField.text.Length != 21) return;
             _lobbyToJoinCode = codeInputField.text;
             ScreenChanger.Instance.ChangeToSetNameScreen();
         }
 
-        public void OnPlayerNameEntered()
+        public void OnPlayerNameValueChanged()
         {
+            confirmNameButton.SetActive(inputPlayerName.text != "");
+        }
+
+        public void OnPlayerNameEnterButtonClicked()
+        {
+            if (inputPlayerName.text == "") return;
             var lobbyID = _lobbyToJoinID;
             var lobbyCode = _lobbyToJoinCode;
             var playerName = inputPlayerName.text;
@@ -161,7 +190,7 @@ namespace UI
             }
             else
             {
-                ScreenChanger.Instance.ChangeToJoinLobbyScreen();
+                ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
             }
 
             if (LobbyManager.Instance.GetPlayersListInLobby().Count == 1)
