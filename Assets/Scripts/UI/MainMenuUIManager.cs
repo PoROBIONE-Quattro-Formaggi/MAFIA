@@ -167,7 +167,10 @@ namespace UI
         public void OnPlayerNameValueChanged()
         {
             confirmNameButton.SetActive(inputPlayerName.text != "");
-            
+            if (!inputPlayerName.text.EndsWith("\n") || inputPlayerName.text.Length <= 2) return;
+            // TODO validate player name correctly later
+            inputPlayerName.text = inputPlayerName.text.Trim();
+            OnPlayerNameEnterButtonClicked();
         }
 
         public void OnPlayerNameEnterButtonClicked()
