@@ -112,8 +112,9 @@ namespace UI
             }*/
 
             Debug.Log(parentHeight/96);
-            for (var i = 0; i < _debug_lobbyNo && i <= parentHeight/96; i++)
+            for (var i = 1; i < _debug_lobbyNo && i <= parentHeight/96; i++)
             {
+                Debug.Log(i);
                 GameObject lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft, lobbyButtonsParent.transform);
                 lobbyButton.GetComponent<Button>().onClick.AddListener(() => ScreenChanger.Instance.ChangeToSetNameScreen());
                 foreach (var lobbyButtonChild in lobbyButton.GetComponentsInChildren<TextMeshProUGUI>(true))
