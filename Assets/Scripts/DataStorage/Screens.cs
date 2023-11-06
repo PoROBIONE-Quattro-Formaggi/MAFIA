@@ -2,7 +2,7 @@ namespace DataStorage
 {
     public static class Screens
     {
-        public const string JoinLobby = "JoinLobby";
+        public const string BrowseLobbies = "BrowseLobbies";
         public const string MainScreen = "Main";
         public const string CreateLobbyScreen = "CreateLobby";
         public const string EnterCodeScreen = "EnterCode";
