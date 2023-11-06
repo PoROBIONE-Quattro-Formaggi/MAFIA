@@ -90,7 +90,9 @@ namespace UI
                 DestroyImmediate(lobbyButtonsParent.transform.GetChild(i).gameObject);
             }
             
+            
             var lobbies = await LobbyManager.GetLobbiesList();
+            float parentHeight = lobbyButtonsParent.GetComponent<RectTransform>().sizeDelta.y;
             /*for (var i = 0; i < lobbies.Count; i++)
             {
                 foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
@@ -109,7 +111,8 @@ namespace UI
                 _lobbyButtons[i].SetActive(true);
             }*/
 
-            for (var i = 0; i < lobbies.Count; i++)
+            Debug.Log(parentHeight/96);
+            for (var i = 0; i < _debug_lobbyNo && i <= parentHeight/96; i++)
             {
                 GameObject lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft, lobbyButtonsParent.transform);
                 lobbyButton.GetComponent<Button>().onClick.AddListener(() => ScreenChanger.Instance.ChangeToSetNameScreen());
@@ -117,8 +120,7 @@ namespace UI
                 {
                     lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
                     {
-                        "CityName" => lobbies[i].Name,
-                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
+                        "CityName" => "Town name", "Population" => $"POPULATION XX / XX",
                         _ => lobbyButtonChild.text
                     };
                 }
