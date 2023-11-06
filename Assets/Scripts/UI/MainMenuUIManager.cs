@@ -127,7 +127,7 @@ namespace UI
                 _lobbyButtons[i].SetActive(true);
             }*/
 
-            for (var i = 1; i < lobbies.Count && i <= parentHeight / 96; i++)
+            for (var i = 0; i < lobbies.Count && i <= parentHeight / 96 - 1; i++)
             {
                 var lobbyButton = Instantiate(i % 2 == 0 ? lobbyButtonRight : lobbyButtonLeft,
                     lobbyButtonsParent.transform);
@@ -160,13 +160,14 @@ namespace UI
 
             codeInputField.caretPosition = codeInputField.text.Length;
             if (codeInputField.text.Length != 21) return;
-            _lobbyToJoinCode = codeInputField.text;
+            _lobbyToJoinCode = codeInputField.text[15..];
             ScreenChanger.Instance.ChangeToSetNameScreen();
         }
 
         public void OnPlayerNameValueChanged()
         {
             confirmNameButton.SetActive(inputPlayerName.text != "");
+            
         }
 
         public void OnPlayerNameEnterButtonClicked()
