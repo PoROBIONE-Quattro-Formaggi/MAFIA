@@ -50,7 +50,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchorMax.y
@@ -66,7 +66,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 1920
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_SizeDelta.y
@@ -102,7 +102,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: 1920
       objectReference: {fileID: 0}
     - target: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -158,7 +158,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4311860671128473104, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 316.49
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4311860671128473104, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_SizeDelta.y
@@ -166,7 +166,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4311860671128473104, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 959.7736
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4311860671128473104, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -220,7 +220,9 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5276417219849117583, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
+    - {fileID: 4241694328605802949, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
@@ -230,9 +232,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3485065771154844290, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
       insertIndex: -1
       addedObject: {fileID: 97937129739445091}
-    - targetCorrespondingSourceObject: {fileID: 3485065771154844290, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1880022904141074852}
   m_SourcePrefab: {fileID: 100100000, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
 --- !u!1 &2003156847555550308 stripped
 GameObject:
@@ -272,28 +271,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   screen: {fileID: 8569116352650125124}
+  textPrefab: {fileID: 3830314848721298425, guid: b3d1fe0c05be39c459a4bce3593be2a6, type: 3}
+  credits: {fileID: 2003156847555550308}
   scrollSpeed: 0.5
---- !u!95 &1880022904141074852
-Animator:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2003156847555550308}
-  m_Enabled: 0
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 09b24fec0a4538842aaeff3ea00eb0b3, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
+  _debug_population: 5
+  nameObjects: []
+  _debug_playerNames: []
 --- !u!224 &4419719525747625894 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1640483638564206912, guid: 667b26c5ca26321418b632af6d2cdbaf, type: 3}
