@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Managers;
 using TMPro;
@@ -46,7 +47,17 @@ namespace UI
 
         private void UpdateCredits()
         {
-            var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
+            List<string> playerNames = new List<string>();
+            try
+            {
+                playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+            Debug.Log(playerNames.Count);
+            
             for (int i = 0; i < _debug_population; i++)
             {
                 nameObjects[i].text = i < playerNames.Count ? playerNames[i] : "";
