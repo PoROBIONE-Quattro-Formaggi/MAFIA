@@ -8,9 +8,14 @@ namespace UI
     public class RollCredits : MonoBehaviour
     {
         public GameObject screen;
-        public float scrollSpeed;
         public GameObject textPrefab;
         public GameObject credits;
+        
+        //parameters
+        public float scrollSpeed;
+        public int _debug_population;
+        public List<TextMeshProUGUI> nameObjects;
+        public List<string> _debug_playerNames;
 
         private float _finY;
         private float _currentY;
@@ -21,6 +26,15 @@ namespace UI
 
         private void Start()
         {
+            for (int i = 0; i < _debug_population; i++)
+            {
+                var nameObj = Instantiate(textPrefab, credits.transform);
+                foreach (var text in nameObj.GetComponentsInChildren<TextMeshProUGUI>())
+                {
+                    if (text.gameObject.name != "Text") continue;
+                    nameObjects.Add(text);
+                }
+            }
             _screenRectTransform = screen.GetComponent<RectTransform>();
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
@@ -33,16 +47,9 @@ namespace UI
         private void UpdateCredits()
         {
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
-            foreach (var playerName in playerNames)
+            for (int i = 0; i < _debug_population; i++)
             {
-                if (_currentNames.Contains(playerName)) break;
-                var nameObj = Instantiate(textPrefab, credits.transform);
-                foreach (var text in nameObj.GetComponentsInChildren<TextMeshProUGUI>())
-                {
-                    if (text.gameObject.name != "Text") continue;
-                    text.text = playerName;
-                    _currentNames.Add(playerName);
-                }
+                nameObjects[i].text = i < playerNames.Count ? playerNames[i] : "";
             }
         }
 
