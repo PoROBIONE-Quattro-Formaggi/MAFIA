@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Managers;
 using TMPro;
@@ -11,23 +10,37 @@ namespace UI
         public GameObject screen;
         public GameObject textPrefab;
         public GameObject credits;
-        
+
         //parameters
         public float scrollSpeed;
-        public int _debug_population;
         public List<TextMeshProUGUI> nameObjects;
-        public List<string> _debug_playerNames;
 
+
+        private bool _isLobbyReady;
+        private int _maxPlayers;
         private float _finY;
         private float _currentY;
         private RectTransform _rectTransform;
         private RectTransform _screenRectTransform;
         private RectTransform _rectTransform2;
-        private List<string> _currentNames; 
+
+        private List<string> _currentNames;
 
         private void Start()
         {
-            for (int i = 0; i < _debug_population; i++)
+            _screenRectTransform = screen.GetComponent<RectTransform>();
+            _rectTransform = GetComponent<RectTransform>();
+            _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
+            GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
+            InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
+        }
+
+        private void WaitForLobby()
+        {
+            _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
+            if (_maxPlayers == 0) return;
+            // Spawn text objects for all possible players 
+            for (var i = 0; i < _maxPlayers; i++)
             {
                 var nameObj = Instantiate(textPrefab, credits.transform);
                 foreach (var text in nameObj.GetComponentsInChildren<TextMeshProUGUI>())
@@ -36,29 +49,17 @@ namespace UI
                     nameObjects.Add(text);
                 }
             }
-            _screenRectTransform = screen.GetComponent<RectTransform>();
-            _rectTransform = GetComponent<RectTransform>();
-            _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
-            
-            UpdateCredits();
-            
-            GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
+
+            _isLobbyReady = true;
+            CancelInvoke(nameof(WaitForLobby));
         }
 
         private void UpdateCredits()
         {
-            List<string> playerNames = new List<string>();
-            try
-            {
-                playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+            if (!_isLobbyReady) return;
+            var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
             Debug.Log(playerNames.Count);
-            
-            for (int i = 0; i < _debug_population; i++)
+            for (var i = 0; i < _maxPlayers; i++)
             {
                 nameObjects[i].text = i < playerNames.Count ? playerNames[i] : "";
             }
