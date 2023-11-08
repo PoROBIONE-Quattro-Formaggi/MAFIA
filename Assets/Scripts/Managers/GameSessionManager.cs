@@ -1,4 +1,5 @@
 using DataStorage;
+using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -53,11 +54,13 @@ namespace Managers
             {
                 RelayManager.Instance.CreateRelay();
                 NetworkCommunicationManager.StartHost();
+                FindObjectOfType<HostGameSessionUIManager>().gameObject.SetActive(true);
             }
             else
             {
                 RelayManager.JoinRelay(joinCode);
                 NetworkCommunicationManager.StartClient();
+                FindObjectOfType<ClientGameSessionUIManager>().gameObject.SetActive(true);
             }
         }
 

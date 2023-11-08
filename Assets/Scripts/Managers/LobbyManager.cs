@@ -345,7 +345,8 @@ namespace Managers
         {
             if (!IsLobbyHost()) return;
             var relayCode = "0";
-            var maxClientsNum = _hostLobby.Players.Count - 1;
+            // var maxClientsNum = _hostLobby.Players.Count - 1; // TODO turn on
+            var maxClientsNum = 10;
             try
             {
                 relayCode = await RelayManager.Instance.GetRelayCode(maxClientsNum);

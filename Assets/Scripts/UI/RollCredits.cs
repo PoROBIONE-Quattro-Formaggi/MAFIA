@@ -58,7 +58,6 @@ namespace UI
         {
             if (!_isLobbyReady) return;
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
-            Debug.Log(playerNames.Count);
             for (var i = 0; i < _maxPlayers; i++)
             {
                 nameObjects[i].text = i < playerNames.Count ? playerNames[i] : "";
