@@ -22,7 +22,11 @@ namespace UI
             }
         }
 
+        // CODE INPUT
         public TMP_InputField codeInputField;
+        public TextMeshProUGUI codeDisplay;
+        
+        
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
         public Button privateLobbyButton;
@@ -30,6 +34,7 @@ namespace UI
         public TMP_InputField inputPlayerName;
         public GameObject confirmNameButton;
 
+        // LOBBY BUTTONS
         public GameObject lobbyButtonsParent;
         public GameObject lobbyButtonRight;
         public GameObject lobbyButtonLeft;
@@ -153,14 +158,8 @@ namespace UI
 
         public void OnLobbyCodeValueChanged()
         {
-            if (!codeInputField.text.StartsWith("<mspace=2.75em>"))
-            {
-                codeInputField.text = "<mspace=2.75em>" + codeInputField.text;
-            }
-
-            codeInputField.caretPosition = codeInputField.text.Length;
-            if (codeInputField.text.Length != 21) return;
-            _lobbyToJoinCode = codeInputField.text[15..];
+            if (codeInputField.text.Length != 6) return;
+            _lobbyToJoinCode = codeInputField.text;
             ScreenChanger.Instance.ChangeToSetNameScreen();
         }
 
@@ -205,6 +204,11 @@ namespace UI
             {
                 LobbyManager.Instance.LeaveLobby();
             }
+        }
+
+        public void DisplayCode()
+        {
+            codeDisplay.text = "<mspace=2.95em>" + codeInputField.text;
         }
     }
 }
