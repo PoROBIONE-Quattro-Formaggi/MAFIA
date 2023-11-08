@@ -25,8 +25,8 @@ namespace UI
         // CODE INPUT
         public TMP_InputField codeInputField;
         public TextMeshProUGUI codeDisplay;
-        
-        
+
+
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
         public Button privateLobbyButton;
@@ -182,7 +182,14 @@ namespace UI
             // Resetting values if player exits and reenters the other lobby
             _lobbyToJoinID = null;
             _lobbyToJoinCode = null;
+            InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
+        }
+
+        private void WaitForLobbyToJoin()
+        {
+            if (!LobbyManager.Instance.IsLobbyJoined()) return;
             ScreenChanger.Instance.ChangeToLobbyPlayerScreen();
+            CancelInvoke(nameof(WaitForLobbyToJoin));
         }
 
         public void LeaveLobby()

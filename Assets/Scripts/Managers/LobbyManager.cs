@@ -232,7 +232,14 @@ namespace Managers
 
         public List<string> GetPlayersNamesInLobby()
         {
-            return _joinedLobby.Players.Select(player => player.Data["PlayerName"].Value).ToList();
+            return _joinedLobby == null
+                ? new List<string>()
+                : _joinedLobby.Players.Select(player => player.Data["PlayerName"].Value).ToList();
+        }
+
+        public int GetMaxPlayers()
+        {
+            return _joinedLobby?.MaxPlayers ?? 0;
         }
 
         public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
@@ -292,6 +299,11 @@ namespace Managers
             {
                 Debug.Log(e);
             }
+        }
+
+        public bool IsLobbyJoined()
+        {
+            return _joinedLobby != null;
         }
 
         public List<Player> GetPlayersListInLobby()
