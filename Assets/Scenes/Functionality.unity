@@ -1894,45 +1894,6 @@ Material:
     m_Colors:
     - _WidthHeightRadius: {r: 45, g: 45, b: 45, a: 0}
   m_BuildTextureStacks: []
---- !u!21 &218485418
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: UI/RoundedCorners/RoundedCorners
-  m_Shader: {fileID: 4800000, guid: 0bd2ec5d73751e34a814274a454bec41, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _ColorMask: 15
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _UseUIAlphaClip: 0
-    m_Colors:
-    - _WidthHeightRadius: {r: 45, g: 45, b: 45, a: 0}
-  m_BuildTextureStacks: []
 --- !u!21 &240907218
 Material:
   serializedVersion: 8
@@ -8109,45 +8070,6 @@ Material:
     m_Colors:
     - _WidthHeightRadius: {r: 45, g: 45, b: 45, a: 0}
   m_BuildTextureStacks: []
---- !u!21 &1497188895
-Material:
-  serializedVersion: 8
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: UI/RoundedCorners/RoundedCorners
-  m_Shader: {fileID: 4800000, guid: 0bd2ec5d73751e34a814274a454bec41, type: 3}
-  m_Parent: {fileID: 0}
-  m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords: []
-  m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
-  stringTagMap: {}
-  disabledShaderPasses: []
-  m_LockedProperties: 
-  m_SavedProperties:
-    serializedVersion: 3
-    m_TexEnvs:
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    m_Ints: []
-    m_Floats:
-    - _ColorMask: 15
-    - _Stencil: 0
-    - _StencilComp: 8
-    - _StencilOp: 0
-    - _StencilReadMask: 255
-    - _StencilWriteMask: 255
-    - _UseUIAlphaClip: 0
-    m_Colors:
-    - _WidthHeightRadius: {r: 45, g: 45, b: 45, a: 0}
-  m_BuildTextureStacks: []
 --- !u!21 &1519856372
 Material:
   serializedVersion: 8
@@ -12774,7 +12696,7 @@ PrefabInstance:
     - target: {fileID: 3640220928780712444, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 218485418}
+      objectReference: {fileID: 1321088139}
     - target: {fileID: 4277222063022910012, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -12858,7 +12780,7 @@ PrefabInstance:
     - target: {fileID: 5698701703908377884, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_Material
       value: 
-      objectReference: {fileID: 1497188895}
+      objectReference: {fileID: 1690150118}
     - target: {fileID: 6043872703951141004, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -13062,10 +12984,6 @@ PrefabInstance:
     - target: {fileID: 8569116352650125124, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_Name
       value: PlayerLobby
-      objectReference: {fileID: 0}
-    - target: {fileID: 8569116352650125124, guid: 8390508bccb06a346b2beba19c918350, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8957540919141237416, guid: 8390508bccb06a346b2beba19c918350, type: 3}
       propertyPath: m_AnchorMax.y
