@@ -183,4 +183,3 @@ var WebGLInput = {
 
 autoAddDeps(WebGLInput, '$instances');
 mergeInto(LibraryManager.library, WebGLInput);
-g
