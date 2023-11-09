@@ -343,6 +343,7 @@ namespace Managers
 
         public async void StartGame()
         {
+            if (_joinedLobby == null) return;
             if (!IsLobbyHost()) return;
             var relayCode = "0";
             // var maxClientsNum = _hostLobby.Players.Count - 1; // TODO turn on

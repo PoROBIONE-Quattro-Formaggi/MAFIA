@@ -1,5 +1,4 @@
 using DataStorage;
-using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -53,14 +52,12 @@ namespace Managers
             else if (isHost == 1)
             {
                 RelayManager.Instance.CreateRelay(); // Here NetworkManager automatically connects as a Host I think
-                // NetworkCommunicationManager.StartHost(); 
-                FindObjectOfType<HostGameSessionUIManager>().gameObject.SetActive(true);
+                // NetworkCommunicationManager.StartHost();
             }
             else
             {
                 RelayManager.JoinRelay(joinCode);
-                NetworkCommunicationManager.StartClient();
-                FindObjectOfType<ClientGameSessionUIManager>().gameObject.SetActive(true);
+                // NetworkCommunicationManager.StartClient(); TODO chyba to wyłączone IDK
             }
         }
 

@@ -1,19 +1,22 @@
+using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
     public class ClientGameSessionUIManager : MonoBehaviour
     {
-        // Start is called before the first frame update
-        void Start()
-        {
+        public GameObject infoBar;
+        public GameObject alibiPrompt;
+        public GameObject alibiInput;
+        public GameObject voteButton;
+        public GameObject okButton;
+        public GameObject rolePrompt;
         
-        }
-
-        // Update is called once per frame
-        void Update()
+        private void OnEnable()
         {
-        
+            rolePrompt.SetActive(true);
+            okButton.SetActive(true);
         }
     }
 }
