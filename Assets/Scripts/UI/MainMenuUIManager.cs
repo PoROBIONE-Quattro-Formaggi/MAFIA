@@ -217,5 +217,16 @@ namespace UI
         {
             codeDisplay.text = "<mspace=2.95em>" + codeInputField.text;
         }
+
+        public void ClearCodeInput()
+        {
+            codeInputField.text = "";
+        }
+
+        public  void ResetTownNameInputCarat()
+        {
+            townName.caretPosition = townName.text.Length;
+            Debug.Log(townName.caretPosition);
+        }
     }
 }
