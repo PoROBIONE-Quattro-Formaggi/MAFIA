@@ -52,8 +52,8 @@ namespace Managers
             }
             else if (isHost == 1)
             {
-                RelayManager.Instance.CreateRelay();
-                NetworkCommunicationManager.StartHost();
+                RelayManager.Instance.CreateRelay(); // Here NetworkManager automatically connects as a Host I think
+                // NetworkCommunicationManager.StartHost(); 
                 FindObjectOfType<HostGameSessionUIManager>().gameObject.SetActive(true);
             }
             else
