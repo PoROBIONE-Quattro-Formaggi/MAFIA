@@ -53,7 +53,7 @@ namespace Managers
         {
             try
             {
-                var relayServerData = new RelayServerData(_createdAllocation, "dtls");
+                var relayServerData = new RelayServerData(_createdAllocation, "wss");
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
                 NetworkManager.Singleton.StartHost();
             }
@@ -68,7 +68,7 @@ namespace Managers
             try
             {
                 var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-                var relayServerData = new RelayServerData(joinAllocation, "dtls");
+                var relayServerData = new RelayServerData(joinAllocation, "wss");
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
                 NetworkManager.Singleton.StartClient();
             }
