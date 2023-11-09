@@ -8,13 +8,15 @@ namespace Managers
     {
         private async void Start()
         {
-            await UnityServices.InitializeAsync();
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            // AuthenticationService.Instance.SignedIn += OnPlayerSignIn;
-        }
+            if (UnityServices.State == ServicesInitializationState.Uninitialized)
+            {
+                await UnityServices.InitializeAsync();
+            }
 
-        // private static void OnPlayerSignIn()
-        // {
-        // }
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            }
+        }
     }
 }
