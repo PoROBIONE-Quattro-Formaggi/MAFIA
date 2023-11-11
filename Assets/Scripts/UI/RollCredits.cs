@@ -10,6 +10,7 @@ namespace UI
         public GameObject screen;
         public GameObject textPrefab;
         public GameObject credits;
+        public TextMeshProUGUI subtitle;
 
         //parameters
         public float scrollSpeed;
@@ -28,6 +29,8 @@ namespace UI
 
         private void Start()
         {
+            //Application.targetFrameRate = 120;   // DEBUG: for testing different frame rates
+            
             _screenRectTransform = screen.GetComponent<RectTransform>();
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
@@ -50,6 +53,8 @@ namespace UI
                 }
             }
 
+            subtitle.text = "FROM" + LobbyManager.Instance.GetLobbyName().ToUpper();
+
             _isLobbyReady = true;
             CancelInvoke(nameof(WaitForLobby));
         }
@@ -64,7 +69,7 @@ namespace UI
             }
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             UpdateCredits();
             if (_currentY < _rectTransform.sizeDelta.y)

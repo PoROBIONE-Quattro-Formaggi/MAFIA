@@ -237,6 +237,11 @@ namespace Managers
                 : _joinedLobby.Players.Select(player => player.Data["PlayerName"].Value).ToList();
         }
 
+        public string GetLobbyName()
+        {
+            return _joinedLobby == null ? "" : _joinedLobby.Name;
+        }
+
         public int GetMaxPlayers()
         {
             return _joinedLobby?.MaxPlayers ?? 0;
