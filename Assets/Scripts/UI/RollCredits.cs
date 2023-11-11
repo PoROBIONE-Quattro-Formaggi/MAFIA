@@ -73,7 +73,6 @@ namespace UI
         private void FixedUpdate()
         {
             UpdateCredits();
-            Debug.Log("Animating credits");
             if (_currentY < _rectTransform.sizeDelta.y)
             {
                 _currentY += 1 * scrollSpeed;
