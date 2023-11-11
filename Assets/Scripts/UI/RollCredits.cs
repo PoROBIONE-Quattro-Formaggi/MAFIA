@@ -36,12 +36,17 @@ namespace UI
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
             GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
             InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
+            
+            Debug.Log("Started Roll credits");
         }
 
         private void WaitForLobby()
         {
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
+            Debug.Log("Lobby Found");
+            
+            
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)
             {
@@ -62,6 +67,7 @@ namespace UI
         private void UpdateCredits()
         {
             if (!_isLobbyReady) return;
+            Debug.Log("Updating credits");
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
             for (var i = 0; i < _maxPlayers; i++)
             {
@@ -72,6 +78,7 @@ namespace UI
         private void FixedUpdate()
         {
             UpdateCredits();
+            Debug.Log("Animating credits");
             if (_currentY < _rectTransform.sizeDelta.y)
             {
                 _currentY += 1 * scrollSpeed;
