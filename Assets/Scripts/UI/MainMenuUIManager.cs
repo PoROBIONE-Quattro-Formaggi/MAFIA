@@ -26,18 +26,23 @@ namespace UI
         public TMP_InputField codeInputField;
         public TextMeshProUGUI codeDisplay;
 
-
+        // CREATE LOBBY
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
         public Button privateLobbyButton;
         public Button publicLobbyButton;
+        
+        // ENTER NAME
         public TMP_InputField inputPlayerName;
         public GameObject confirmNameButton;
 
-        // LOBBY BUTTONS
+        // BROWSE LOBBY BUTTONS
         public GameObject lobbyButtonsParent;
         public GameObject lobbyButtonRight;
         public GameObject lobbyButtonLeft;
+        
+        // LOBBY
+        public TextMeshProUGUI codeText;
 
         private static MainMenuUIManager _instance;
         private string _lobbyToJoinID;
