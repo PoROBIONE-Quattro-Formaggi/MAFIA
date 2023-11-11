@@ -43,6 +43,10 @@ namespace UI
         {
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
+            
+            // Display town name
+            subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
+            
             // Display lobby code
             lobbyCodeText.text = "LOBBY CODE - <mspace=2em>" + LobbyManager.Instance.GetLobbyCode();
             
