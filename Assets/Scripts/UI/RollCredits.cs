@@ -10,6 +10,7 @@ namespace UI
         public GameObject screen;
         public GameObject textPrefab;
         public GameObject credits;
+        public TextMeshProUGUI subtitle;
 
         //parameters
         public float scrollSpeed;
@@ -28,6 +29,8 @@ namespace UI
 
         private void Start()
         {
+            //Application.targetFrameRate = 120;   // DEBUG: for testing different frame rates
+            
             _screenRectTransform = screen.GetComponent<RectTransform>();
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
@@ -39,6 +42,7 @@ namespace UI
         {
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
+            
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)
             {
@@ -49,6 +53,8 @@ namespace UI
                     nameObjects.Add(text);
                 }
             }
+
+            subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
 
             _isLobbyReady = true;
             CancelInvoke(nameof(WaitForLobby));
@@ -64,9 +70,10 @@ namespace UI
             }
         }
 
-        private void Update()
+        private void FixedUpdate()
         {
             UpdateCredits();
+            Debug.Log("Animating credits");
             if (_currentY < _rectTransform.sizeDelta.y)
             {
                 _currentY += 1 * scrollSpeed;
