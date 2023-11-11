@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Managers;
 using TMPro;
@@ -15,7 +16,8 @@ namespace UI
 
         //parameters
         public float scrollSpeed;
-        public List<TextMeshProUGUI> nameObjects;
+        public List<TextMeshProUGUI> nameTexts;
+        public List<GameObject> nameObjects;
 
 
         private bool _isLobbyReady;
@@ -28,7 +30,17 @@ namespace UI
 
         private List<string> _currentNames;
 
-        private void Start()
+        private void OnDisable()
+        {
+            foreach (var nameObj in nameObjects)
+            {
+                Destroy(nameObj);
+            }
+            nameTexts.Clear();
+            nameObjects.Clear();
+        }
+
+        private void OnEnable()
         {
             //Application.targetFrameRate = 120;   // DEBUG: for testing different frame rates
             
@@ -54,10 +66,11 @@ namespace UI
             for (var i = 0; i < _maxPlayers; i++)
             {
                 var nameObj = Instantiate(textPrefab, credits.transform);
+                nameObjects.Add(nameObj);
                 foreach (var text in nameObj.GetComponentsInChildren<TextMeshProUGUI>())
                 {
                     if (text.gameObject.name != "Text") continue;
-                    nameObjects.Add(text);
+                    nameTexts.Add(text);
                 }
             }
 
@@ -71,7 +84,7 @@ namespace UI
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
             for (var i = 0; i < _maxPlayers; i++)
             {
-                nameObjects[i].text = i < playerNames.Count ? playerNames[i] : "";
+                nameTexts[i].text = i < playerNames.Count ? playerNames[i] : "";
             }
         }
 
