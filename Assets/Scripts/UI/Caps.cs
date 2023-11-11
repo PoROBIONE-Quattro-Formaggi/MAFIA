@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.Serialization;
 
 public class Caps : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class Caps : MonoBehaviour
 
     private List<TextMeshProUGUI> _chars = new List<TextMeshProUGUI>();
 
-    private bool _caps;
+    public bool caps;
     
     
     void Start()
@@ -25,9 +26,9 @@ public class Caps : MonoBehaviour
     public void OnCapsPressed()
     {
         // toggle caps
-        _caps = !_caps;
+        caps = !caps;
             
-        if (_caps)
+        if (caps)
         {
             foreach (var keyChar in _chars)
             {
