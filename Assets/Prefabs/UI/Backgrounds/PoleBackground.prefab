@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 795459152174940338}
   - component: {fileID: 7381192859630890282}
   - component: {fileID: 6002789852288766682}
+  - component: {fileID: 8098939530673035129}
   m_Layer: 0
   m_Name: PoleBackground
   m_TagString: Untagged
@@ -125,6 +126,26 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &8098939530673035129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3541478002538619599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 306cc8c2b49d7114eaa3623786fc2126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: 812
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: -1
+  m_LayoutPriority: 1
 --- !u!1001 &6305850804654984508
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -215,7 +236,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3041837300879818546, guid: a4ef99f4d8498d845acae85209ff5fbc, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 255.8096
+      value: 924
       objectReference: {fileID: 0}
     - target: {fileID: 3041837300879818546, guid: a4ef99f4d8498d845acae85209ff5fbc, type: 3}
       propertyPath: m_AnchoredPosition.y
