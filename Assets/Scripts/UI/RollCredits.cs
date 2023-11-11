@@ -56,9 +56,6 @@ namespace UI
                     nameObjects.Add(text);
                 }
             }
-            
-            // Display town name
-            subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
 
             _isLobbyReady = true;
             CancelInvoke(nameof(WaitForLobby));
