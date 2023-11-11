@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 779364123721625366}
   - component: {fileID: 4248792076106189421}
+  - component: {fileID: 231235527997618696}
   m_Layer: 0
   m_Name: VotingOption
   m_TagString: Untagged
@@ -65,6 +66,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &231235527997618696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8669060421292906025}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 922653f3e4ae5324db00f00aa8585a4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1013291601329885983
 PrefabInstance:
   m_ObjectHideFlags: 0
