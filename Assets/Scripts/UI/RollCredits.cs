@@ -11,6 +11,7 @@ namespace UI
         public GameObject textPrefab;
         public GameObject credits;
         public TextMeshProUGUI subtitle;
+        public TextMeshProUGUI lobbyCodeText;
 
         //parameters
         public float scrollSpeed;
@@ -42,6 +43,8 @@ namespace UI
         {
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
+            // Display lobby code
+            lobbyCodeText.text = "LOBBY CODE - <mspace=2.95em>" + LobbyManager.Instance.GetLobbyCode();
             
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)

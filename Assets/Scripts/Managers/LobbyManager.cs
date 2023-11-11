@@ -242,6 +242,11 @@ namespace Managers
             return _joinedLobby == null ? "" : _joinedLobby.Name;
         }
 
+        public string GetLobbyCode()
+        {
+            return _joinedLobby == null ? "" : _joinedLobby.LobbyCode;
+        }
+
         public int GetMaxPlayers()
         {
             return _joinedLobby?.MaxPlayers ?? 0;
