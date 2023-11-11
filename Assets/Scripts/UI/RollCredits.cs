@@ -44,7 +44,7 @@ namespace UI
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
             // Display lobby code
-            lobbyCodeText.text = "LOBBY CODE - <mspace=2.95em>" + LobbyManager.Instance.GetLobbyCode();
+            lobbyCodeText.text = "LOBBY CODE - <mspace=2em>" + LobbyManager.Instance.GetLobbyCode();
             
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)
@@ -56,7 +56,8 @@ namespace UI
                     nameObjects.Add(text);
                 }
             }
-
+            
+            // Display town name
             subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
 
             _isLobbyReady = true;
