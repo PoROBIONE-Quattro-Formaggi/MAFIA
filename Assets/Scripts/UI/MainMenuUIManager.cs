@@ -42,7 +42,7 @@ namespace UI
         public GameObject lobbyButtonLeft;
         
         // LOBBY
-        public TextMeshProUGUI codeText;
+        public GameObject lobbyScreen;
 
         private static MainMenuUIManager _instance;
         private string _lobbyToJoinID;
