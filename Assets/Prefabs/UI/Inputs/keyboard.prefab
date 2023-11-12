@@ -287,7 +287,7 @@ GameObject:
   - component: {fileID: 5031595096038600948}
   - component: {fileID: 5227796257702582627}
   m_Layer: 0
-  m_Name: Keyboard
+  m_Name: keyboard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -376,6 +376,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70b2b975feaadbf4baf3048107181c3d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  screenRect: {fileID: 0}
+  caps: 0
+  inputField: {fileID: 0}
 --- !u!114 &5227796257702582627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -440,6 +443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   keyboard: {fileID: 5415459243146200045}
+  caps: 0
 --- !u!1 &5809034165030948372
 GameObject:
   m_ObjectHideFlags: 0
@@ -627,57 +631,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!1 &7542397664585685657
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3707307836679535591}
-  - component: {fileID: 9143554369459589402}
-  m_Layer: 0
-  m_Name: EnterScript
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &3707307836679535591
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7542397664585685657}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 9008636594998079219}
-  m_RootOrder: -1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &9143554369459589402
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7542397664585685657}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: abb5b83bc0ee5d548ac7aaf84a1af42b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  keyboard: {fileID: 5415459243146200045}
-  inputField: {fileID: 0}
 --- !u!1001 &52334494153345907
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -688,7 +641,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (6)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -796,6 +749,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 754670601333715312}
     m_Modifications:
+    - target: {fileID: 1847768745436513509, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
+      propertyPath: keyboard
+      value: 
+      objectReference: {fileID: 5031595096038600948}
     - target: {fileID: 4585375821127636508, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
       propertyPath: m_Name
       value: Enter
@@ -803,18 +760,14 @@ PrefabInstance:
     - target: {fileID: 6029119676287181225, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 9143554369459589402}
+      objectReference: {fileID: 5031595096038600948}
     - target: {fileID: 6029119676287181225, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnEnterPressed
+      value: HideKeyboard
       objectReference: {fileID: 0}
     - target: {fileID: 6029119676287181225, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UI.EnterKey, Assembly-CSharp
-      objectReference: {fileID: 0}
-    - target: {fileID: 8002977286019100388, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
-      propertyPath: m_text
-      value: '>'
+      value: KeyboardController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 9185273416308247524, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
       propertyPath: m_Pivot.x
@@ -901,12 +854,8 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects:
-    - {fileID: 3832237106574224359, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 9185273416308247524, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 3707307836679535591}
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7c708053ae47d6c4abbcf84e576661f7, type: 3}
 --- !u!224 &9008636594998079219 stripped
@@ -1608,7 +1557,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (2)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -1718,7 +1667,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (8)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -1828,7 +1777,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (7)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -2158,7 +2107,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (3)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -2378,7 +2327,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (9)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -2708,7 +2657,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (1)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -3167,7 +3116,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (4)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
@@ -3717,7 +3666,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
-      value: Key (5)
+      value: Key
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text

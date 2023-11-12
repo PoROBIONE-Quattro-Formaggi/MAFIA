@@ -11,6 +11,8 @@ public class InputChar : MonoBehaviour
 
     public void OnKeyPressed()
     {
+        if (inputField.text.Length == inputField.characterLimit) return;
         inputField.text += charText.text;
+        
     }
 }

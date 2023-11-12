@@ -5,11 +5,13 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UI;
 
 public class KeyboardController : MonoBehaviour
 {
     public RectTransform screenRect;
     public bool caps;
+    public TMP_InputField inputField;
     
     private RectTransform _keyboardTransform;
     private List<HorizontalLayoutGroup> _rows = new List<HorizontalLayoutGroup>();
@@ -20,6 +22,9 @@ public class KeyboardController : MonoBehaviour
     private void Start()
     {
         _keyboardTransform = GetComponent<RectTransform>();
+        
+        connectKeys();
+        
         foreach (var row in _keyboardTransform.GetComponentsInChildren<HorizontalLayoutGroup>())
         {
             _rows.Add(row);
@@ -48,6 +53,21 @@ public class KeyboardController : MonoBehaviour
                 _rows[i].spacing = screenRect.sizeDelta.x / 100;
             }
         }
+    }
+
+    public void connectKeys()
+    {
+        // Connect key scripts with input field
+        foreach (var keyScript in _keyboardTransform.GetComponentsInChildren<InputChar>())
+        {
+            keyScript.inputField = inputField;
+        }
+        
+        // Connect delete with input field
+        _keyboardTransform.GetComponentInChildren<DeleteKey>().inputField = inputField;
+
+        // Connect enter with input field
+        _keyboardTransform.GetComponentInChildren<EnterKey>().inputField = inputField;
     }
 
     public void ShowKeyboard()
