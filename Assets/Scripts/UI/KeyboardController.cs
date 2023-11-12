@@ -80,7 +80,7 @@ public class KeyboardController : MonoBehaviour
     public void ShowKeyboard()
     {
         //if(!Application.isMobilePlatform) return;
-        _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y);
+        _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y + heightOnScreen);
     }
 
     public void HideKeyboard()
