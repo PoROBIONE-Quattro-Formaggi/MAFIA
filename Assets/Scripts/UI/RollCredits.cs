@@ -60,7 +60,7 @@ namespace UI
             subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
             
             // Display lobby code
-            lobbyCodeText.text = "LOBBY CODE - <mspace=2em>" + LobbyManager.Instance.GetLobbyCode();
+            lobbyCodeText.text = "LOBBY CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
             
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)

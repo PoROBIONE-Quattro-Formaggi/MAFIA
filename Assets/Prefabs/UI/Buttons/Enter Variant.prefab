@@ -1,5 +1,56 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3300838477515673500
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 980744717195546295}
+  - component: {fileID: 1847768745436513509}
+  m_Layer: 0
+  m_Name: EnterScript
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &980744717195546295
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3300838477515673500}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9185273416308247524}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1847768745436513509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3300838477515673500}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abb5b83bc0ee5d548ac7aaf84a1af42b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  keyboard: {fileID: 0}
+  inputField: {fileID: 0}
 --- !u!1001 &118595257185981832
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12,9 +63,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: Enter Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 5912920255494599713, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5912920255494599713, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnEnterPressed
+      objectReference: {fileID: 0}
+    - target: {fileID: 5912920255494599713, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UI.EnterKey, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
-      value: .
+      value: '>'
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Pivot.x
@@ -70,15 +133,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -101,7 +164,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 3786263510626909807, guid: 55c686fa17274a545a7316166475d329, type: 3}
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 980744717195546295}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 55c686fa17274a545a7316166475d329, type: 3}
+--- !u!224 &9185273416308247524 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
+  m_PrefabInstance: {fileID: 118595257185981832}
+  m_PrefabAsset: {fileID: 0}
