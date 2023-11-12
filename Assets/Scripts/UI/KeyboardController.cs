@@ -10,8 +10,15 @@ using UI;
 public class KeyboardController : MonoBehaviour
 {
     public RectTransform screenRect;
-    public bool caps;
     public TMP_InputField inputField;
+    
+    [Header("Variables")]
+    public bool caps;
+
+    public float heightOnScreen;
+
+    public float spacingRatio;
+    
     
     private RectTransform _keyboardTransform;
     private List<HorizontalLayoutGroup> _rows = new List<HorizontalLayoutGroup>();
@@ -46,11 +53,11 @@ public class KeyboardController : MonoBehaviour
         {
             if (i == 4)
             {
-                _rows[i].spacing = screenRect.sizeDelta.x / 10;
+                _rows[i].spacing = screenRect.sizeDelta.x / (spacingRatio / 10);
             }
             else
             {
-                _rows[i].spacing = screenRect.sizeDelta.x / 100;
+                _rows[i].spacing = screenRect.sizeDelta.x / spacingRatio;
             }
         }
     }
@@ -72,13 +79,13 @@ public class KeyboardController : MonoBehaviour
 
     public void ShowKeyboard()
     {
-        if(!Application.isMobilePlatform) return;
+        //if(!Application.isMobilePlatform) return;
         _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y);
     }
 
     public void HideKeyboard()
     {
-        if(!Application.isMobilePlatform) return;
+        //if(!Application.isMobilePlatform) return;
         _keyboardTransform.anchoredPosition = new Vector2(0, 0);
     }
     
