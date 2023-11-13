@@ -61,7 +61,6 @@ namespace Managers
             else if (isHost == 1)
             {
                 RelayManager.Instance.CreateRelay(); // Here NetworkManager automatically connects as a Host I think
-                Debug.Log("Invoking Assigning players");
                 InvokeRepeating(nameof(TryToAssignPlayersToRoles), 0f, 0.1f);
             }
             else
@@ -72,10 +71,11 @@ namespace Managers
 
         private void TryToAssignPlayersToRoles()
         {
-            Debug.Log($"Network spawned: {NetworkCommunicationManager.Instance.IsNetworkSpawned}");
             if (!NetworkCommunicationManager.Instance.IsNetworkSpawned) return;
             var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
+            Debug.Log($"Host ID: {hostID}");
             var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
+            Debug.Log($"Players number: {playersIDs.Count}");
             foreach (var id in playersIDs.Where(id => id == hostID))
             {
                 playersIDs.Remove(id);
