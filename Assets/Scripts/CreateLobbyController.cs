@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
+using UI;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,21 +10,20 @@ public class CreateLobbyController : MonoBehaviour
     public TMP_InputField populationInputField;
     public KeyboardController keyboard;
 
-    public void onInputValueChanged()
+    public void OnInputValueChanged()
     {
         hostButton.gameObject.SetActive(townNameInputField.text.Length != 0 && populationInputField.text.Length != 0);
     }
 
-    public void onTownNameInputSelected()
+    public void OnTownNameInputSelected()
     {
         keyboard.inputField = townNameInputField;
-        keyboard.connectKeys();
-    }
-    
-    public void onPopulationInputSelected()
-    {
-        keyboard.inputField = populationInputField;
-        keyboard.connectKeys();
+        keyboard.ConnectKeys();
     }
 
+    public void OnPopulationInputSelected()
+    {
+        keyboard.inputField = populationInputField;
+        keyboard.ConnectKeys();
+    }
 }

@@ -1,46 +1,44 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using TMPro;
-using Unity.VisualScripting;
-using UnityEngine.Serialization;
+using UnityEngine;
 
-public class Caps : MonoBehaviour
+namespace UI
 {
-    public GameObject keyboard;
-
-    private List<TextMeshProUGUI> _chars = new List<TextMeshProUGUI>();
-
-    public bool caps;
-    
-    
-    void Start()
+    public class Caps : MonoBehaviour
     {
-        foreach (var keyChar in keyboard.GetComponentsInChildren<TextMeshProUGUI>())
-        {
-            _chars.Add(keyChar);
-        }
-        
-    }
+        public GameObject keyboard;
 
-    public void OnCapsPressed()
-    {
-        // toggle caps
-        caps = !caps;
-            
-        if (caps)
+        private readonly List<TextMeshProUGUI> _chars = new();
+
+        public bool caps;
+
+
+        private void Start()
         {
-            foreach (var keyChar in _chars)
+            foreach (var keyChar in keyboard.GetComponentsInChildren<TextMeshProUGUI>())
             {
-                
-                keyChar.text = keyChar.text.ToUpper();
+                _chars.Add(keyChar);
             }
         }
-        else
+
+        public void OnCapsPressed()
         {
-            foreach (var keyChar in _chars)
+            // toggle caps
+            caps = !caps;
+
+            if (caps)
             {
-                keyChar.text = keyChar.text.ToLower();
+                foreach (var keyChar in _chars)
+                {
+                    keyChar.text = keyChar.text.ToUpper();
+                }
+            }
+            else
+            {
+                foreach (var keyChar in _chars)
+                {
+                    keyChar.text = keyChar.text.ToLower();
+                }
             }
         }
     }

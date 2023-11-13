@@ -1,15 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
-public class DeleteKey : MonoBehaviour
+namespace UI
 {
-    public TMP_InputField inputField;
-
-    public void onDeleteKeyPressed()
+    public class DeleteKey : MonoBehaviour
     {
-        if (inputField.text.Length == 0) return;
-        inputField.text = inputField.text[..^1];
+        public TMP_InputField inputField;
+
+        public void OnDeleteKeyPressed()
+        {
+            if (inputField.text.Length == 0) return;
+            inputField.text = inputField.text[..^1];
+        }
     }
 }

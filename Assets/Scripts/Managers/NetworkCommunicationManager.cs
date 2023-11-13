@@ -1,4 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
+using Third_Party.Toast_UI.Scripts;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace Managers
 {
@@ -38,16 +42,41 @@ namespace Managers
         public override void OnNetworkSpawn()
         {
             IsNetworkSpawned = true;
+            Debug.Log("Invoking sending roles");
+            InvokeRepeating(nameof(TryToSendRolesToClients), 0f, 0.1f);
         }
 
-        public static void StartHost()
+        private void TryToSendRolesToClients()
         {
-            NetworkManager.Singleton.StartHost();
+            if (GameSessionManager.Instance.IdxRole.Count == 0) return;
+            foreach (var clientId in GameSessionManager.Instance.ClientsIds)
+            {
+                var clientRpcParams = new ClientRpcParams
+                {
+                    Send = new ClientRpcSendParams
+                    {
+                        TargetClientIds = new List<ulong> { clientId }
+                    }
+                };
+                var role = GameSessionManager.Instance.IdxRole[clientId];
+                Debug.Log("Sending RPC");
+                SendRolesToClientsClientRpc(role, clientRpcParams);
+            }
+
+            CancelInvoke(nameof(TryToSendRolesToClients));
         }
 
-        public static void StartClient()
+        [ClientRpc]
+        private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
-            NetworkManager.Singleton.StartClient();
+            if (clientRpcParams.Send.TargetClientIds[0] != OwnerClientId) return;
+            Toast.Show($"You are {role}");
+            Debug.Log($"You are {role}");
+        }
+
+        public static List<ulong> GetAllConnectedPlayersIDs()
+        {
+            return NetworkManager.Singleton.ConnectedClientsIds.ToList();
         }
     }
 }
