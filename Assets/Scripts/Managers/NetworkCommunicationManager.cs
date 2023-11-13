@@ -41,9 +41,19 @@ namespace Managers
 
         public override void OnNetworkSpawn()
         {
-            IsNetworkSpawned = true;
-            Debug.Log("Invoking sending roles");
             InvokeRepeating(nameof(TryToSendRolesToClients), 0f, 0.1f);
+        }
+
+        public static void StartHost()
+        {
+            NetworkManager.Singleton.StartHost();
+            NetworkManager.Singleton.OnServerStarted += OnHostStarted;
+        }
+
+        private static void OnHostStarted()
+        {
+            Debug.Log("Server started");
+            _instance.IsNetworkSpawned = true;
         }
 
         private void TryToSendRolesToClients()

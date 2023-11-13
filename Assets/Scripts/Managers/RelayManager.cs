@@ -55,7 +55,7 @@ namespace Managers
             {
                 var relayServerData = new RelayServerData(_createdAllocation, "wss");
                 NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-                NetworkManager.Singleton.StartHost();
+                NetworkCommunicationManager.StartHost();
             }
             catch (RelayServiceException e)
             {
