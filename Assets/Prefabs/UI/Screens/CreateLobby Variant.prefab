@@ -598,7 +598,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5415459243146200045, guid: c9a6e0cee329ce14bb6a619d0e228136, type: 3}
       propertyPath: m_Name
-      value: keyboard
+      value: Keyboard
       objectReference: {fileID: 0}
     - target: {fileID: 5468636636441530254, guid: c9a6e0cee329ce14bb6a619d0e228136, type: 3}
       propertyPath: m_AnchorMax.y
@@ -1467,7 +1467,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1600643986674890230, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_RootOrder
-      value: -1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1600643986674890230, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_AnchorMax.x
@@ -2079,7 +2079,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4474757567022969596, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 742.5526
+      value: 249.23076
       objectReference: {fileID: 0}
     - target: {fileID: 4474757567022969596, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -2147,7 +2147,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5365334773674862921, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: onPopulationInputSelected
+      value: OnPopulationInputSelected
       objectReference: {fileID: 0}
     - target: {fileID: 5365334773674862921, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -2167,7 +2167,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5365334773674862921, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: onInputValueChanged
+      value: OnInputValueChanged
       objectReference: {fileID: 0}
     - target: {fileID: 5365334773674862921, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -2247,7 +2247,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
@@ -2275,7 +2275,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: onTownNameInputSelected
+      value: OnTownNameInputSelected
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -2290,6 +2290,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
+      propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 6914780015972760008}
+    - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
       objectReference: {fileID: 6914780015972760008}
@@ -2303,11 +2307,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ResetTownNameInputCarat
+      value: OnInputValueChanged
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
-      value: onInputValueChanged
+      value: OnInputValueChanged
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnSelect.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
@@ -2319,7 +2323,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UI.MainMenuUIManager, Assembly-CSharp
+      value: CreateLobbyController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 5863023788994778768, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_OnValueChanged.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
