@@ -30,7 +30,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 5157371722504680983}
   - {fileID: 8399581719733438847}
   - {fileID: 9008636594998079219}
   m_Father: {fileID: 7118335060311659737}
@@ -57,7 +56,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 48
+  m_PreferredHeight: 64
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -79,7 +78,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 16
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -127,7 +126,6 @@ RectTransform:
   - {fileID: 6997691002770799873}
   - {fileID: 7020834727415340943}
   - {fileID: 5923047250413581724}
-  - {fileID: 4630984617564686000}
   m_Father: {fileID: 7118335060311659737}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -152,7 +150,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 48
+  m_PreferredHeight: 64
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -173,8 +171,8 @@ MonoBehaviour:
     m_Right: 0
     m_Top: 0
     m_Bottom: 0
-  m_ChildAlignment: 1
-  m_Spacing: 16
+  m_ChildAlignment: 4
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -212,6 +210,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5157371722504680983}
   - {fileID: 3200839688716553614}
   - {fileID: 4597459159702326833}
   - {fileID: 3958449297779204078}
@@ -219,6 +218,7 @@ RectTransform:
   - {fileID: 5495528286932480075}
   - {fileID: 3714246858905473054}
   - {fileID: 5750585488354436849}
+  - {fileID: 4630984617564686000}
   m_Father: {fileID: 7118335060311659737}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -243,7 +243,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 48
+  m_PreferredHeight: 64
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -265,7 +265,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 16
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -334,7 +334,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 320
+  m_PreferredHeight: 385
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -377,8 +377,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   screenRect: {fileID: 0}
-  caps: 0
   inputField: {fileID: 0}
+  caps: 0
+  heightOnScreen: 0
+  spacingRatio: 200
 --- !u!114 &5227796257702582627
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -507,7 +509,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 48
+  m_PreferredHeight: 64
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -529,7 +531,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 16
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -601,7 +603,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 48
+  m_PreferredHeight: 64
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -623,7 +625,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 16
+  m_Spacing: 8
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -1419,7 +1421,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 754670601333715312}
+    m_TransformParent: {fileID: 8361136392160370908}
     m_Modifications:
     - target: {fileID: 1297207113607981093, guid: cdd4ea2c4068cfe4eb446143d87c921f, type: 3}
       propertyPath: m_Name
@@ -1515,7 +1517,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5975119785288701488, guid: cdd4ea2c4068cfe4eb446143d87c921f, type: 3}
       propertyPath: m_PreferredWidth
-      value: 72
+      value: 88
       objectReference: {fileID: 0}
     - target: {fileID: 8968294765109088846, guid: cdd4ea2c4068cfe4eb446143d87c921f, type: 3}
       propertyPath: keyboard
@@ -2873,7 +2875,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7572659316859870951}
+    m_TransformParent: {fileID: 8361136392160370908}
     m_Modifications:
     - target: {fileID: 4082626776551599090, guid: 9b6b9600ce7a2064a8fc06b57da899af, type: 3}
       propertyPath: m_Name
@@ -2945,15 +2947,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8679076321923773962, guid: 9b6b9600ce7a2064a8fc06b57da899af, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8679076321923773962, guid: 9b6b9600ce7a2064a8fc06b57da899af, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8679076321923773962, guid: 9b6b9600ce7a2064a8fc06b57da899af, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 8679076321923773962, guid: 9b6b9600ce7a2064a8fc06b57da899af, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -4324,6 +4326,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7572659316859870951}
     m_Modifications:
+    - target: {fileID: 1332682133323413503, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1332682133323413503, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: b4b06fd1e1d49a64fa09d7c5dd0660a5, type: 3}
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
       value: Key
