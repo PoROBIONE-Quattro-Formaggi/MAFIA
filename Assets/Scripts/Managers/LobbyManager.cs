@@ -1,7 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DataStorage;
+using Third_Party.Toast_UI.Scripts;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -68,11 +70,13 @@ namespace Managers
                     _lastLobbyServiceCall = Time.time;
                     _polling = true;
                     _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+                    _hostLobby = _joinedLobby;
+                    Debug.Log("New host lobby polled");
                     _polling = false;
                 }
                 catch (LobbyServiceException e)
                 {
-                    Debug.Log(e);
+                    Debug.LogError(e);
                 }
             }
             else
@@ -88,7 +92,7 @@ namespace Managers
                 }
                 catch (LobbyServiceException e)
                 {
-                    Debug.Log(e);
+                    Debug.LogError(e);
                 }
             }
         }
@@ -105,7 +109,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
                 return;
             }
 
@@ -189,7 +193,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
                 return;
             }
 
@@ -222,7 +226,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
                 return new List<Lobby>();
             }
 
@@ -294,7 +298,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
             }
         }
 
@@ -307,7 +311,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
             }
         }
 
@@ -332,7 +336,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
             }
         }
 
@@ -347,7 +351,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
             }
         }
 
@@ -355,16 +359,23 @@ namespace Managers
         {
             if (_joinedLobby == null) return;
             if (!IsLobbyHost()) return;
-            var relayCode = "0";
-            // var maxClientsNum = _hostLobby.Players.Count - 1; // TODO turn on
-            var maxClientsNum = 10;
+            string relayCode;
+            var maxClientsNum = _hostLobby.Players.Count;
             try
             {
                 relayCode = await RelayManager.Instance.GetRelayCode(maxClientsNum);
             }
-            catch (LobbyServiceException e)
+            catch (Exception e)
             {
-                Debug.Log(e);
+                Toast.Show("Cannot start the game. Try again.");
+                Debug.LogError(e);
+                return;
+            }
+
+            if (relayCode == ErrorCodes.JoinRelayErrorCode)
+            {
+                Toast.Show("Cannot start the game. Try again.");
+                return;
             }
 
             PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
@@ -390,7 +401,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
-                Debug.Log(e);
+                Debug.LogError(e);
             }
 
             _joinedLobby = null;

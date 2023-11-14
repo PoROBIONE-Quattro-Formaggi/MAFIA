@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
+using Third_Party.Toast_UI.Scripts;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -10,7 +12,6 @@ namespace Managers
     {
         public int mafiaNumber = 1;
         public int doctorNumber = 1;
-        public int residentNumber = 2;
 
         public static GameSessionManager Instance
         {
@@ -25,8 +26,10 @@ namespace Managers
             }
         }
 
+
         public Dictionary<ulong, string> IdxRole { get; } = new();
-        public List<ulong> ClientsIds { get; private set; } = new();
+        public List<ulong> ClientsIds { get; } = new();
+        public event Action OnPlayersAssignedToRoles;
 
         private static GameSessionManager _instance;
 
@@ -49,55 +52,71 @@ namespace Managers
             SceneManager.sceneLoaded += OnSceneChanged;
         }
 
-        private void OnSceneChanged(Scene scene, LoadSceneMode loadSceneMode)
+        private async void OnSceneChanged(Scene scene, LoadSceneMode loadSceneMode)
         {
             if (SceneManager.GetActiveScene().name != Scenes.GameScene) return;
             var joinCode = PlayerPrefs.GetString(PpKeys.KeyStartGame);
             var isHost = PlayerPrefs.GetInt(PpKeys.KeyIsHost);
             if (joinCode == "0") // Error - no join code was registered
             {
+                Toast.Show("Cannot join to the game");
                 SceneChanger.ChangeToMainScene();
             }
             else if (isHost == 1)
             {
-                RelayManager.Instance.CreateRelay(); // Here NetworkManager automatically connects as a Host I think
-                InvokeRepeating(nameof(TryToAssignPlayersToRoles), 0f, 0.1f);
+                NetworkCommunicationManager.Instance.OnNetworkReady += AssignPlayersToRoles;
+                if (RelayManager.Instance.CreateRelay()) return;
+                Toast.Show("Cannot create the game");
+                SceneChanger.ChangeToMainScene();
             }
             else
             {
-                RelayManager.JoinRelay(joinCode);
+                if (await RelayManager.JoinRelay(joinCode)) return;
+                Toast.Show("Cannot join to the game");
+                SceneChanger.ChangeToMainScene();
             }
         }
 
-        private void TryToAssignPlayersToRoles()
+        private void AssignPlayersToRoles()
         {
-            if (!NetworkCommunicationManager.Instance.IsNetworkSpawned) return;
+            NetworkCommunicationManager.Instance.OnNetworkReady -= AssignPlayersToRoles;
             var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
-            Debug.Log($"Host ID: {hostID}");
             var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
-            Debug.Log($"Players number: {playersIDs.Count}");
-            foreach (var id in playersIDs.Where(id => id == hostID))
+            foreach (var id in playersIDs.Where(id => id != hostID))
             {
-                playersIDs.Remove(id);
+                ClientsIds.Add(id);
             }
 
-            ClientsIds = playersIDs;
-            Shuffle(playersIDs);
-            var rolesList = GetRolesList(playersIDs.Count);
+            var playersIDsToAssignRoles = ClientsIds.ToList();
+            if (playersIDsToAssignRoles.Count <
+                mafiaNumber + doctorNumber + 1) //TODO delete later (debug case when players < 3
+            {
+                for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
+                {
+                    playersIDsToAssignRoles.Add((ulong)(i + 100));
+                }
+            }
 
+            Shuffle(playersIDsToAssignRoles);
+            var rolesList = GetRolesList(playersIDsToAssignRoles.Count);
             for (var i = 0; i < rolesList.Count; i++)
             {
-                IdxRole[playersIDs[i]] = rolesList[i];
+                IdxRole[playersIDsToAssignRoles[i]] = rolesList[i];
             }
 
             IdxRole[hostID] = Roles.Narrator;
-            Debug.Log("Assigned players");
-            CancelInvoke(nameof(TryToAssignPlayersToRoles));
+            Debug.Log("Players assigned with roles like:");
+            foreach (var keyValPair in IdxRole)
+            {
+                Debug.Log($"ClientID: {keyValPair.Key} - {keyValPair.Value}");
+            }
+
+            OnPlayersAssignedToRoles?.Invoke();
         }
 
         private List<string> GetRolesList(int playerNumber)
         {
-            List<string> rolesList = new();
+            var rolesList = new List<string>(playerNumber);
             foreach (var field in typeof(Roles).GetFields())
             {
                 var roleName = field.GetValue(typeof(Roles));

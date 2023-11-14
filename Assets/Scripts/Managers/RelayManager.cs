@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using DataStorage;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
@@ -25,6 +28,7 @@ namespace Managers
 
         private static RelayManager _instance;
         private Allocation _createdAllocation;
+        private RelayServerData _relayServerData;
 
         private string _joinCode;
 
@@ -44,38 +48,131 @@ namespace Managers
 
         public async Task<string> GetRelayCode(int maxClientsNum)
         {
-            _createdAllocation = await RelayService.Instance.CreateAllocationAsync(maxClientsNum);
-            _joinCode = await RelayService.Instance.GetJoinCodeAsync(_createdAllocation.AllocationId);
+            var isAnyAllocationFound = await AssignAllocation("europe-central2");
+            if (!isAnyAllocationFound) // If default region has failed
+            {
+                var (europeRegions, regionsWithoutEurope) = await GetEuropeAndTheRestRegions();
+                if (europeRegions == null || regionsWithoutEurope == null) return ErrorCodes.JoinRelayErrorCode;
+                foreach (var region in europeRegions)
+                {
+                    isAnyAllocationFound = await AssignAllocation(region);
+                    if (isAnyAllocationFound) break;
+                }
+
+                if (!isAnyAllocationFound) // If europe regions have failed
+                {
+                    foreach (var region in regionsWithoutEurope)
+                    {
+                        isAnyAllocationFound = await AssignAllocation(region);
+                        if (isAnyAllocationFound) break;
+                    }
+                }
+            }
+
+            if (!isAnyAllocationFound) return ErrorCodes.JoinRelayErrorCode; // If all allocations have failed
+            try
+            {
+                _joinCode = await RelayService.Instance.GetJoinCodeAsync(_createdAllocation.AllocationId);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                return ErrorCodes.JoinRelayErrorCode;
+            }
+
             return _joinCode;
+
+            async Task<bool> AssignAllocation(string region)
+            {
+                try
+                {
+                    _createdAllocation =
+                        await RelayService.Instance.CreateAllocationAsync(maxClientsNum, region);
+                    _relayServerData = new RelayServerData(_createdAllocation, "wss");
+                    Debug.Log($"Successfully created allocation at {region}.");
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning(
+                        $"Cannot create allocation to the {region} region. Trying another region.\nError: {e}");
+                    return false;
+                }
+            }
+
+            async Task<Tuple<List<string>, List<string>>> GetEuropeAndTheRestRegions()
+            {
+                var regions = await GetAvailableRegions();
+                if (regions == null)
+                {
+                    return new Tuple<List<string>, List<string>>(null, null);
+                }
+
+                List<string> europeRegions = new();
+                List<string> regionsWithoutEurope = new();
+                foreach (var region in regions)
+                {
+                    if (region.Id.ToLower().Contains("europe"))
+                    {
+                        europeRegions.Add(region.Id);
+                    }
+                    else
+                    {
+                        regionsWithoutEurope.Add(region.Id);
+                    }
+                }
+
+                return new Tuple<List<string>, List<string>>(europeRegions, regionsWithoutEurope);
+            }
+
+            async Task<List<Region>> GetAvailableRegions()
+            {
+                List<Region> regions = null;
+                try
+                {
+                    regions = await RelayService.Instance.ListRegionsAsync();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError($"Cannot find any regions.\nError: {e}");
+                }
+
+                return regions;
+            }
         }
 
-        public void CreateRelay()
+        public bool CreateRelay()
         {
             try
             {
-                var relayServerData = new RelayServerData(_createdAllocation, "wss");
-                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-                NetworkCommunicationManager.StartHost();
+                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(_relayServerData);
+                return NetworkCommunicationManager.StartHost();
             }
-            catch (RelayServiceException e)
+            catch (Exception e)
             {
                 Debug.Log(e);
+                return false;
             }
         }
 
-        public static async void JoinRelay(string joinCode)
+        public static async Task<bool> JoinRelay(string joinCode)
         {
-            try
+            for (var i = 0; i < 5; i++)
             {
-                var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-                var relayServerData = new RelayServerData(joinAllocation, "wss");
-                NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
-                NetworkManager.Singleton.StartClient();
+                try
+                {
+                    var joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+                    var relayServerData = new RelayServerData(joinAllocation, "wss");
+                    NetworkManager.Singleton.GetComponent<UnityTransport>().SetRelayServerData(relayServerData);
+                    return NetworkCommunicationManager.StartClient();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"Error during joining. Retrying.\nError: {e}");
+                }
             }
-            catch (RelayServiceException e)
-            {
-                Debug.Log(e);
-            }
+
+            return false;
         }
     }
 }
