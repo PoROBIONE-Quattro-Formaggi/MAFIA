@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Third_Party.Toast_UI.Scripts;
@@ -21,7 +22,7 @@ namespace Managers
             }
         }
 
-        public bool IsNetworkSpawned { get; private set; }
+        public event Action OnNetworkReady;
 
         private static NetworkCommunicationManager _instance;
 
@@ -30,35 +31,53 @@ namespace Managers
             if (_instance == null)
             {
                 _instance = this;
-                transform.SetParent(null);
-                DontDestroyOnLoad(gameObject);
             }
             else
             {
                 Destroy(gameObject);
             }
-        }
 
-        public override void OnNetworkSpawn()
-        {
-            InvokeRepeating(nameof(TryToSendRolesToClients), 0f, 0.1f);
-        }
-
-        public static void StartHost()
-        {
-            NetworkManager.Singleton.StartHost();
             NetworkManager.Singleton.OnServerStarted += OnHostStarted;
+            NetworkManager.Singleton.OnServerStopped += OnHostStopped;
         }
 
-        private static void OnHostStarted()
+        private void OnHostStarted()
         {
-            Debug.Log("Server started");
-            _instance.IsNetworkSpawned = true;
+            transform.SetParent(null);
+            DontDestroyOnLoad(gameObject);
+            GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
+            OnNetworkReady?.Invoke();
         }
 
-        private void TryToSendRolesToClients()
+        private static void OnHostStopped(bool obj)
         {
+            Debug.Log("Server stopped");
+        }
+
+        public static bool StartHost()
+        {
+            return NetworkManager.Singleton.StartHost();
+        }
+
+        public static bool StartClient()
+        {
+            return NetworkManager.Singleton.StartClient();
+        }
+
+        private void SendRolesToClients()
+        {
+            GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
             if (GameSessionManager.Instance.IdxRole.Count == 0) return;
+            var clientRpcParamsTemp = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = new List<ulong> { OwnerClientId }
+                }
+            };
+            var roleTemp = GameSessionManager.Instance.IdxRole[OwnerClientId];
+            Debug.Log("Sending special RPC");
+            SendRolesToClientsClientRpc(roleTemp, clientRpcParamsTemp);
             foreach (var clientId in GameSessionManager.Instance.ClientsIds)
             {
                 var clientRpcParams = new ClientRpcParams
@@ -72,19 +91,17 @@ namespace Managers
                 Debug.Log("Sending RPC");
                 SendRolesToClientsClientRpc(role, clientRpcParams);
             }
-
-            CancelInvoke(nameof(TryToSendRolesToClients));
         }
 
         [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Local, UnusedParameter.Local 
         private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
-            if (clientRpcParams.Send.TargetClientIds[0] != OwnerClientId) return;
             Toast.Show($"You are {role}");
             Debug.Log($"You are {role}");
         }
 
-        public static List<ulong> GetAllConnectedPlayersIDs()
+        public static IEnumerable<ulong> GetAllConnectedPlayersIDs()
         {
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
         }
