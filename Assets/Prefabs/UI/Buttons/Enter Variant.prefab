@@ -59,6 +59,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1332682133323413503, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_Type
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1332682133323413503, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 1332682133323413503, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4469772884837368724, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Name
       value: Enter Variant
@@ -69,19 +81,67 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5912920255494599713, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnEnterPressed
+      value: HideKeyboard
       objectReference: {fileID: 0}
     - target: {fileID: 5912920255494599713, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UI.EnterKey, Assembly-CSharp
+      value: KeyboardController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_text
-      value: '>'
+      value: enter.
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontSize
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 95b39f7fd0772f74c8f56ec46e333daa, type: 2}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontStyle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontColor.b
+      value: 0.85490197
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontColor.g
+      value: 0.8627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.8627451
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 5047527431379346677, guid: 95b39f7fd0772f74c8f56ec46e333daa, type: 2}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_characterSpacing
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4292533468
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7977313868842924908, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Pivot.x
-      value: 0.5
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_Pivot.y
@@ -93,27 +153,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_AnchorMin.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 0
+      value: 96
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 0
+      value: 64
       objectReference: {fileID: 0}
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_LocalPosition.x
@@ -162,6 +222,18 @@ PrefabInstance:
     - target: {fileID: 9141726992263650924, guid: 55c686fa17274a545a7316166475d329, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9145874022529744257, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_MinWidth
+      value: 96
+      objectReference: {fileID: 0}
+    - target: {fileID: 9145874022529744257, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_IgnoreLayout
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9145874022529744257, guid: 55c686fa17274a545a7316166475d329, type: 3}
+      propertyPath: m_PreferredWidth
+      value: -1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

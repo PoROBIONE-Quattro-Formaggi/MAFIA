@@ -42,14 +42,7 @@ namespace UI
         {
             for (var i = 0; i < _rows.Count; i++)
             {
-                if (i == 4)
-                {
-                    _rows[i].spacing = screenRect.sizeDelta.x / (spacingRatio / 10);
-                }
-                else
-                {
-                    _rows[i].spacing = screenRect.sizeDelta.x / spacingRatio;
-                }
+                _rows[i].spacing = screenRect.sizeDelta.x / spacingRatio;
             }
         }
 
