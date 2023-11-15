@@ -22,10 +22,6 @@ namespace UI
             }
         }
 
-        // CODE INPUT
-        public TMP_InputField codeInputField;
-        public TextMeshProUGUI codeDisplay;
-
         // CREATE LOBBY
         public TMP_InputField townName;
         public TMP_InputField maxPlayers;
@@ -47,6 +43,7 @@ namespace UI
         private static MainMenuUIManager _instance;
         private string _lobbyToJoinID;
         private string _lobbyToJoinCode;
+        private string _playerName;
         private bool _isPrivate = true;
         private Image _privateLobbyButtonBg;
         private Image _publicLobbyButtonBg;
@@ -119,23 +116,6 @@ namespace UI
 
             var lobbies = await LobbyManager.GetLobbiesList();
             var parentHeight = lobbyButtonsParent.GetComponent<RectTransform>().sizeDelta.y;
-            /*for (var i = 0; i < lobbies.Count; i++)
-            {
-                foreach (var lobbyButtonChild in _lobbyButtons[i].GetComponentsInChildren<TextMeshProUGUI>(true))
-                {
-                    lobbyButtonChild.text = lobbyButtonChild.gameObject.name switch
-                    {
-                        "CityName" => lobbies[i].Name,
-                        "Population" => $"POPULATION {lobbies[i].Players.Count} / {lobbies[i].MaxPlayers}",
-                        _ => lobbyButtonChild.text
-                    };
-                }
-
-                var lobbyId = lobbies[i].Id;
-                _lobbyButtons[i].GetComponent<Button>().onClick
-                    .AddListener(() => HandleJoinLobbyClicked(lobbyId));
-                _lobbyButtons[i].SetActive(true);
-            }*/
 
             for (var i = 0; i < lobbies.Count && i <= parentHeight / 96 - 1; i++)
             {
@@ -155,39 +135,31 @@ namespace UI
             }
         }
 
-        private void HandleJoinLobbyClicked(string lobbyID)
+        public void HandleJoinLobbyClicked(string lobbyID)
         {
-            _lobbyToJoinID = lobbyID;
-            ScreenChanger.Instance.ChangeToSetNameScreen();
-        }
-
-        public void OnLobbyCodeValueChanged()
-        {
-            if (codeInputField.text.Length != 6) return;
-            _lobbyToJoinCode = codeInputField.text;
-            ScreenChanger.Instance.ChangeToSetNameScreen();
+            var lobbyId = lobbyID;
+            var lobbyCode = _lobbyToJoinCode;
+            var playerName = _playerName;
+            LobbyManager.Instance.JoinLobby(lobbyID: lobbyId, code: lobbyCode, playerName: playerName);
+            // Resetting values if player exits and reenters the other lobby
+            _lobbyToJoinID = null;
+            _lobbyToJoinCode = null;
+            InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
         }
 
         public void OnPlayerNameValueChanged()
         {
+            // TODO validate player name correctly later
+            
             confirmNameButton.SetActive(inputPlayerName.text != "");
             if (!inputPlayerName.text.EndsWith("\n") || inputPlayerName.text.Length <= 2) return;
-            // TODO validate player name correctly later
-            inputPlayerName.text = inputPlayerName.text.Trim();
             OnPlayerNameEnterButtonClicked();
         }
 
         public void OnPlayerNameEnterButtonClicked()
         {
-            if (inputPlayerName.text == "") return;
-            var lobbyID = _lobbyToJoinID;
-            var lobbyCode = _lobbyToJoinCode;
-            var playerName = inputPlayerName.text;
-            LobbyManager.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
-            // Resetting values if player exits and reenters the other lobby
-            _lobbyToJoinID = null;
-            _lobbyToJoinCode = null;
-            InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
+            _playerName = inputPlayerName.text.Trim();
+            ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
         }
 
         private void WaitForLobbyToJoin()
@@ -216,22 +188,6 @@ namespace UI
             {
                 LobbyManager.Instance.LeaveLobby();
             }
-        }
-
-        public void DisplayCode()
-        {
-            codeDisplay.text = "<mspace=2.95em>" + codeInputField.text;
-        }
-
-        public void ClearCodeInput()
-        {
-            codeInputField.text = "";
-        }
-
-        public  void ResetTownNameInputCarat()
-        {
-            townName.caretPosition = townName.text.Length;
-            Debug.Log(townName.caretPosition);
         }
     }
 }
