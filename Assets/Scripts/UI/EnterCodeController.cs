@@ -9,32 +9,14 @@ namespace UI
 {
     public class EnterCodeController : MonoBehaviour
     {
+        [Header("Input")] 
         public TMP_InputField codeInputField;
         public TextMeshProUGUI codeInputPlaceholder;
         public TextMeshProUGUI codeDisplay;
+        
+        [Header("Information")] 
         public TextMeshProUGUI information;
-
-        public void PasteCode()
-        {
-            TextEditor textEditor = new TextEditor();
-            textEditor.Paste();
-            codeInputField.text = textEditor.text;
-        }
-
-        public void TogglePlaceholder()
-        {
-            codeInputPlaceholder.text = codeInputPlaceholder.text switch
-            {
-                "<mspace=2.95em>......" => codeInputPlaceholder.text = "<mspace=2.95em> .....",
-                "<mspace=2.95em> ....." => codeInputPlaceholder.text = "<mspace=2.95em>. ....",
-                "<mspace=2.95em>. ...." => codeInputPlaceholder.text = "<mspace=2.95em>.. ...",
-                "<mspace=2.95em>.. ..." => codeInputPlaceholder.text = "<mspace=2.95em>... ..",
-                "<mspace=2.95em>... .." => codeInputPlaceholder.text = "<mspace=2.95em>.... .",
-                "<mspace=2.95em>.... ." => codeInputPlaceholder.text = "<mspace=2.95em>..... ",
-                "<mspace=2.95em>..... " => codeInputPlaceholder.text = "<mspace=2.95em>......",
-                _ => codeInputPlaceholder.text
-            };
-        }
+        
 
         public void OnCodeInputDeselected()
         {
@@ -54,10 +36,16 @@ namespace UI
             }
         }
     
-        public void OnLobbyCodeValueChanged()
+        public void OnCodeInputValueChanged()
         {
             OnCodeInputSelected();
-            
+            TryToJoin();
+            DisplayCode();
+        }
+        
+        // HELPER FUNCTIONS
+        private void TryToJoin()
+        {
             if (codeInputField.text.Length != 6)
             {
                 information.text = "enter lobby code";
@@ -65,17 +53,16 @@ namespace UI
             }
             try
             {
-                // TODO this dont work lol
-                MainMenuUIManager.Instance.HandleJoinLobbyClicked(codeInputField.text);
+                MainMenuUIManager.Instance.SetCode(codeInputField.text.Trim());
+                MainMenuUIManager.Instance.HandleJoinLobbyClicked("id");
             }
             catch(Exception)
             {
                 information.text = "lobby not found";
             }
-            
         }
         
-        public void DisplayCode()
+        private void DisplayCode()
         {
             codeDisplay.text = "<mspace=2.95em>" + codeInputField.text;
         }
@@ -83,6 +70,28 @@ namespace UI
         public void ClearCodeInput()
         {
             codeInputField.text = "";
+        }
+        
+        private void TogglePlaceholder()
+        {
+            codeInputPlaceholder.text = codeInputPlaceholder.text switch
+            {
+                "<mspace=2.95em>......" => codeInputPlaceholder.text = "<mspace=2.95em> .....",
+                "<mspace=2.95em> ....." => codeInputPlaceholder.text = "<mspace=2.95em>. ....",
+                "<mspace=2.95em>. ...." => codeInputPlaceholder.text = "<mspace=2.95em>.. ...",
+                "<mspace=2.95em>.. ..." => codeInputPlaceholder.text = "<mspace=2.95em>... ..",
+                "<mspace=2.95em>... .." => codeInputPlaceholder.text = "<mspace=2.95em>.... .",
+                "<mspace=2.95em>.... ." => codeInputPlaceholder.text = "<mspace=2.95em>..... ",
+                "<mspace=2.95em>..... " => codeInputPlaceholder.text = "<mspace=2.95em>......",
+                _ => codeInputPlaceholder.text
+            };
+        }
+        
+        public void PasteCode()
+        {
+            TextEditor textEditor = new TextEditor();
+            textEditor.Paste();
+            codeInputField.text = textEditor.text;
         }
     }
 }

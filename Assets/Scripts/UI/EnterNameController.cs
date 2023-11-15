@@ -7,9 +7,14 @@ using UnityEngine.UIElements;
 
 public class EnterNameController : MonoBehaviour
 {
+    [Header("Input")]
     public TextMeshProUGUI enterNamePlaceholder;
     public TMP_InputField enterNameField;
+    
+    [Header("Confirm button")]
     public GameObject confirmNameButton;
+    
+    [Header("Keyboard")]
     public KeyboardController keyboard;
 
     public void ToggleNameFieldPlaceholder()
@@ -24,41 +29,33 @@ public class EnterNameController : MonoBehaviour
         };
     }
 
-    public void TogglePlaceholder(TMP_InputField inputField)
-    {
-        inputField.caretWidth = inputField.text.Length == 0 ? 0 : 2;
-    }
-
     public void OnNameFieldSelected()
     {
         InvokeRepeating(nameof(ToggleNameFieldPlaceholder), 0f, 0.5f);
-        TogglePlaceholder(enterNameField);
-        ToggleCaps();
+        MainMenuUIManager.Instance.ToggleCarat(enterNameField);
+        MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
     }
 
     public void OnNameFieldDeselected()
     {
         CancelInvoke(nameof(ToggleNameFieldPlaceholder));
+        enterNamePlaceholder.text = ". . ."; 
+        enterNameField.text = enterNameField.text.Trim();
     }
-
-    private void ToggleCaps()
-    {
-        // Toggle caps for each word typed
-        keyboard.caps = enterNameField.text.Length == 0 ||  enterNameField.text[^1] == ' ';
-    }
+    
     
     public void OnPlayerNameValueChanged()
     {
         // TODO validate player name correctly later (ale jak lepiej??? - Wera)
 
         CancelInvoke(nameof(ToggleNameFieldPlaceholder));
-        ToggleCaps();
-        TogglePlaceholder(enterNameField);
-
-        // Run animation for deleted text and still selected input
+        MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
+        MainMenuUIManager.Instance.ToggleCarat(enterNameField);
+        
+        // Play placeholder animation if no text input present
         if (enterNameField.text.Length == 0)
         {
-            OnNameFieldSelected();
+            InvokeRepeating(nameof(ToggleNameFieldPlaceholder), 0f, 0.5f);
         }
             
         // Toggle confirm name button if input is correct
@@ -66,6 +63,11 @@ public class EnterNameController : MonoBehaviour
         
         // Enter shortcut key implementation
         if (!enterNameField.text.EndsWith("\n") || enterNameField.text.Length <= 2) return;
+        OnConfirmNameButtonClicked();
+    }
+
+    public void OnConfirmNameButtonClicked()
+    {
         MainMenuUIManager.Instance.SetName(enterNameField.text.Trim());
         ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
     }
