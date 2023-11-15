@@ -8870,7 +8870,15 @@ PrefabInstance:
     - target: {fileID: 4417268470190304262, guid: 665825a9169371b428bdc9bdc473c188, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 276158946}
+      objectReference: {fileID: 1768204894}
+    - target: {fileID: 4417268470190304262, guid: 665825a9169371b428bdc9bdc473c188, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnEnterCodeButtonClicked
+      objectReference: {fileID: 0}
+    - target: {fileID: 4417268470190304262, guid: 665825a9169371b428bdc9bdc473c188, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: BrowseLobbiesController, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 4467911308314524075, guid: 665825a9169371b428bdc9bdc473c188, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

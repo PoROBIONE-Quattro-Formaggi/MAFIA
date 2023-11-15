@@ -33,7 +33,6 @@ namespace UI
 
         public void ChangeToBrowseLobbiesScreen()
         {
-            MainMenuUIManager.Instance.AssignLobbiesToButtons();
             ChangeTo(Screens.BrowseLobbies);
         }
 
