@@ -43,8 +43,6 @@ namespace Managers
 
         private void OnHostStarted()
         {
-            transform.SetParent(null);
-            DontDestroyOnLoad(gameObject);
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
             OnNetworkReady?.Invoke();
         }

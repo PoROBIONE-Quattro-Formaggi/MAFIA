@@ -5,12 +5,12 @@ namespace Managers
 {
     public class NetworkManagerSpawner : MonoBehaviour
     {
-        [SerializeField] private GameObject networkManager;
+        [SerializeField] private NetworkManager networkManager;
 
         private void Awake()
         {
             if (FindObjectOfType<NetworkManager>() != null) return;
-            Instantiate(networkManager);
+            Instantiate(networkManager.gameObject);
         }
     }
 }
