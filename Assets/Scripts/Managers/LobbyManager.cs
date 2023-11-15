@@ -101,6 +101,7 @@ namespace Managers
         {
             if (_joinedLobby == null) return;
             if (IsLobbyHost()) return;
+            CheckIfNewHost();
             if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
             try
             {
@@ -113,10 +114,9 @@ namespace Managers
                 return;
             }
 
-            CheckIfNewHost();
             if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
-            _joinedLobby = null;
+            LeaveLobby();
             PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
             PlayerPrefs.SetInt(PpKeys.KeyIsHost, 0);
             PlayerPrefs.Save();
@@ -404,8 +404,7 @@ namespace Managers
                 Debug.LogError(e);
             }
 
-            _joinedLobby = null;
-            _hostLobby = null;
+            LeaveLobby();
             SceneChanger.ChangeToGameScene();
         }
     }
