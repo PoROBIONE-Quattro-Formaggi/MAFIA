@@ -70,6 +70,11 @@ namespace UI
             _publicLobbyButtonText = publicLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
         }
 
+        public void SetName(string playerName)
+        {
+            _playerName = playerName;
+        }
+
         public void OnCreateLobbyClicked()
         {
             var maxPlayersInt = 5;
