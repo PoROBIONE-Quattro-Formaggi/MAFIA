@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
-using Third_Party.Toast_UI.Scripts;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -25,6 +25,7 @@ namespace Managers
         private static NetworkCommunicationManager _instance;
 
         // CLIENT FIELDS
+        public event Action OnPlayerRoleAssigned;
         private string _playerName;
         private string _role;
 
@@ -112,13 +113,18 @@ namespace Managers
         private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
             _role = role;
-            Toast.Show($"You are {role}");
+            OnPlayerRoleAssigned?.Invoke();
             Debug.Log($"You are {role}");
         }
 
         public static List<ulong> GetAllConnectedPlayersIDs()
         {
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
+        }
+
+        public string GetPlayerRole()
+        {
+            return _role ?? "";
         }
     }
 }

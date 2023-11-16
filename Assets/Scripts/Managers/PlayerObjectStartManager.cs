@@ -17,11 +17,11 @@ namespace Managers
             playerCamera.SetActive(true);
             if (PlayerPrefs.GetInt(PpKeys.KeyIsHost) == 1)
             {
-                FindObjectOfType<HostGameSessionUIManager>(true).gameObject.SetActive(true);
+                GetComponentInChildren<HostGameSessionUIManager>(true).gameObject.SetActive(true);
             }
             else
             {
-                FindObjectOfType<ClientGameSessionUIManager>(true).gameObject.SetActive(true);
+                GetComponentInChildren<ClientGameSessionUIManager>(true).gameObject.SetActive(true);
             }
         }
     }
