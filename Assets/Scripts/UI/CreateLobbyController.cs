@@ -27,7 +27,8 @@ namespace UI
         public TextMeshProUGUI townNameInputText;
         public RectTransform townNameInputTextRectTransform;
         public float inputDisplayOffset;
-        public float spaceWidth;
+        public TextMeshProUGUI spaceWidth;
+        public TextMeshProUGUI maxWidthChar;
         
         [Header("Keyboard")] 
         public KeyboardController keyboard;
@@ -38,6 +39,10 @@ namespace UI
         // VARIABLES
         private bool _isPrivate = true;
         private float _inputDisplayMinWidth;
+        private float _spaceWidth;
+        private float _maxCharWidth;
+        private bool _blockTownAnimationInvoke;
+        private bool _blockPopulationAnimationInvoke;
         
 
         private void Awake()
@@ -47,12 +52,14 @@ namespace UI
             _privateLobbyButtonText = privateLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
             _publicLobbyButtonText = publicLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
 
-            _inputDisplayMinWidth = inputDisplay.sizeDelta.x;
+            _inputDisplayMinWidth = inputDisplay.sizeDelta.x - inputDisplayOffset;
+            _spaceWidth = spaceWidth.preferredWidth;
+            _maxCharWidth = maxWidthChar.preferredWidth;
         }
 
-        private void AdjustCreateDisplay()
+        private void AdjustCreateDisplay(float preferredWidth)
         { 
-            inputDisplay.sizeDelta = new Vector2(townNameInputText.preferredWidth + inputDisplayOffset, inputDisplay.sizeDelta.y);
+            inputDisplay.sizeDelta = new Vector2(preferredWidth + inputDisplayOffset, inputDisplay.sizeDelta.y);
             
             // TODO: reset text position (left = 4, but this is fucked up w chuy), spacja nie dodaje do preffered width XDD
         }
@@ -61,24 +68,35 @@ namespace UI
         // INPUT FIELD ON VALUE CHANGED
         public void OnTownNameInputValueChanged()
         {
-            MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
-            
-            // Adjust create display width to text input width
-            if (townNameInputText.preferredWidth > _inputDisplayMinWidth - inputDisplayOffset)
+            if (Application.isMobilePlatform)
             {
-                AdjustCreateDisplay();
+                MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
             }
+            
             
             if (townNameInputField.text.Length == 0)
             {
                 townNameInputField.caretWidth = 0;
-                InvokeRepeating(nameof(ToggleTownNamePlaceholder),0.5f,0.5f);
+
+                if (!_blockTownAnimationInvoke)
+                {
+                    InvokeRepeating(nameof(ToggleTownNamePlaceholder),0.5f,0.5f);
+                    // Escape multiple delete on empty input toggling animation
+                    _blockTownAnimationInvoke = true;
+                }
             }
             else
             {
                 // show carat and cancel placeholder animation if input is present
                 townNameInputField.caretWidth = 2;
                 CancelInvoke(nameof(ToggleTownNamePlaceholder));
+                _blockTownAnimationInvoke = false;
+                
+                var preferredTextWidth = townNameInputText.preferredWidth + _maxCharWidth;
+                // Adjust create display width to text input width
+                AdjustCreateDisplay(preferredTextWidth > _inputDisplayMinWidth
+                    ? preferredTextWidth
+                    : _inputDisplayMinWidth);
             }
             OnInputValueChanged();
         }
@@ -88,13 +106,20 @@ namespace UI
             if (populationInputField.text.Length == 0)
             {
                 populationInputField.caretWidth = 0;
-                InvokeRepeating(nameof(TogglePopulationPlaceholder),0.5f,0.5f);
+                if (!_blockPopulationAnimationInvoke)
+                {
+                    InvokeRepeating(nameof(TogglePopulationPlaceholder),0.5f,0.5f);
+                    _blockPopulationAnimationInvoke = true;
+                }
+                
+                
             }
             else
             {
                 // show carat and cancel placeholder animation if input is present
                 populationInputField.caretWidth = 2;
                 CancelInvoke(nameof(TogglePopulationPlaceholder));
+                _blockPopulationAnimationInvoke = false;
             }
             OnInputValueChanged();
         }
