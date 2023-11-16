@@ -25,7 +25,9 @@ namespace UI
         public TextMeshProUGUI populationInputPlaceholder;
         public RectTransform inputDisplay;
         public TextMeshProUGUI townNameInputText;
+        public RectTransform townNameInputTextRectTransform;
         public float inputDisplayOffset;
+        public float spaceWidth;
         
         [Header("Keyboard")] 
         public KeyboardController keyboard;
@@ -49,8 +51,10 @@ namespace UI
         }
 
         private void AdjustCreateDisplay()
-        {
+        { 
             inputDisplay.sizeDelta = new Vector2(townNameInputText.preferredWidth + inputDisplayOffset, inputDisplay.sizeDelta.y);
+            
+            // TODO: reset text position (left = 4, but this is fucked up w chuy), spacja nie dodaje do preffered width XDD
         }
 
         
@@ -204,6 +208,29 @@ namespace UI
         private void TogglePopulationPlaceholder()
         {
             populationInputPlaceholder.text = populationInputPlaceholder.text == "" ? "." : "";
+        }
+    }
+    
+    public static class RectTransformExtensions
+    {
+        public static void SetLeft(this RectTransform rt, float left)
+        {
+            rt.offsetMin = new Vector2(left, rt.offsetMin.y);
+        }
+
+        public static void SetRight(this RectTransform rt, float right)
+        {
+            rt.offsetMax = new Vector2(-right, rt.offsetMax.y);
+        }
+
+        public static void SetTop(this RectTransform rt, float top)
+        {
+            rt.offsetMax = new Vector2(rt.offsetMax.x, -top);
+        }
+
+        public static void SetBottom(this RectTransform rt, float bottom)
+        {
+            rt.offsetMin = new Vector2(rt.offsetMin.x, bottom);
         }
     }
 }
