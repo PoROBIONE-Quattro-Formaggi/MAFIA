@@ -5,35 +5,31 @@ namespace UI
 {
     public class EnterNameController : MonoBehaviour
     {
-        [Header("Input")] public TextMeshProUGUI enterNamePlaceholder;
+        [Header("Input")] 
+        public TextMeshProUGUI enterNamePlaceholder;
         public TMP_InputField enterNameField;
 
         [Header("Confirm button")] public GameObject confirmNameButton;
 
         [Header("Keyboard")] public KeyboardController keyboard;
 
-        public void ToggleNameFieldPlaceholder()
+
+        private void AnimateEnterNamePlaceholder()
         {
-            enterNamePlaceholder.text = enterNamePlaceholder.text.Length switch
-            {
-                0 => ".",
-                1 => ". .",
-                3 => ". . .",
-                5 => "",
-                _ => enterNamePlaceholder.text
-            };
+            MainMenuUIManager.Instance.AnimatePlaceholder(enterNamePlaceholder);
         }
+        
 
         public void OnNameFieldSelected()
         {
-            InvokeRepeating(nameof(ToggleNameFieldPlaceholder), 0f, 0.5f);
+            InvokeRepeating(nameof(AnimateEnterNamePlaceholder), 0f, 0.5f);
             MainMenuUIManager.ToggleCarat(enterNameField);
             MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
         }
 
         public void OnNameFieldDeselected()
         {
-            CancelInvoke(nameof(ToggleNameFieldPlaceholder));
+            CancelInvoke(nameof(AnimateEnterNamePlaceholder));
             enterNamePlaceholder.text = ". . .";
             enterNameField.text = enterNameField.text.Trim();
         }
@@ -43,14 +39,14 @@ namespace UI
         {
             // TODO validate player name correctly later (ale jak lepiej??? - Wera)
 
-            CancelInvoke(nameof(ToggleNameFieldPlaceholder));
+            CancelInvoke(nameof(AnimateEnterNamePlaceholder));
             MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
             MainMenuUIManager.ToggleCarat(enterNameField);
 
             // Play placeholder animation if no text input present
             if (enterNameField.text.Length == 0)
             {
-                InvokeRepeating(nameof(ToggleNameFieldPlaceholder), 0f, 0.5f);
+                InvokeRepeating(nameof(AnimateEnterNamePlaceholder), 0f, 0.5f);
             }
 
             // Toggle confirm name button if input is correct

@@ -12,22 +12,27 @@ namespace UI
 
         [Header("Information")] public TextMeshProUGUI information;
 
+        private bool _blockAnimateCodeInputInvoke;
+
 
         public void OnCodeInputDeselected()
         {
             CancelInvoke(nameof(TogglePlaceholder));
+            _blockAnimateCodeInputInvoke = false;
             codeInputPlaceholder.text = "<mspace=2.95em>......";
         }
 
         public void OnCodeInputSelected()
         {
-            if (codeInputField.text.Length == 0)
+            if (codeInputField.text.Length == 0 && !_blockAnimateCodeInputInvoke)
             {
                 InvokeRepeating(nameof(TogglePlaceholder), 0f, 0.5f);
+                _blockAnimateCodeInputInvoke = true;
             }
             else
             {
                 CancelInvoke(nameof(TogglePlaceholder));
+                _blockAnimateCodeInputInvoke = false;
             }
         }
 
