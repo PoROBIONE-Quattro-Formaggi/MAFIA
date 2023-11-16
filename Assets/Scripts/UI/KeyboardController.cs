@@ -10,8 +10,8 @@ namespace UI
         public RectTransform screenRect;
         public TMP_InputField inputField;
 
-        [Header("Variables")] public bool caps;
-
+        [Header("Variables")] 
+        public bool caps;
         public float heightOnScreen;
         public float spacingRatio;
 
@@ -40,9 +40,9 @@ namespace UI
 
         private void Update()
         {
-            for (var i = 0; i < _rows.Count; i++)
+            foreach (var row in _rows)
             {
-                _rows[i].spacing = screenRect.sizeDelta.x / spacingRatio;
+                row.spacing = screenRect.sizeDelta.x / spacingRatio;
             }
         }
 
@@ -63,13 +63,13 @@ namespace UI
 
         public void ShowKeyboard()
         {
-            //if(!Application.isMobilePlatform) return;
+            if(!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y + heightOnScreen);
         }
 
         public void HideKeyboard()
         {
-            //if(!Application.isMobilePlatform) return;
+            if(!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, 0);
         }
 
