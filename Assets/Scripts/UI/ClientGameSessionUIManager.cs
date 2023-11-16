@@ -7,7 +7,7 @@ namespace UI
         public GameObject infoBar;
         public GameObject alibiPrompt;
         public GameObject alibiInput;
-        public GameObject voteButton;
+        public GameObject goVoteButton;
         public GameObject okButton;
         public GameObject rolePrompt;
 
@@ -15,6 +15,22 @@ namespace UI
         {
             rolePrompt.SetActive(true);
             okButton.SetActive(true);
+        }
+
+        public void OnOkButtonClicked()
+        {
+            okButton.SetActive(false);
+            rolePrompt.SetActive(false);
+            
+            // TODO: set information for information prompt + actually animate prompt
+            infoBar.SetActive(true);
+            goVoteButton.SetActive(true);
+        }
+
+        public void OnGoVoteButtonClicked()
+        {
+            infoBar.SetActive(false);
+            goVoteButton.SetActive(false);
         }
     }
 }
