@@ -64,24 +64,40 @@ namespace Managers
             }
             else if (isHost == 1)
             {
-                NetworkCommunicationManager.Instance.OnNetworkReady += AssignPlayersToRoles;
+                Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
+                NetworkCommunicationManager.Instance.OnNetworkReady += TryToAssignPlayersToRoles;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
             }
             else
             {
-                if (await RelayManager.JoinRelay(joinCode)) return;
+                if (await RelayManager.JoinRelay(joinCode))
+                {
+                    PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
+                    PlayerPrefs.Save();
+                    Debug.Log("[GameSessionManager] Joining to the Relay");
+                    return;
+                }
+
                 Toast.Show("Cannot join to the game");
                 SceneChanger.ChangeToMainScene();
             }
         }
 
+        private void TryToAssignPlayersToRoles()
+        {
+            InvokeRepeating(nameof(AssignPlayersToRoles), 0f, 0.1f);
+            NetworkCommunicationManager.Instance.OnNetworkReady -= TryToAssignPlayersToRoles;
+        }
+
         private void AssignPlayersToRoles()
         {
-            NetworkCommunicationManager.Instance.OnNetworkReady -= AssignPlayersToRoles;
-            var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
             var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
+            var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
+            if (expectedNumberOfPlayers != playersIDs.Count) return;
+            CancelInvoke(nameof(AssignPlayersToRoles));
+            var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
             foreach (var id in playersIDs.Where(id => id != hostID))
             {
                 ClientsIds.Add(id);

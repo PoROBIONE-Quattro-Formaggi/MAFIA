@@ -59,7 +59,7 @@ namespace Managers
 
         private async void HandleLobbyHeartbeatAndHostLobbyPoll()
         {
-            if (_hostLobby == null) return;
+            if (_hostLobby == null || _joinedLobby == null) return;
             if (!IsLobbyHost()) return;
             if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
             if (Time.time - _lastHeartbeatSent < HeartbeatPeriod)
@@ -380,6 +380,7 @@ namespace Managers
 
             PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
             PlayerPrefs.SetInt(PpKeys.KeyIsHost, 1);
+            PlayerPrefs.SetInt(PpKeys.KeyPlayersNumber, _hostLobby.Players.Count);
             PlayerPrefs.Save();
             var data = new Dictionary<string, DataObject>
             {

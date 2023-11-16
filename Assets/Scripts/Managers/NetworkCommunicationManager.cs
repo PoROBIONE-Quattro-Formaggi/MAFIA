@@ -43,6 +43,7 @@ namespace Managers
 
         private void OnHostStarted()
         {
+            Debug.Log("[NetworkCommunicationManager] OnHostStarted");
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
             OnNetworkReady?.Invoke();
         }
@@ -65,7 +66,7 @@ namespace Managers
         private void SendRolesToClients()
         {
             GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
-            if (GameSessionManager.Instance.IdxRole.Count == 0) return;
+            Debug.Log("Test RPC to host");
             var clientRpcParamsTemp = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -73,11 +74,10 @@ namespace Managers
                     TargetClientIds = new List<ulong> { OwnerClientId }
                 }
             };
-            var roleTemp = GameSessionManager.Instance.IdxRole[OwnerClientId];
-            Debug.Log("Sending special RPC");
-            SendRolesToClientsClientRpc(roleTemp, clientRpcParamsTemp);
+            SendRolesToClientsClientRpc("Test Message", clientRpcParamsTemp);
             foreach (var clientId in GameSessionManager.Instance.ClientsIds)
             {
+                Debug.Log($"Trying to send RPC to {clientId}");
                 var clientRpcParams = new ClientRpcParams
                 {
                     Send = new ClientRpcSendParams
@@ -99,7 +99,7 @@ namespace Managers
             Debug.Log($"You are {role}");
         }
 
-        public static IEnumerable<ulong> GetAllConnectedPlayersIDs()
+        public static List<ulong> GetAllConnectedPlayersIDs()
         {
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
         }
