@@ -12,13 +12,20 @@ namespace UI
         public void ChangeButton()
         {
             var white = blackBackground ? Colours.NightWhite : Colours.DayWhite;
-            if (radioButtonBg.color == Colours.NightBlack){
+            if (radioButtonBg.color == Colours.NightBlack)
+            {
                 radioButtonBg.color = white;
-            } else if (radioButtonBg.color == white) {
+            }
+            else if (radioButtonBg.color == white)
+            {
                 radioButtonBg.color = Colours.NightBlack;
-            } else if (blackBackground) {
+            }
+            else if (blackBackground)
+            {
                 radioButtonBg.color = white;
-            } else {
+            }
+            else
+            {
                 radioButtonBg.color = Colours.NightBlack;
             }
         }

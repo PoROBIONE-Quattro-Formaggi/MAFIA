@@ -1,9 +1,6 @@
-using System;
-using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace UI
 {
@@ -23,7 +20,6 @@ namespace UI
         }
 
         private static MainMenuUIManager _instance;
-        private string _lobbyToJoinID;
         private string _lobbyToJoinCode;
         private string _playerName;
 
@@ -52,7 +48,7 @@ namespace UI
         {
             _lobbyToJoinCode = code;
         }
-        
+
 
         public void HandleJoinLobbyClicked(string lobbyID)
         {
@@ -60,12 +56,12 @@ namespace UI
             {
                 lobbyID = null;
             }
+
             Debug.Log($"lobbyID: {lobbyID}, code: {_lobbyToJoinCode}, playerName: {_playerName}");
             var lobbyCode = _lobbyToJoinCode;
             var playerName = _playerName;
             LobbyManager.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
-            // Resetting values if player exits and reenters the other lobby
-            _lobbyToJoinID = null;
+            // Resetting value if player exits and reenters the other lobby
             _lobbyToJoinCode = null;
             InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
         }
@@ -97,7 +93,7 @@ namespace UI
                 LobbyManager.Instance.LeaveLobby();
             }
         }
-        
+
         // HELPER FUNCTIONS
         public static void ToggleCapitalize(KeyboardController keyboard, TMP_InputField inputField)
         {
@@ -107,8 +103,8 @@ namespace UI
                 keyboard.OnCapsPressed();
             }
         }
-        
-        public void ToggleCarat(TMP_InputField inputField)
+
+        public static void ToggleCarat(TMP_InputField inputField)
         {
             inputField.caretWidth = inputField.text.Length == 0 ? 0 : 2;
         }

@@ -7,7 +7,7 @@ namespace UI
         public GameObject mafiaStatus;
         public GameObject doctorStatus;
         public GameObject lastDeath;
-        
+
         private void OnEnable()
         {
             // First night from lobby game start

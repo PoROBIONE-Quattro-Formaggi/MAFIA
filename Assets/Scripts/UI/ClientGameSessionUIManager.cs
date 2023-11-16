@@ -10,7 +10,7 @@ namespace UI
         public GameObject voteButton;
         public GameObject okButton;
         public GameObject rolePrompt;
-        
+
         private void OnEnable()
         {
             rolePrompt.SetActive(true);
