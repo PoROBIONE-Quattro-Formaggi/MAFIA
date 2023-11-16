@@ -29,6 +29,7 @@ namespace Managers
         private static LobbyManager _instance;
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
+        private string _playerName;
         private int _lastPlayersCount;
         private float _lastLobbyServiceCall;
         private float _lastHeartbeatSent;
@@ -114,12 +115,11 @@ namespace Managers
                 return;
             }
 
-            if (_joinedLobby.Data[PpKeys.KeyStartGame].Value == "0") return;
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
+            if (relayCode == "0") return;
+            var playersNumber = _joinedLobby.Players.Count;
             LeaveLobby();
-            PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
-            PlayerPrefs.SetInt(PpKeys.KeyIsHost, 0);
-            PlayerPrefs.Save();
+            SetPlayerPrefsForGameSession(relayCode, 0, playersNumber, _playerName);
             SceneChanger.ChangeToGameScene();
         }
 
@@ -258,6 +258,7 @@ namespace Managers
 
         public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
+            _playerName = playerName;
             var player = new Player
             {
                 Data = new Dictionary<string, PlayerDataObject>
@@ -378,10 +379,7 @@ namespace Managers
                 return;
             }
 
-            PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
-            PlayerPrefs.SetInt(PpKeys.KeyIsHost, 1);
-            PlayerPrefs.SetInt(PpKeys.KeyPlayersNumber, _hostLobby.Players.Count);
-            PlayerPrefs.Save();
+            SetPlayerPrefsForGameSession(relayCode, 1, _hostLobby.Players.Count, Roles.Narrator);
             var data = new Dictionary<string, DataObject>
             {
                 {
@@ -407,6 +405,19 @@ namespace Managers
 
             LeaveLobby();
             SceneChanger.ChangeToGameScene();
+        }
+
+        private static void SetPlayerPrefsForGameSession(
+            string relayCode,
+            int isHost,
+            int playersNumber,
+            string playerName)
+        {
+            PlayerPrefs.SetString(PpKeys.KeyStartGame, relayCode);
+            PlayerPrefs.SetInt(PpKeys.KeyIsHost, isHost);
+            PlayerPrefs.SetInt(PpKeys.KeyPlayersNumber, playersNumber);
+            PlayerPrefs.SetString(PpKeys.KeyPlayerName, playerName);
+            PlayerPrefs.Save();
         }
     }
 }

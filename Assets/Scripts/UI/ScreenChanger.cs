@@ -65,12 +65,12 @@ namespace UI
         {
             ChangeTo(Screens.LobbyPlayerScreen);
         }
-        
+
         public void ChangeToPlayerGameScreen()
         {
             ChangeTo(Screens.PlayerGameScreen);
         }
-        
+
         public void ChangeToHostGameScreen()
         {
             ChangeTo(Screens.HostGameScreen);

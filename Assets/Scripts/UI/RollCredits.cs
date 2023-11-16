@@ -35,6 +35,7 @@ namespace UI
             {
                 Destroy(nameObj);
             }
+
             nameTexts.Clear();
             nameObjects.Clear();
         }
@@ -42,7 +43,7 @@ namespace UI
         private void OnEnable()
         {
             //Application.targetFrameRate = 120;   // DEBUG: for testing different frame rates
-            
+
             _screenRectTransform = screen.GetComponent<RectTransform>();
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
@@ -54,13 +55,13 @@ namespace UI
         {
             _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
-            
+
             // Display town name
             subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
-            
+
             // Display lobby code
             lobbyCodeText.text = "LOBBY CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
-            
+
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)
             {

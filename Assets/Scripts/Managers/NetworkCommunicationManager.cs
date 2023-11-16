@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using Unity.Netcode;
 using UnityEngine;
@@ -25,6 +26,8 @@ namespace Managers
         public event Action OnNetworkReady;
 
         private static NetworkCommunicationManager _instance;
+        private string _playerName;
+        private readonly List<string> _allPlayerNames = new();
 
         private void Awake()
         {
@@ -39,13 +42,35 @@ namespace Managers
 
             NetworkManager.Singleton.OnServerStarted += OnHostStarted;
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
         }
 
         private void OnHostStarted()
         {
             Debug.Log("[NetworkCommunicationManager] OnHostStarted");
+            _playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
+            _allPlayerNames.Add(_playerName);
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
-            OnNetworkReady?.Invoke();
+            // OnNetworkReady?.Invoke();
+        }
+
+        private void OnClientConnected(ulong clientId)
+        {
+            if (IsHost) return;
+            Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
+            _playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
+            AddClientNameToListServerRpc(_playerName);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void AddClientNameToListServerRpc(string playerName)
+        {
+            _allPlayerNames.Add(playerName);
+            Debug.Log("All current player names:");
+            foreach (var nickname in _allPlayerNames)
+            {
+                Debug.Log(nickname);
+            }
         }
 
         private static void OnHostStopped(bool obj)
@@ -66,15 +91,6 @@ namespace Managers
         private void SendRolesToClients()
         {
             GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
-            Debug.Log("Test RPC to host");
-            var clientRpcParamsTemp = new ClientRpcParams
-            {
-                Send = new ClientRpcSendParams
-                {
-                    TargetClientIds = new List<ulong> { OwnerClientId }
-                }
-            };
-            SendRolesToClientsClientRpc("Test Message", clientRpcParamsTemp);
             foreach (var clientId in GameSessionManager.Instance.ClientsIds)
             {
                 Debug.Log($"Trying to send RPC to {clientId}");

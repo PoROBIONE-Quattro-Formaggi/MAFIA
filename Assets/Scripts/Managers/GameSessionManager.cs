@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -65,7 +66,7 @@ namespace Managers
             else if (isHost == 1)
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
-                NetworkCommunicationManager.Instance.OnNetworkReady += TryToAssignPlayersToRoles;
+                NetworkManager.Singleton.OnClientConnectedCallback += TryToAssignPlayersToRoles;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
@@ -85,10 +86,10 @@ namespace Managers
             }
         }
 
-        private void TryToAssignPlayersToRoles()
+        private void TryToAssignPlayersToRoles(ulong clientId)
         {
-            InvokeRepeating(nameof(AssignPlayersToRoles), 0f, 0.1f);
-            NetworkCommunicationManager.Instance.OnNetworkReady -= TryToAssignPlayersToRoles;
+            Debug.Log($"New client connected with id: {clientId}");
+            AssignPlayersToRoles();
         }
 
         private void AssignPlayersToRoles()
@@ -96,7 +97,7 @@ namespace Managers
             var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             if (expectedNumberOfPlayers != playersIDs.Count) return;
-            CancelInvoke(nameof(AssignPlayersToRoles));
+            NetworkManager.Singleton.OnClientConnectedCallback -= TryToAssignPlayersToRoles;
             var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
             foreach (var id in playersIDs.Where(id => id != hostID))
             {
