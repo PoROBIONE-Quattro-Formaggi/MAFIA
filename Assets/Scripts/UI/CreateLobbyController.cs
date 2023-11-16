@@ -25,9 +25,7 @@ namespace UI
         public TextMeshProUGUI populationInputPlaceholder;
         public RectTransform inputDisplay;
         public TextMeshProUGUI townNameInputText;
-        public RectTransform townNameInputTextRectTransform;
         public float inputDisplayOffset;
-        public TextMeshProUGUI spaceWidth;
         public TextMeshProUGUI maxWidthChar;
         
         [Header("Keyboard")] 
@@ -39,7 +37,6 @@ namespace UI
         // VARIABLES
         private bool _isPrivate = true;
         private float _inputDisplayMinWidth;
-        private float _spaceWidth;
         private float _maxCharWidth;
         private bool _blockTownAnimationInvoke;
         private bool _blockPopulationAnimationInvoke;
@@ -53,7 +50,6 @@ namespace UI
             _publicLobbyButtonText = publicLobbyButton.GetComponentInChildren<TextMeshProUGUI>();
 
             _inputDisplayMinWidth = inputDisplay.sizeDelta.x - inputDisplayOffset;
-            _spaceWidth = spaceWidth.preferredWidth;
             _maxCharWidth = maxWidthChar.preferredWidth;
         }
 
@@ -80,7 +76,7 @@ namespace UI
 
                 if (!_blockTownAnimationInvoke)
                 {
-                    InvokeRepeating(nameof(ToggleTownNamePlaceholder),0.5f,0.5f);
+                    InvokeRepeating(nameof(AnimateTownNamePlaceholder),0.5f,0.5f);
                     // Escape multiple delete on empty input toggling animation
                     _blockTownAnimationInvoke = true;
                 }
@@ -89,7 +85,7 @@ namespace UI
             {
                 // show carat and cancel placeholder animation if input is present
                 townNameInputField.caretWidth = 2;
-                CancelInvoke(nameof(ToggleTownNamePlaceholder));
+                CancelInvoke(nameof(AnimateTownNamePlaceholder));
                 _blockTownAnimationInvoke = false;
                 
                 var preferredTextWidth = townNameInputText.preferredWidth + _maxCharWidth;
@@ -108,7 +104,7 @@ namespace UI
                 populationInputField.caretWidth = 0;
                 if (!_blockPopulationAnimationInvoke)
                 {
-                    InvokeRepeating(nameof(TogglePopulationPlaceholder),0.5f,0.5f);
+                    InvokeRepeating(nameof(AnimatePopulationPlaceholder),0.5f,0.5f);
                     _blockPopulationAnimationInvoke = true;
                 }
                 
@@ -118,7 +114,7 @@ namespace UI
             {
                 // show carat and cancel placeholder animation if input is present
                 populationInputField.caretWidth = 2;
-                CancelInvoke(nameof(TogglePopulationPlaceholder));
+                CancelInvoke(nameof(AnimatePopulationPlaceholder));
                 _blockPopulationAnimationInvoke = false;
             }
             OnInputValueChanged();
@@ -149,7 +145,7 @@ namespace UI
         public void OnTownNameInputSelected()
         {
             MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
-            InvokeRepeating(nameof(ToggleTownNamePlaceholder),0.5f,0.5f);
+            InvokeRepeating(nameof(AnimateTownNamePlaceholder),0.5f,0.5f);
             
             if (townNameInputField.text.Length == 0)
             {
@@ -162,7 +158,7 @@ namespace UI
         
         public void OnPopulationInputSelected()
         {
-            InvokeRepeating(nameof(TogglePopulationPlaceholder),0.5f,0.5f);
+            InvokeRepeating(nameof(AnimatePopulationPlaceholder),0.5f,0.5f);
             
             if (populationInputField.text.Length == 0)
             {
@@ -177,13 +173,13 @@ namespace UI
         // INPUT FIELD ON DESELECTED FUNCTIONS
         public void OnTownNameInputDeselected()
         {
-            CancelInvoke(nameof(ToggleTownNamePlaceholder));
+            CancelInvoke(nameof(AnimateTownNamePlaceholder));
             townNameInputPlaceholder.text = ".";
         }
 
         public void OnPopulationInputDeselected()
         {
-            CancelInvoke(nameof(TogglePopulationPlaceholder));
+            CancelInvoke(nameof(AnimatePopulationPlaceholder));
             populationInputPlaceholder.text = ".";
         }
         
@@ -225,17 +221,22 @@ namespace UI
         
         
         // PLACEHOLDER ANIMATION FUNCTIONS
-        private void ToggleTownNamePlaceholder()
+        private void AnimateTownNamePlaceholder()
         {
-            townNameInputPlaceholder.text = townNameInputPlaceholder.text == "" ? "." : "";
+            MainMenuUIManager.Instance.AnimatePlaceholder(townNameInputPlaceholder);
         }
         
-        private void TogglePopulationPlaceholder()
+        private void AnimatePopulationPlaceholder()
         {
-            populationInputPlaceholder.text = populationInputPlaceholder.text == "" ? "." : "";
+            if (populationInputPlaceholder.text == ". .")
+            {
+                populationInputPlaceholder.text = ". . .";
+            }
+            MainMenuUIManager.Instance.AnimatePlaceholder(populationInputPlaceholder);
         }
     }
     
+    // This class modified will probably solve all input text resize issues - i think?
     public static class RectTransformExtensions
     {
         public static void SetLeft(this RectTransform rt, float left)

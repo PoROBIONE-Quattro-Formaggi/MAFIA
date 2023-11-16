@@ -108,5 +108,17 @@ namespace UI
         {
             inputField.caretWidth = inputField.text.Length == 0 ? 0 : 2;
         }
+        
+        public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        {
+            placeholderText.text = placeholderText.text.Length switch
+            {
+                0 => ".",
+                1 => ". .",
+                3 => ". . .",
+                5 => "",
+                _ => placeholderText.text
+            };
+        }
     }
 }
