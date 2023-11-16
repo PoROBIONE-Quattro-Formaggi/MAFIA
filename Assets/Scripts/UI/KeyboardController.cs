@@ -63,13 +63,13 @@ namespace UI
 
         public void ShowKeyboard()
         {
-            //if(!Application.isMobilePlatform) return;
+            if(!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y + heightOnScreen);
         }
 
         public void HideKeyboard()
         {
-            //if(!Application.isMobilePlatform) return;
+            if(!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, 0);
         }
 

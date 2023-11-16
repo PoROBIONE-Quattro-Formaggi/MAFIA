@@ -56,6 +56,11 @@ namespace UI
 
         public void HandleJoinLobbyClicked(string lobbyID)
         {
+            if (lobbyID == "id")
+            {
+                lobbyID = null;
+            }
+            Debug.Log($"lobbyID: {lobbyID}, code: {_lobbyToJoinCode}, playerName: {_playerName}");
             var lobbyCode = _lobbyToJoinCode;
             var playerName = _playerName;
             LobbyManager.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);

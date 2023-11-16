@@ -53,6 +53,7 @@ namespace UI
             }
             try
             {
+                Debug.Log("Attempting to join lobby");
                 MainMenuUIManager.Instance.SetCode(codeInputField.text.Trim());
                 MainMenuUIManager.Instance.HandleJoinLobbyClicked("id");
             }

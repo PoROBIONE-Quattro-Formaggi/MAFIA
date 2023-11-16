@@ -45,6 +45,7 @@ namespace UI
         // INPUT FIELD ON VALUE CHANGED
         public void OnInputValueChanged()
         {
+            MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
             if (townNameInputField.text.Length == 0)
             {
                 information.text = "Enter town name, and";
@@ -77,6 +78,7 @@ namespace UI
         // INPUT FIELD ON SELECTED FUNCTIONS
         public void OnTownNameInputSelected()
         {
+            MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
             InvokeRepeating(nameof(ToggleTownNamePlaceholder),0.5f,0.5f);
             
             if (townNameInputField.text.Length == 0)
