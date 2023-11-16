@@ -29,6 +29,8 @@ namespace Managers
 
 
         public Dictionary<ulong, string> IdxRole { get; } = new();
+
+        public Dictionary<ulong, string> IdxPlayerName { get; } = new();
         public List<ulong> ClientsIds { get; } = new();
         public event Action OnPlayersAssignedToRoles;
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
-using Third_Party.Toast_UI.Scripts;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -23,11 +22,12 @@ namespace Managers
             }
         }
 
-        public event Action OnNetworkReady;
-
         private static NetworkCommunicationManager _instance;
+
+        // CLIENT FIELDS
+        public event Action OnPlayerRoleAssigned;
         private string _playerName;
-        private readonly List<string> _allPlayerNames = new();
+        private string _role;
 
         private void Awake()
         {
@@ -47,11 +47,11 @@ namespace Managers
 
         private void OnHostStarted()
         {
+            if (!IsHost) return;
             Debug.Log("[NetworkCommunicationManager] OnHostStarted");
             _playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
-            _allPlayerNames.Add(_playerName);
+            GameSessionManager.Instance.IdxPlayerName[OwnerClientId] = _playerName;
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
-            // OnNetworkReady?.Invoke();
         }
 
         private void OnClientConnected(ulong clientId)
@@ -63,13 +63,14 @@ namespace Managers
         }
 
         [ServerRpc(RequireOwnership = false)]
-        private void AddClientNameToListServerRpc(string playerName)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
-            _allPlayerNames.Add(playerName);
+            GameSessionManager.Instance.IdxPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             Debug.Log("All current player names:");
-            foreach (var nickname in _allPlayerNames)
+            foreach (var idxPlayerName in GameSessionManager.Instance.IdxPlayerName)
             {
-                Debug.Log(nickname);
+                Debug.Log($"ID: {idxPlayerName.Key} - {idxPlayerName.Value}");
             }
         }
 
@@ -111,13 +112,19 @@ namespace Managers
         // ReSharper disable once MemberCanBeMadeStatic.Local, UnusedParameter.Local 
         private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
-            Toast.Show($"You are {role}");
+            _role = role;
+            OnPlayerRoleAssigned?.Invoke();
             Debug.Log($"You are {role}");
         }
 
         public static List<ulong> GetAllConnectedPlayersIDs()
         {
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
+        }
+
+        public string GetPlayerRole()
+        {
+            return _role ?? "";
         }
     }
 }
