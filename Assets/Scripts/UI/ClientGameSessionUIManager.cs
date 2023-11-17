@@ -1,4 +1,4 @@
-using System.Linq;
+using DataStorage;
 using Managers;
 using UnityEngine;
 using TMPro;
@@ -22,19 +22,14 @@ namespace UI
         public GameObject voteOptionsParent;
         public GameObject voteOptionPrefab;
 
-        private string _role;
-
-        public void SubscribeToOnPlayerRoleAssigned()
+        private void OnEnable()
         {
             NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetPlayerRoleToPrompt;
         }
 
         private void SetPlayerRoleToPrompt()
         {
-            Debug.Log("OnPlayerRoleAssigned fired");
-            _role = NetworkCommunicationManager.Instance.GetPlayerRole();
-
-            rolePromptText.text = "You are " + _role;
+            rolePromptText.text = "You are " + PlayerData.Role;
             EnableRoleInformation();
         }
 
@@ -77,7 +72,7 @@ namespace UI
 
         private void EnableNightVote()
         {
-            nightVotePromptText.text = _role switch
+            nightVotePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
                 "Mafia" => "Who to kill?",
@@ -87,7 +82,8 @@ namespace UI
             };
 
             nightVotePrompt.SetActive(true);
-            var playerNames = GameSessionManager.Instance.IdxPlayerName.Select(keyVal => keyVal.Value).ToList();
+            // var playerNames = GameSessionManager.Instance.IDToPlayerName.Select(keyVal => keyVal.Value).ToList(); TODO change
+            var playerNames = NetworkCommunicationManager.Instance.GetAllAlivePlayersNames();
 
             foreach (var playerName in playerNames)
             {
