@@ -28,10 +28,12 @@ namespace Managers
         }
 
 
-        public Dictionary<ulong, string> IdxRole { get; } = new();
+        public Dictionary<ulong, string> IDToRole { get; } = new();
 
-        public Dictionary<ulong, string> IdxPlayerName { get; } = new();
-        public List<ulong> ClientsIds { get; } = new();
+        public Dictionary<ulong, string> IDToPlayerName { get; } = new();
+
+        public Dictionary<ulong, bool> IDToIsPlayerAlive { get; } = new();
+        public List<ulong> ClientsIDs { get; } = new();
         public event Action OnPlayersAssignedToRoles;
 
         private static GameSessionManager _instance;
@@ -103,10 +105,10 @@ namespace Managers
             var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
             foreach (var id in playersIDs.Where(id => id != hostID))
             {
-                ClientsIds.Add(id);
+                ClientsIDs.Add(id);
             }
 
-            var playersIDsToAssignRoles = ClientsIds.ToList();
+            var playersIDsToAssignRoles = ClientsIDs.ToList();
             if (playersIDsToAssignRoles.Count <
                 mafiaNumber + doctorNumber + 1) //TODO delete later (debug case when players < 3
             {
@@ -120,12 +122,12 @@ namespace Managers
             var rolesList = GetRolesList(playersIDsToAssignRoles.Count);
             for (var i = 0; i < rolesList.Count; i++)
             {
-                IdxRole[playersIDsToAssignRoles[i]] = rolesList[i];
+                IDToRole[playersIDsToAssignRoles[i]] = rolesList[i];
+                IDToIsPlayerAlive[(ulong)i] = true;
             }
 
-            IdxRole[hostID] = Roles.Narrator;
             Debug.Log("Players assigned with roles like:");
-            foreach (var keyValPair in IdxRole)
+            foreach (var keyValPair in IDToRole)
             {
                 Debug.Log($"ClientID: {keyValPair.Key} - {keyValPair.Value}");
             }

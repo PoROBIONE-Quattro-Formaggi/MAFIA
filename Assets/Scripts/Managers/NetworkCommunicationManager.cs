@@ -24,10 +24,7 @@ namespace Managers
 
         private static NetworkCommunicationManager _instance;
 
-        // CLIENT FIELDS
         public event Action OnPlayerRoleAssigned;
-        private string _playerName;
-        private string _role;
 
         private void Awake()
         {
@@ -49,8 +46,11 @@ namespace Managers
         {
             if (!IsHost) return;
             Debug.Log("[NetworkCommunicationManager] OnHostStarted");
-            _playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
-            GameSessionManager.Instance.IdxPlayerName[OwnerClientId] = _playerName;
+            var playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
+            PlayerData.Name = playerName;
+            PlayerData.IsAlive = true;
+            PlayerData.ClientID = OwnerClientId;
+            PlayerData.Role = Roles.Narrator;
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
         }
 
@@ -58,17 +58,20 @@ namespace Managers
         {
             if (IsHost) return;
             Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
-            _playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
-            AddClientNameToListServerRpc(_playerName);
+            var playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
+            PlayerData.Name = playerName;
+            PlayerData.IsAlive = true;
+            PlayerData.ClientID = clientId;
+            AddClientNameToListServerRpc(playerName);
         }
 
         [ServerRpc(RequireOwnership = false)]
         // ReSharper disable once MemberCanBeMadeStatic.Local
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
-            GameSessionManager.Instance.IdxPlayerName[rpcParams.Receive.SenderClientId] = playerName;
+            GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             Debug.Log("All current player names:");
-            foreach (var idxPlayerName in GameSessionManager.Instance.IdxPlayerName)
+            foreach (var idxPlayerName in GameSessionManager.Instance.IDToPlayerName)
             {
                 Debug.Log($"ID: {idxPlayerName.Key} - {idxPlayerName.Value}");
             }
@@ -92,7 +95,7 @@ namespace Managers
         private void SendRolesToClients()
         {
             GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
-            foreach (var clientId in GameSessionManager.Instance.ClientsIds)
+            foreach (var clientId in GameSessionManager.Instance.ClientsIDs)
             {
                 Debug.Log($"Trying to send RPC to {clientId}");
                 var clientRpcParams = new ClientRpcParams
@@ -102,7 +105,7 @@ namespace Managers
                         TargetClientIds = new List<ulong> { clientId }
                     }
                 };
-                var role = GameSessionManager.Instance.IdxRole[clientId];
+                var role = GameSessionManager.Instance.IDToRole[clientId];
                 Debug.Log("Sending RPC");
                 SendRolesToClientsClientRpc(role, clientRpcParams);
             }
@@ -112,7 +115,7 @@ namespace Managers
         // ReSharper disable once MemberCanBeMadeStatic.Local, UnusedParameter.Local 
         private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
-            _role = role;
+            PlayerData.Role = role;
             OnPlayerRoleAssigned?.Invoke();
             Debug.Log($"You are {role}");
         }
@@ -122,9 +125,15 @@ namespace Managers
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
         }
 
-        public string GetPlayerRole()
+        public List<string> GetAllAlivePlayersNames()
         {
-            return _role ?? "";
+            List<string> playersNames = new();
+            // TODO: rewrite needed fields in GameSessionManager into ObservableDictionary as showed by ChatGPT
+            // TODO: on any change (observed by the server) send ClientRpc to all clients to update their versions of that fields.
+            // TODO: For list of strings use FixedString32Bytes array
+            // TODO: for dictionary send keys and values separately
+            // TODO: in the code, relate to fields in GameSessionManager directly as they will be constantly copied from the server versions
+            return playersNames;
         }
     }
 }
