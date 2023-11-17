@@ -60,6 +60,22 @@ namespace UI
             // TODO: reset text position (left = 4, but this is fucked up w chuy), spacja nie dodaje do preffered width XDD
         }
 
+        public void OnPromptClicked()
+        {
+            if (information.text == "Enter town name")
+            {
+                townNameInputField.Select();
+            } else if (information.text == "Enter population number")
+            {
+                populationInputField.Select();
+            }
+            else
+            {
+                keyboard.HideKeyboard();
+            }
+            
+        }
+
         
         // INPUT FIELD ON VALUE CHANGED
         public void OnTownNameInputValueChanged()
