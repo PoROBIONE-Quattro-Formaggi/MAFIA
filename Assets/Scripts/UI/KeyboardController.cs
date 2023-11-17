@@ -9,6 +9,8 @@ namespace UI
     {
         public RectTransform screenRect;
         public TMP_InputField inputField;
+        public GameObject numpadKeyboard;
+        public GameObject defaultKeyboard;
 
         [Header("Variables")] public bool caps;
         public float heightOnScreen;
@@ -43,6 +45,18 @@ namespace UI
             {
                 row.spacing = screenRect.sizeDelta.x / spacingRatio;
             }
+        }
+
+        public void DisplayNumpad()
+        {
+            defaultKeyboard.SetActive(false);
+            numpadKeyboard.SetActive(true);
+        }
+
+        public void DisplayDefault()
+        {
+            numpadKeyboard.SetActive(false);
+            defaultKeyboard.SetActive(true);
         }
 
         public void ConnectKeys()

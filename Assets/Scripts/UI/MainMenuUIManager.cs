@@ -48,6 +48,12 @@ namespace UI
         {
             _lobbyToJoinCode = code;
         }
+        
+        // GET FUNCTIONS
+        public string GetName()
+        {
+            return _playerName;
+        }
 
 
         public void HandleJoinLobbyClicked(string lobbyID)
