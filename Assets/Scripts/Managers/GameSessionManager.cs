@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
+using DataStorage.ObservableDictionary;
 using Third_Party.Toast_UI.Scripts;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 
 namespace Managers
 {
@@ -28,11 +31,11 @@ namespace Managers
         }
 
 
-        public Dictionary<ulong, string> IDToRole { get; } = new();
+        public ObservableDictionary<ulong, string> IDToRole { get; } = new();
 
-        public Dictionary<ulong, string> IDToPlayerName { get; } = new();
+        public ObservableDictionary<ulong, string> IDToPlayerName { get; } = new();
 
-        public Dictionary<ulong, bool> IDToIsPlayerAlive { get; } = new();
+        public ObservableDictionary<ulong, bool> IDToIsPlayerAlive { get; } = new();
         public List<ulong> ClientsIDs { get; } = new();
         public event Action OnPlayersAssignedToRoles;
 
@@ -50,6 +53,28 @@ namespace Managers
             {
                 Destroy(gameObject);
             }
+        }
+
+        private void OnIDToRoleChanged(object sender, DictionaryChangedEventArgs<ulong, string> e)
+        {
+            var keys = IDToRole.Keys.ToArray();
+            var values = IDToRole.Values.Select(value => new FixedString32Bytes(value)).ToArray();
+
+            NetworkCommunicationManager.Instance.SendNewIDToRoleClientRpc(keys, values);
+        }
+
+        private void OnIDToPlayerNameChanged(object sender, DictionaryChangedEventArgs<ulong, string> e)
+        {
+            var keys = IDToPlayerName.Keys.ToArray();
+            var values = IDToRole.Values.Select(value => new FixedString32Bytes(value)).ToArray();
+            NetworkCommunicationManager.Instance.SendNewIDToPlayerNameClientRpc(keys, values);
+        }
+
+        private void OnIDToIsPlayerAlive(object sender, DictionaryChangedEventArgs<ulong, bool> e)
+        {
+            var keys = IDToIsPlayerAlive.Keys.ToArray();
+            var values = IDToIsPlayerAlive.Values.ToArray();
+            NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
         }
 
         private void OnEnable()
@@ -71,6 +96,9 @@ namespace Managers
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
                 NetworkManager.Singleton.OnClientConnectedCallback += TryToAssignPlayersToRoles;
+                IDToRole.DictionaryChanged += OnIDToRoleChanged;
+                IDToPlayerName.DictionaryChanged += OnIDToPlayerNameChanged;
+                IDToIsPlayerAlive.DictionaryChanged += OnIDToIsPlayerAlive;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
