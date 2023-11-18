@@ -50,7 +50,7 @@ namespace UI
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
             GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
             Debug.Log(informationText.text);
-            informationText.text = $"Wait, {MainMenuUIManager.Instance.GetName()}";
+            informationText.text = $"You are {MainMenuUIManager.Instance.GetName()}, please wait";
             InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
         }
 
