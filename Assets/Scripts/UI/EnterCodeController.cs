@@ -39,6 +39,7 @@ namespace UI
         public void OnCodeInputValueChanged()
         {
             OnCodeInputSelected();
+            codeInputField.text = codeInputField.text.ToUpper();
             TryToJoin();
             DisplayCode();
         }

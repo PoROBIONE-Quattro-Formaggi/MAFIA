@@ -62,18 +62,18 @@ namespace UI
 
         public void OnPromptClicked()
         {
-            if (information.text == "Enter town name")
+            switch (information.text)
             {
-                townNameInputField.Select();
-            } else if (information.text == "Enter population number")
-            {
-                populationInputField.Select();
+                case "Enter town name":
+                    townNameInputField.Select();
+                    break;
+                case "Enter population number":
+                    populationInputField.Select();
+                    break;
+                default:
+                    keyboard.HideKeyboard();
+                    break;
             }
-            else
-            {
-                keyboard.HideKeyboard();
-            }
-            
         }
 
         
@@ -161,6 +161,7 @@ namespace UI
         public void OnTownNameInputSelected()
         {
             MainMenuUIManager.ToggleCapitalize(keyboard,townNameInputField);
+            keyboard.DisplayDefault();
             InvokeRepeating(nameof(AnimateTownNamePlaceholder),0.5f,0.5f);
             
             if (townNameInputField.text.Length == 0)
@@ -174,6 +175,7 @@ namespace UI
         
         public void OnPopulationInputSelected()
         {
+            keyboard.DisplayNumpad();
             InvokeRepeating(nameof(AnimatePopulationPlaceholder),0.5f,0.5f);
             
             if (populationInputField.text.Length == 0)
@@ -190,13 +192,13 @@ namespace UI
         public void OnTownNameInputDeselected()
         {
             CancelInvoke(nameof(AnimateTownNamePlaceholder));
-            townNameInputPlaceholder.text = ".";
+            townNameInputPlaceholder.text = ". . .";
         }
 
         public void OnPopulationInputDeselected()
         {
             CancelInvoke(nameof(AnimatePopulationPlaceholder));
-            populationInputPlaceholder.text = ".";
+            populationInputPlaceholder.text = ". .";
         }
         
         
@@ -232,7 +234,6 @@ namespace UI
             }
 
             LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), maxPlayersInt, _isPrivate, "");
-            ScreenChanger.Instance.ChangeToLobbyHostScreen();
         }
         
         

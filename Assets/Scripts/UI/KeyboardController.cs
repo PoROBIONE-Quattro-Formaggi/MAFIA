@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -9,6 +10,8 @@ namespace UI
     {
         public RectTransform screenRect;
         public TMP_InputField inputField;
+        public GameObject numpadKeyboard;
+        public GameObject defaultKeyboard;
 
         [Header("Variables")] public bool caps;
         public float heightOnScreen;
@@ -45,6 +48,18 @@ namespace UI
             }
         }
 
+        public void DisplayNumpad()
+        {
+            defaultKeyboard.SetActive(false);
+            numpadKeyboard.SetActive(true);
+        }
+
+        public void DisplayDefault()
+        {
+            numpadKeyboard.SetActive(false);
+            defaultKeyboard.SetActive(true);
+        }
+
         public void ConnectKeys()
         {
             // Connect key scripts with input field
@@ -53,11 +68,19 @@ namespace UI
                 keyScript.inputField = inputField;
             }
 
-            // Connect delete with input field
-            _keyboardTransform.GetComponentInChildren<DeleteKey>().inputField = inputField;
+            try
+            {
+                // Connect delete with input field
+                _keyboardTransform.GetComponentInChildren<DeleteKey>().inputField = inputField;
 
-            // Connect enter with input field
-            _keyboardTransform.GetComponentInChildren<EnterKey>().inputField = inputField;
+                // Connect enter with input field
+                _keyboardTransform.GetComponentInChildren<EnterKey>().inputField = inputField;
+            }
+            catch (Exception)
+            {
+                Debug.Log("some key missing");
+            }
+            
         }
 
         public void ShowKeyboard()

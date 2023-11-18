@@ -16,11 +16,6 @@ namespace UI
             AssignLobbiesToButtons();
         }
 
-        public void OnEnterCodeButtonClicked()
-        {
-            ScreenChanger.Instance.ChangeToEnterCodeScreen();
-        }
-
         public async void AssignLobbiesToButtons()
         {
             // CLEAR LOBBIES LIST BEFORE REFRESH
