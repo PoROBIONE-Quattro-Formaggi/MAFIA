@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DataStorage;
 using Unity.Collections;
@@ -66,18 +67,6 @@ namespace Managers
             AddClientNameToListServerRpc(playerName);
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Local
-        private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
-        {
-            GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
-            Debug.Log("All current player names:");
-            foreach (var idxPlayerName in GameSessionManager.Instance.IDToPlayerName)
-            {
-                Debug.Log($"ID: {idxPlayerName.Key} - {idxPlayerName.Value}");
-            }
-        }
-
         private static void OnHostStopped(bool obj)
         {
             Debug.Log("Server stopped");
@@ -112,17 +101,79 @@ namespace Managers
             }
         }
 
+        public static List<ulong> GetAllConnectedPlayersIDs()
+        {
+            return NetworkManager.Singleton.ConnectedClientsIds.ToList();
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // SERVER RPCs //////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void SetAlibiServerRpc(string alibi, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.IDToAlibi[rpcParams.Receive.SenderClientId] = alibi;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void DayVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.IDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void MafiaVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void DoctorVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.DoctorIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void ResidentVoteForServerRpc(int votedForOption, ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.ResidentIDToVotedForOption[rpcParams.Receive.SenderClientId] = votedForOption;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void SetLastWordsServerRpc(string lastWords)
+        {
+            GameSessionManager.Instance.LastWords = lastWords;
+            SendLastWordsClientRpc(lastWords);
+        }
+
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // CLIENT RPCs //////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [ClientRpc]
         // ReSharper disable once MemberCanBeMadeStatic.Local, UnusedParameter.Local 
         private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
         {
             PlayerData.Role = role;
             OnPlayerRoleAssigned?.Invoke();
-            Debug.Log($"You are {role}");
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SendNewIDToRoleClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
             for (var i = 0; i < keys.Length; i++)
@@ -132,7 +183,7 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
             for (var i = 0; i < keys.Length; i++)
@@ -142,29 +193,55 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SendNewIDToIsPlayerAliveClientRpc(ulong[] keys, bool[] values)
         {
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
             }
+
+            PlayerData.IsAlive = GameSessionManager.Instance.IDToIsPlayerAlive[PlayerData.ClientID];
+            if (!PlayerData.IsAlive)
+            {
+                // TODO Player death here
+            }
         }
 
-        public static List<ulong> GetAllConnectedPlayersIDs()
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void SendNewIDToAlibiClientRpc(ulong[] keys, FixedString128Bytes[] values)
         {
-            return NetworkManager.Singleton.ConnectedClientsIds.ToList();
+            for (var i = 0; i < keys.Length; i++)
+            {
+                GameSessionManager.Instance.IDToAlibi[keys[i]] = values[i].ToString();
+            }
         }
 
-        public List<string> GetAllAlivePlayersNames()
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        public void SendNewMafiaIDToVotedForIDClientRpc(ulong[] keys, ulong[] values,
+            ClientRpcParams clientRpcParams = default)
         {
-            List<string> playersNames = new();
-            // TODO: rewrite needed fields in GameSessionManager into ObservableDictionary as showed by ChatGPT
-            // TODO: on any change (observed by the server) send ClientRpc to all clients to update their versions of that fields.
-            // TODO: For list of strings use FixedString32Bytes array
-            // TODO: for dictionary send keys and values separately
-            // TODO: in the code, relate to fields in GameSessionManager directly as they will be constantly copied from the server versions
-            return playersNames;
+            for (var i = 0; i < keys.Length; i++)
+            {
+                GameSessionManager.Instance.MafiaIDToVotedForID[keys[i]] = values[i];
+            }
+        }
+
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void SendLastWordsClientRpc(string lastWords)
+        {
+            GameSessionManager.Instance.LastWords = lastWords;
+        }
+        
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public void SendLastKilledNameClientRpc(string lastKilledName)
+        {
+            GameSessionManager.Instance.LastKilledName = lastKilledName;
         }
     }
 }
