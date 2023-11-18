@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -118,6 +119,36 @@ namespace Managers
             PlayerData.Role = role;
             OnPlayerRoleAssigned?.Invoke();
             Debug.Log($"You are {role}");
+        }
+
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        public void SendNewIDToRoleClientRpc(ulong[] keys, FixedString32Bytes[] values)
+        {
+            for (var i = 0; i < keys.Length; i++)
+            {
+                GameSessionManager.Instance.IDToRole[keys[i]] = values[i].ToString();
+            }
+        }
+
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        public void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
+        {
+            for (var i = 0; i < keys.Length; i++)
+            {
+                GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
+            }
+        }
+
+        [ClientRpc]
+        // ReSharper disable once MemberCanBeMadeStatic.Global, SuggestBaseTypeForParameter
+        public void SendNewIDToIsPlayerAliveClientRpc(ulong[] keys, bool[] values)
+        {
+            for (var i = 0; i < keys.Length; i++)
+            {
+                GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
+            }
         }
 
         public static List<ulong> GetAllConnectedPlayersIDs()
