@@ -18,7 +18,8 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
     public RectTransform textParent;
 
     private float _animationMaxWidth;
-    private const string MaxWidthKeyFrame = ".";
+    private const string MaxWidthKeyFrame = "...";
+    private string _text;
     private RectTransform _textRectTransform;
 
 
@@ -28,8 +29,16 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
         _buttonText = GetComponentInChildren<TextMeshProUGUI>();
         _animationMaxWidth = GetAnimationMaxWidth();
         _textRectTransform = text.gameObject.GetComponent<RectTransform>();
+        _text = text.text;
         Debug.Log(_animationMaxWidth);
         _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+    }
+
+    private void OnDisable()
+    {
+        Debug.Log(text.text);
+        Debug.Log(_text);
+        text.text = _text;
     }
 
     private float GetAnimationMaxWidth()
@@ -45,7 +54,7 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
 
     private IEnumerator AnimateOnClick()
     {
-        _buttonText.text += MaxWidthKeyFrame;
+        _buttonText.text += ".";
         yield return new WaitForSeconds(animationTime);
         _buttonText.text = _buttonText.text[..^1];
         if (changesScreen)
