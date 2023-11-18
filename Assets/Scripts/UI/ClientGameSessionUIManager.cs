@@ -77,13 +77,15 @@ namespace UI
                 // Assign question to information prompt
                 "Mafia" => "Who to kill?",
                 "Doctor" => "Who to save?",
-                "Resident" => "Who is sus?",
+                "Resident" => "Who is sus?", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => nightVotePromptText.text
             };
 
             nightVotePrompt.SetActive(true);
-            // var playerNames = GameSessionManager.Instance.IDToPlayerName.Select(keyVal => keyVal.Value).ToList(); TODO change
-            var playerNames = NetworkCommunicationManager.Instance.GetAllAlivePlayersNames();
+            var playerNames = GameSessionManager.Instance.GetAlivePlayersNames();
+            //TODO if you don't want to show the user himself to vote for:
+            // var playerNames = GameSessionManager.Instance.GetAlivePlayersNames(false);
+
 
             foreach (var playerName in playerNames)
             {
