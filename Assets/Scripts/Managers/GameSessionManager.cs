@@ -43,7 +43,6 @@ namespace Managers
         public Dictionary<ulong, int> ResidentIDToVotedForOption { get; } = new();
         public Dictionary<ulong, ulong> IDToVotedForID { get; } = new();
         public List<ulong> ClientsIDs { get; } = new();
-
         public string LastKilledName { get; set; } = "";
         public string LastWords { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
@@ -54,7 +53,8 @@ namespace Managers
 
         private static GameSessionManager _instance;
         private string CurrentNightResidentsQuestion { get; set; } = "";
-        private List<string> CurrentNightResidentsAnswers { get; } = new();
+        private List<string> CurrentNightResidentsAnswerOptions { get; } = new();
+        private string NightResidentsPollChosenAnswer { get; set; } = "";
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // MONO BEHAVIOUR FUNCTIONS /////////////////////////////////////////////////////////////////////////////////////////
@@ -283,6 +283,28 @@ namespace Managers
             return mafiaChoice;
         }
 
+        private int GetOptionResidentsVotedFor()
+        {
+            var occurrences = ResidentIDToVotedForOption.Values
+                .GroupBy(v => v)
+                .ToDictionary(g => g.Key, g => g.Count());
+            var chosenOption = occurrences.OrderByDescending(x => x.Value).First().Key;
+            return chosenOption;
+        }
+
+        private void ClearDataFromLastVoting()
+        {
+            MafiaIDToVotedForID.Clear();
+            DoctorIDToVotedForID.Clear();
+            IDToVotedForID.Clear();
+            IDToAlibi.Clear();
+            LastKilledName = "";
+            LastWords = "";
+            CurrentNightResidentsQuestion = "";
+            CurrentNightResidentsAnswerOptions.Clear();
+            NightResidentsPollChosenAnswer = "";
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // PUBLIC FUNCTIONS /////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -307,7 +329,7 @@ namespace Managers
 
         public List<string> GetCurrentNightResidentsAnswers()
         {
-            return CurrentNightResidentsAnswers;
+            return CurrentNightResidentsAnswerOptions;
         }
 
         public void MafiaVoteFor(ulong votedForID)
@@ -335,15 +357,19 @@ namespace Managers
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
 
+        /// <summary>
+        /// Host-only function
+        /// </summary>
         public void EndNight()
         {
+            // 1.0 Clear all the voting variables to be ready for next voting - DONE
             // 1. Calculate who to kill if not protected - DONE
             // 2. Check if game ended - DONE
             // 3. Update status of the killed player (send him an RPC and update host dictionary) - DONE
             // 4. Update 'lastDeath' (show to all who is dead) - DONE
-            // 5. Show the winner in the night residents' poll
-            // 5.1 Show players' alibis
-            // 6. Clear all the voting variables to be ready for next voting
+            // 5. Show the winner in the night residents' poll - DONE
+            // 5.1 Show players' alibis - DONE
+            ClearDataFromLastVoting();
             var mafiaChoice = GetWhoMafiaVotedID();
             if (!DoctorIDToVotedForID.Values.Contains(mafiaChoice))
             {
@@ -363,7 +389,19 @@ namespace Managers
                 LastKilledName = "Nobody";
                 NetworkCommunicationManager.Instance.SendLastKilledNameClientRpc(LastKilledName);
             }
-            // TODO finish me
+
+            var optionResidentsVotedFor = GetOptionResidentsVotedFor();
+            NightResidentsPollChosenAnswer = CurrentNightResidentsAnswerOptions[optionResidentsVotedFor];
+        }
+
+        public string GetLastKilledName()
+        {
+            return LastKilledName;
+        }
+
+        public string GetNightResidentsPollChosenAnswer()
+        {
+            return NightResidentsPollChosenAnswer;
         }
 
         public Dictionary<ulong, string> GetAlibis()
@@ -376,15 +414,19 @@ namespace Managers
             NetworkCommunicationManager.Instance.DayVoteForServerRpc(votedForID);
         }
 
+        /// <summary>
+        /// Host-only function
+        /// </summary>
         public void EndDay()
         {
+            // - Clear all the voting variables to be ready for next voting - DONE
             // - Calculate who won the voting
             // - Allow this player to put last words
             // - Kill player
             // - Check if game ended
             // - Show last words
-            // - Clear all the voting variables to be ready for next voting
             // - Send new night residents questions to clients (RCP)
+            ClearDataFromLastVoting();
         }
 
         public void SetLastWords(string lastWords)

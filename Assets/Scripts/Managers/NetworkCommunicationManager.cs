@@ -231,12 +231,12 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
-        public void SendLastWordsClientRpc(string lastWords)
+        // ReSharper disable once MemberCanBeMadeStatic.Local
+        private void SendLastWordsClientRpc(string lastWords)
         {
             GameSessionManager.Instance.LastWords = lastWords;
         }
-        
+
         [ClientRpc]
         // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SendLastKilledNameClientRpc(string lastKilledName)
