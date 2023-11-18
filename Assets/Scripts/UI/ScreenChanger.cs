@@ -27,6 +27,7 @@ namespace UI
             foreach (Transform screenTransform in screensParent.transform)
             {
                 if (screenTransform.gameObject.name != screenName) continue;
+                Debug.Log(screenTransform.name);
                 screenTransform.gameObject.SetActive(true);
             }
         }

@@ -234,7 +234,6 @@ namespace UI
             }
 
             LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), maxPlayersInt, _isPrivate, "");
-            ScreenChanger.Instance.ChangeToLobbyHostScreen();
         }
         
         

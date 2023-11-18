@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -67,11 +68,19 @@ namespace UI
                 keyScript.inputField = inputField;
             }
 
-            // Connect delete with input field
-            _keyboardTransform.GetComponentInChildren<DeleteKey>().inputField = inputField;
+            try
+            {
+                // Connect delete with input field
+                _keyboardTransform.GetComponentInChildren<DeleteKey>().inputField = inputField;
 
-            // Connect enter with input field
-            _keyboardTransform.GetComponentInChildren<EnterKey>().inputField = inputField;
+                // Connect enter with input field
+                _keyboardTransform.GetComponentInChildren<EnterKey>().inputField = inputField;
+            }
+            catch (Exception)
+            {
+                Debug.Log("some key missing");
+            }
+            
         }
 
         public void ShowKeyboard()

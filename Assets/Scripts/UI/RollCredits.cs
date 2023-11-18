@@ -49,6 +49,7 @@ namespace UI
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
             GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
+            Debug.Log(informationText.text);
             informationText.text = $"Wait, {MainMenuUIManager.Instance.GetName()}";
             InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
         }
