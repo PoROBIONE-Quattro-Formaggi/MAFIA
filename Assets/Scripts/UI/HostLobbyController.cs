@@ -1,16 +1,24 @@
 using Managers;
 using TMPro;
 using UnityEngine;
+using System.Runtime.InteropServices;
 
 namespace UI
 {
     public class HostLobbyController : MonoBehaviour
     {
+        [DllImport("__Internal")]
+        private static extern void CopyToClipboard(string str);
+        
+        [DllImport("__Internal")]
+        private static extern void HandlePermission(string str);
+        
         public TextMeshProUGUI information;
 
-        public void CopyCode()
+        public async void CopyCode()
         {
-            LobbyManager.Instance.GetLobbyCode().CopyToClipboard();
+            HandlePermission("clipboard-write");
+            CopyToClipboard(LobbyManager.Instance.GetLobbyCode());
             information.text = "CODE COPIED - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
         }
     }

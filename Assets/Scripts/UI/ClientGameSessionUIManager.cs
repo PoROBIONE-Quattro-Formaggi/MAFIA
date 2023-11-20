@@ -24,11 +24,13 @@ namespace UI
 
         private void OnEnable()
         {
+            Debug.Log("GameScreen Enabled");
             NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetPlayerRoleToPrompt;
         }
 
         private void SetPlayerRoleToPrompt()
         {
+            Debug.Log("role prompt assigned");
             rolePromptText.text = "You are " + PlayerData.Role;
             EnableRoleInformation();
         }
