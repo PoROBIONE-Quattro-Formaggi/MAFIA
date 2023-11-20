@@ -43,6 +43,9 @@ namespace Managers
         public List<ulong> ClientsIDs { get; } = new();
         public string LastKilledName { get; set; } = "";
         public string LastWords { get; set; } = "";
+        public string CurrentNightResidentsQuestion { get; set; } = "";
+        public List<string> CurrentNightResidentsAnswerOptions { get; } = new();
+        public string NightResidentsPollChosenAnswer { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,9 +53,6 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static GameSessionManager _instance;
-        private string CurrentNightResidentsQuestion { get; set; } = "";
-        private List<string> CurrentNightResidentsAnswerOptions { get; } = new();
-        private string NightResidentsPollChosenAnswer { get; set; } = "";
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // MONO BEHAVIOUR FUNCTIONS /////////////////////////////////////////////////////////////////////////////////////////
@@ -285,13 +285,22 @@ namespace Managers
             return mafiaChoice;
         }
 
-        private int GetOptionResidentsVotedFor()
+        private void AssignNightResidentsPollChosenAnswer()
         {
-            var occurrences = ResidentIDToVotedForOption.Values
-                .GroupBy(v => v)
-                .ToDictionary(g => g.Key, g => g.Count());
-            var chosenOption = occurrences.OrderByDescending(x => x.Value).First().Key;
-            return chosenOption;
+            var optionResidentsVotedFor = GetOptionResidentsVotedFor();
+            NightResidentsPollChosenAnswer = CurrentNightResidentsAnswerOptions[optionResidentsVotedFor];
+            NetworkCommunicationManager.Instance.SendNightResidentsPollChosenAnswerClientRpc(
+                NightResidentsPollChosenAnswer);
+            return;
+
+            int GetOptionResidentsVotedFor()
+            {
+                var occurrences = ResidentIDToVotedForOption.Values
+                    .GroupBy(v => v)
+                    .ToDictionary(g => g.Key, g => g.Count());
+                var chosenOption = occurrences.OrderByDescending(x => x.Value).First().Key;
+                return chosenOption;
+            }
         }
 
         private void ClearDataFromLastVoting()
@@ -305,6 +314,7 @@ namespace Managers
             CurrentNightResidentsQuestion = "";
             CurrentNightResidentsAnswerOptions.Clear();
             NightResidentsPollChosenAnswer = "";
+            NetworkCommunicationManager.Instance.ClearDataFromLastVotingClientRpc();
         }
 
         private void KillPlayerWithID(ulong id)
@@ -400,8 +410,7 @@ namespace Managers
                 NetworkCommunicationManager.Instance.SendLastKilledNameClientRpc(LastKilledName);
             }
 
-            var optionResidentsVotedFor = GetOptionResidentsVotedFor();
-            NightResidentsPollChosenAnswer = CurrentNightResidentsAnswerOptions[optionResidentsVotedFor];
+            AssignNightResidentsPollChosenAnswer();
         }
 
         public string GetLastKilledName()

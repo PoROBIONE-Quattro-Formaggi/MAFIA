@@ -255,5 +255,27 @@ namespace Managers
             if (IsHost) return;
             GameSessionManager.Instance.LastKilledName = lastKilledName;
         }
+
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        public void ClearDataFromLastVotingClientRpc()
+        {
+            GameSessionManager.Instance.MafiaIDToVotedForID.Clear();
+            GameSessionManager.Instance.DoctorIDToVotedForID.Clear();
+            GameSessionManager.Instance.IDToVotedForID.Clear();
+            GameSessionManager.Instance.IDToAlibi.Clear();
+            GameSessionManager.Instance.LastKilledName = "";
+            GameSessionManager.Instance.LastWords = "";
+            GameSessionManager.Instance.CurrentNightResidentsQuestion = "";
+            GameSessionManager.Instance.CurrentNightResidentsAnswerOptions.Clear();
+            GameSessionManager.Instance.NightResidentsPollChosenAnswer = "";
+        }
+
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        public void SendNightResidentsPollChosenAnswerClientRpc(string answer)
+        {
+            GameSessionManager.Instance.NightResidentsPollChosenAnswer = answer;
+        }
     }
 }
