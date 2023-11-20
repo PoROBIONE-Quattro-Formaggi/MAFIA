@@ -85,20 +85,11 @@ namespace Managers
         private void SendRolesToClients()
         {
             GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
-            foreach (var clientId in GameSessionManager.Instance.ClientsIDs)
-            {
-                Debug.Log($"Trying to send RPC to {clientId}");
-                var clientRpcParams = new ClientRpcParams
-                {
-                    Send = new ClientRpcSendParams
-                    {
-                        TargetClientIds = new List<ulong> { clientId }
-                    }
-                };
-                var role = GameSessionManager.Instance.IDToRole[clientId];
-                Debug.Log("Sending RPC");
-                SendRolesToClientsClientRpc(role, clientRpcParams);
-            }
+            var keys = GameSessionManager.Instance.IDToRole.Keys.ToArray();
+            var values = GameSessionManager.Instance.IDToRole.Values
+                .Select(value => new FixedString32Bytes(value))
+                .ToArray();
+            SendNewIDToRoleClientRpc(keys, values);
         }
 
         public static List<ulong> GetAllConnectedPlayersIDs()
@@ -111,49 +102,65 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Local
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
+            var keys = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
+            var values = GameSessionManager.Instance.IDToPlayerName.Values
+                .Select(value => new FixedString32Bytes(value))
+                .ToArray();
+            SendNewIDToPlayerNameClientRpc(keys, values);
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SetAlibiServerRpc(string alibi, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToAlibi[rpcParams.Receive.SenderClientId] = alibi;
+            var keys = GameSessionManager.Instance.IDToAlibi.Keys.ToArray();
+            var values = GameSessionManager.Instance.IDToAlibi.Values
+                .Select(value => new FixedString128Bytes(value))
+                .ToArray();
+            SendNewIDToAlibiClientRpc(keys, values);
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void DayVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void MafiaVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+            var keys = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
+            var values = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
+            var clientRpcParams = new ClientRpcParams
+            {
+                Send = new ClientRpcSendParams
+                {
+                    TargetClientIds = keys.ToList()
+                }
+            };
+            SendNewMafiaIDToVotedForIDClientRpc(keys, values, clientRpcParams);
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void DoctorVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.DoctorIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void ResidentVoteForServerRpc(int votedForOption, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.ResidentIDToVotedForOption[rpcParams.Receive.SenderClientId] = votedForOption;
         }
 
         [ServerRpc(RequireOwnership = false)]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
         public void SetLastWordsServerRpc(string lastWords)
         {
             GameSessionManager.Instance.LastWords = lastWords;
@@ -165,27 +172,25 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Local, UnusedParameter.Local 
-        private void SendRolesToClientsClientRpc(string role, ClientRpcParams clientRpcParams)
+        [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
+        private void SendNewIDToRoleClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
-            PlayerData.Role = role;
-            OnPlayerRoleAssigned?.Invoke();
-        }
-
-        [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
-        public void SendNewIDToRoleClientRpc(ulong[] keys, FixedString32Bytes[] values)
-        {
+            if (IsHost) return;
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToRole[keys[i]] = values[i].ToString();
             }
+
+            PlayerData.Role = GameSessionManager.Instance.IDToRole[PlayerData.ClientID];
+            OnPlayerRoleAssigned?.Invoke();
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
-        public void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
+        [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
+        private void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
+            if (IsHost) return;
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
@@ -193,9 +198,10 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void SendNewIDToIsPlayerAliveClientRpc(ulong[] keys, bool[] values)
         {
+            if (IsHost) return;
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
@@ -209,9 +215,11 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
-        public void SendNewIDToAlibiClientRpc(ulong[] keys, FixedString128Bytes[] values)
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
+        [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
+        private void SendNewIDToAlibiClientRpc(ulong[] keys, FixedString128Bytes[] values)
         {
+            if (IsHost) return;
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToAlibi[keys[i]] = values[i].ToString();
@@ -219,11 +227,13 @@ namespace Managers
         }
 
         [ClientRpc]
-        [SuppressMessage("ReSharper", "UnusedParameter.Global")]
-        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
-        public void SendNewMafiaIDToVotedForIDClientRpc(ulong[] keys, ulong[] values,
+        [SuppressMessage("ReSharper", "UnusedParameter.Local")]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
+        [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
+        private void SendNewMafiaIDToVotedForIDClientRpc(ulong[] keys, ulong[] values,
             ClientRpcParams clientRpcParams = default)
         {
+            if (IsHost) return;
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.MafiaIDToVotedForID[keys[i]] = values[i];
@@ -231,16 +241,18 @@ namespace Managers
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Local
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
         private void SendLastWordsClientRpc(string lastWords)
         {
+            if (IsHost) return;
             GameSessionManager.Instance.LastWords = lastWords;
         }
 
         [ClientRpc]
-        // ReSharper disable once MemberCanBeMadeStatic.Global
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void SendLastKilledNameClientRpc(string lastKilledName)
         {
+            if (IsHost) return;
             GameSessionManager.Instance.LastKilledName = lastKilledName;
         }
     }
