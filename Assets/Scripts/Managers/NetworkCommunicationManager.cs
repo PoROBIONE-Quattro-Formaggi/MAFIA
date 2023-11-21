@@ -260,6 +260,7 @@ namespace Managers
         [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void ClearDataFromLastVotingClientRpc()
         {
+            if (IsHost) return;
             GameSessionManager.Instance.MafiaIDToVotedForID.Clear();
             GameSessionManager.Instance.DoctorIDToVotedForID.Clear();
             GameSessionManager.Instance.IDToVotedForID.Clear();
@@ -275,7 +276,26 @@ namespace Managers
         [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
         public void SendNightResidentsPollChosenAnswerClientRpc(string answer)
         {
+            if (IsHost) return;
             GameSessionManager.Instance.NightResidentsPollChosenAnswer = answer;
+        }
+
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        public void SendNightResidentsQuestionClientRpc(string question)
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.CurrentNightResidentsQuestion = question;
+        }
+
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        [SuppressMessage("ReSharper", "ParameterTypeCanBeEnumerable.Global")]
+        public void SendNightResidentsOptionsClientRpc(FixedString64Bytes[] options)
+        {
+            if (IsHost) return;
+            var reconvertedOptions = options.Select(v => v.ToString()).ToList();
+            GameSessionManager.Instance.CurrentNightResidentsAnswerOptions = reconvertedOptions;
         }
     }
 }
