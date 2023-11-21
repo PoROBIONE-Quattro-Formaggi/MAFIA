@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -40,11 +41,10 @@ namespace Managers
         public Dictionary<ulong, ulong> DoctorIDToVotedForID { get; } = new();
         public Dictionary<ulong, int> ResidentIDToVotedForOption { get; } = new();
         public Dictionary<ulong, ulong> IDToVotedForID { get; } = new();
-        public List<ulong> ClientsIDs { get; } = new();
         public string LastKilledName { get; set; } = "";
         public string LastWords { get; set; } = "";
         public string CurrentNightResidentsQuestion { get; set; } = "";
-        public List<string> CurrentNightResidentsAnswerOptions { get; } = new();
+        public List<string> CurrentNightResidentsAnswerOptions { get; set; } = new();
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
 
@@ -53,6 +53,7 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static GameSessionManager _instance;
+        private List<ulong> ClientsIDs { get; } = new();
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // MONO BEHAVIOUR FUNCTIONS /////////////////////////////////////////////////////////////////////////////////////////
@@ -311,8 +312,7 @@ namespace Managers
             IDToAlibi.Clear();
             LastKilledName = "";
             LastWords = "";
-            CurrentNightResidentsQuestion = "";
-            CurrentNightResidentsAnswerOptions.Clear();
+            ResidentIDToVotedForOption.Clear();
             NightResidentsPollChosenAnswer = "";
             NetworkCommunicationManager.Instance.ClearDataFromLastVotingClientRpc();
         }
@@ -325,6 +325,47 @@ namespace Managers
             var values = IDToIsPlayerAlive.Values.ToArray();
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             NetworkCommunicationManager.Instance.SendLastKilledNameClientRpc(LastKilledName);
+        }
+
+        private ulong GetWhoPlayersDayVotedID()
+        {
+            var occurrences = IDToVotedForID.Values
+                .GroupBy(v => v)
+                .ToDictionary(g => g.Key, g => g.Count());
+            var playersChoice = occurrences.OrderByDescending(x => x.Value).First().Key;
+            return playersChoice;
+        }
+
+        private void SendNewResidentsNightPoll()
+        {
+            CurrentNightResidentsQuestion = "NEW QUESTION"; //TODO
+            CurrentNightResidentsAnswerOptions = new List<string>(); //TODO
+            NetworkCommunicationManager.Instance.SendNightResidentsQuestionClientRpc(CurrentNightResidentsQuestion);
+            var options = CurrentNightResidentsAnswerOptions
+                .Select(value => new FixedString64Bytes(value))
+                .ToArray();
+            NetworkCommunicationManager.Instance.SendNightResidentsOptionsClientRpc(options);
+        }
+
+        private void EndGameIfApplicable()
+        {
+            var aliveIDs = GetAlivePlayersIDs();
+            var aliveNonMafia = aliveIDs.Where(id => IDToRole[id] != Roles.Mafia).ToList();
+            var aliveMafia = aliveIDs.Where(id => IDToRole[id] == Roles.Mafia).ToList();
+            if (aliveNonMafia.Count == 0)
+            {
+                EndGame(Roles.Mafia);
+            }
+            else if (aliveMafia.Count == 0)
+            {
+                EndGame(Roles.Resident);
+            }
+        }
+
+        private void EndGame(string winnerRole)
+        {
+            Debug.Log($"THE END\n{winnerRole} wins");
+            //TODO implement functionality
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -396,13 +437,7 @@ namespace Managers
             if (!DoctorIDToVotedForID.Values.Contains(mafiaChoice))
             {
                 KillPlayerWithID(mafiaChoice);
-                var aliveIDs = GetAlivePlayersIDs();
-                var aliveNonMafia = aliveIDs.Where(id => IDToRole[id] != Roles.Mafia).ToList();
-                var isGameFinished = aliveNonMafia.Count == 0;
-                if (isGameFinished)
-                {
-                    EndGame(Roles.Mafia);
-                }
+                EndGameIfApplicable();
             }
             else
             {
@@ -439,13 +474,17 @@ namespace Managers
         public void EndDay()
         {
             // - Clear all the voting variables to be ready for next voting - DONE
-            // - Calculate who won the voting
-            // - Allow this player to put last words
-            // - Kill player
-            // - Check if game ended
-            // - Show last words
-            // - Send new night residents questions to clients (RCP)
+            // - Calculate who won the voting - DONE
+            // - Allow this player to put last words - TODO
+            // - Kill player - DONE
+            // - Check if game ended - DONE
+            // - Show last words - TODO
+            // - Send new night residents questions to clients (RCP) - DONE
             ClearDataFromLastVoting();
+            var playersChoice = GetWhoPlayersDayVotedID();
+            KillPlayerWithID(playersChoice);
+            EndGameIfApplicable();
+            SendNewResidentsNightPoll();
         }
 
         public void SetLastWords(string lastWords)
@@ -456,11 +495,6 @@ namespace Managers
         public string GetLastWords()
         {
             return LastWords;
-        }
-
-        public void EndGame(string winnerRole)
-        {
-            //TODO implement functionality
         }
     }
 }
