@@ -1,3 +1,4 @@
+using System.Linq;
 using DataStorage;
 using Managers;
 using UnityEngine;
@@ -85,6 +86,7 @@ namespace UI
 
             nightVotePrompt.SetActive(true);
             var playerNames = GameSessionManager.Instance.GetAlivePlayersNames();
+            Debug.Log(GameSessionManager.Instance.IDToPlayerName.Count);
             //TODO if you don't want to show the user himself to vote for:
             // var playerNames = GameSessionManager.Instance.GetAlivePlayersNames(false);
 
