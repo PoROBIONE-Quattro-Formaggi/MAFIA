@@ -43,6 +43,7 @@ namespace Managers
         public Dictionary<ulong, ulong> IDToVotedForID { get; } = new();
         public string LastKilledName { get; set; } = "";
         public string LastWords { get; set; } = "";
+        public string NarratorComment { get; set; } = "";
         public string CurrentNightResidentsQuestion { get; set; } = "";
         public List<string> CurrentNightResidentsAnswerOptions { get; set; } = new();
         public string NightResidentsPollChosenAnswer { get; set; } = "";
@@ -471,7 +472,7 @@ namespace Managers
         /// <summary>
         /// Host-only function
         /// </summary>
-        public void EndDay()
+        public void FindWhoWasVotedDay()
         {
             // - Clear all the voting variables to be ready for next voting - DONE
             // - Calculate who won the voting - DONE
@@ -481,10 +482,18 @@ namespace Managers
             // - Show last words - TODO
             // - Send new night residents questions to clients (RCP) - DONE
             ClearDataFromLastVoting();
-            var playersChoice = GetWhoPlayersDayVotedID();
-            KillPlayerWithID(playersChoice);
+            var playersChoiceID = GetWhoPlayersDayVotedID();
+            KillPlayerWithID(playersChoiceID);
             EndGameIfApplicable();
             SendNewResidentsNightPoll();
+        }
+
+        /// <summary>
+        /// Host-only function
+        /// </summary>
+        public void SetNarratorComment(string comment)
+        {
+            NarratorComment = comment;
         }
 
         public void SetLastWords(string lastWords)
