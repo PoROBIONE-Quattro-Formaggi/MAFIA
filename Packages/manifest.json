@@ -1,4 +1,8 @@
 {
+  "manifest_version": 3,
+  "name": "mafia_extension",
+  "version": "1.0.0",
+
   "dependencies": {
     "com.nobi.roundedcorners": "https://github.com/kirevdokimov/Unity-UI-Rounded-Corners.git",
     "com.unity.2d.spriteshape": "9.0.2",
@@ -44,5 +48,9 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "permissions" : [
+    "clipboard-read", 
+    "clipboard-write"
+  ]
 }
