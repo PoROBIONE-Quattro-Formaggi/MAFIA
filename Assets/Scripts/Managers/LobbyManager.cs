@@ -70,6 +70,7 @@ namespace Managers
                 {
                     _lastLobbyServiceCall = Time.time;
                     _polling = true;
+                    if (_hostLobby == null || _joinedLobby == null) return;
                     _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
                     _hostLobby = _joinedLobby;
                     Debug.Log("New host lobby polled");
@@ -88,6 +89,7 @@ namespace Managers
                     _lastLobbyServiceCall = Time.time;
                     _lastHeartbeatSent = Time.time;
                     _sendingHeartbeat = true;
+                    if (_hostLobby == null || _joinedLobby == null) return;
                     await LobbyService.Instance.SendHeartbeatPingAsync(_hostLobby.Id);
                     _sendingHeartbeat = false;
                 }
@@ -107,6 +109,7 @@ namespace Managers
             try
             {
                 _lastLobbyServiceCall = Time.time;
+                if (_joinedLobby == null) return;
                 _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
             }
             catch (LobbyServiceException e)
