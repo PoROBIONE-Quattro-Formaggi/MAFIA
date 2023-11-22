@@ -13,6 +13,7 @@ namespace Managers
         private void Start()
         {
             if (!IsOwner) return;
+            Debug.Log("Canvas set active");
             playerCanvas.SetActive(true);
             playerCamera.SetActive(true);
             if (PlayerPrefs.GetInt(PpKeys.KeyIsHost) == 1)

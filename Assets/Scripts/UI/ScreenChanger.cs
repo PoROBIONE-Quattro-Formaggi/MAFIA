@@ -32,6 +32,11 @@ namespace UI
             }
         }
 
+        public void ChangeToPlayerRoleScreen()
+        {
+            ChangeTo(Screens.BrowseLobbies);
+        }
+
         public void ChangeToBrowseLobbiesScreen()
         {
             ChangeTo(Screens.BrowseLobbies);
@@ -75,6 +80,11 @@ namespace UI
         public void ChangeToHostGameScreen()
         {
             ChangeTo(Screens.HostGameScreen);
+        }
+
+        public void ChangeToPlayerVoteScreen()
+        {
+            ChangeTo(Screens.PlayerVoteScreen);
         }
     }
 }

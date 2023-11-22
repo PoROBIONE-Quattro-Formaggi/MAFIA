@@ -23,10 +23,7 @@ namespace UI
         public GameObject voteOptionPrefab;
         public GameObject exitVoteButton;
 
-        [Header("ROLE PROMPTS")] 
-        public GameObject mafiaPrompt;
-        public GameObject doctorPrompt;
-        public GameObject residentPrompt;
+        public RoleController roleController;
         
         
 
@@ -38,9 +35,7 @@ namespace UI
 
         private void SetPlayerRoleToPrompt()
         {
-            Debug.Log("role prompt assigned");
-            rolePromptText.text = "You are " + PlayerData.Role;
-            EnableRoleInformation();
+            roleController.DisplayRole(PlayerData.Role);
         }
 
         // BUTTON ONCLICK FUNCTIONS
