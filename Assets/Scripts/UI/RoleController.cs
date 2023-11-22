@@ -55,7 +55,6 @@ public class RoleController : MonoBehaviour
         }
         
         // Show prompts and ok button
-        mafiaRole.SetActive(true);
         paragraph1.gameObject.SetActive(true);
         paragraph2.gameObject.SetActive(true);
         okButton.SetActive(true);
@@ -64,8 +63,9 @@ public class RoleController : MonoBehaviour
     private void DisplayMafia()
     {
         prompt.text = "You are in the";
-        paragraph1.text = "Choose a target for elimination during the night voting";
+        paragraph1.text = "Choose a target for elimination during the night voting.";
         paragraph2.text = "Select victims wisely to conquer the city without revealing your identity.";
+        mafiaRole.SetActive(true);
     }
     
     private void DisplayDoctor()
@@ -73,6 +73,7 @@ public class RoleController : MonoBehaviour
         prompt.text = "You are the";
         paragraph1.text = "Eliminate suspected Mafia members during the day voting.";
         paragraph2.text = "During the night voting select one person to protect from being killed by the Mafia.";
+        doctorRole.SetActive(true);
     }
     
     private void DisplayCitizen()
@@ -80,17 +81,7 @@ public class RoleController : MonoBehaviour
         prompt.text = "You are a";
         paragraph1.text = "Eliminate suspected Mafia members during the day voting.";
         paragraph2.text = "Be vigilant and make smart decisions to avoid being killed by the mafia.";
+        citizenRole.SetActive(true);
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

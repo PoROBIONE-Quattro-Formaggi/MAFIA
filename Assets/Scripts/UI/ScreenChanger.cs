@@ -26,6 +26,7 @@ namespace UI
             DisableAll();
             foreach (Transform screenTransform in screensParent.transform)
             {
+                Debug.Log(screenTransform.gameObject.name);
                 if (screenTransform.gameObject.name != screenName) continue;
                 Debug.Log(screenTransform.name);
                 screenTransform.gameObject.SetActive(true);
