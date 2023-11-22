@@ -18,7 +18,7 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
     public RectTransform textParent;
 
     private float _animationMaxWidth;
-    private const string MaxWidthKeyFrame = "...";
+    private const string MaxWidthKeyFrame = "....";
     private string _text;
     private RectTransform _textRectTransform;
 
@@ -36,8 +36,6 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
 
     private void OnDisable()
     {
-        Debug.Log(text.text);
-        Debug.Log(_text);
         text.text = _text;
     }
 

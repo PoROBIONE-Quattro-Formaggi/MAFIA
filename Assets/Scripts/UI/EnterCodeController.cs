@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using TMPro;
 
@@ -6,6 +7,15 @@ namespace UI
 {
     public class EnterCodeController : MonoBehaviour
     {
+        [DllImport("__Internal")]
+        private static extern string ClearClipboard();
+        
+        [DllImport("__Internal")]
+        private static extern void ShowClipboard();
+        
+        [DllImport("__Internal")]
+        private static extern void HideClipboard();
+        
         [Header("Input")] public TMP_InputField codeInputField;
         public TextMeshProUGUI codeInputPlaceholder;
         public TextMeshProUGUI codeDisplay;
@@ -13,7 +23,17 @@ namespace UI
         [Header("Information")] public TextMeshProUGUI information;
 
         private bool _blockAnimateCodeInputInvoke;
+        private bool _blockAutomaticJoin;
 
+        private void OnEnable()
+        {
+            ShowClipboard();
+        }
+
+        private void OnDisable()
+        {
+            HideClipboard();
+        }
 
         public void OnCodeInputDeselected()
         {
@@ -36,10 +56,28 @@ namespace UI
             }
         }
 
+        public void SelectCodeInput()
+        {
+            codeInputField.Select();
+            Debug.Log("carat reset");
+            codeInputField.caretPosition = codeInputField.text.Length;
+        }
+
+        public void OnPaste(string pasteString)
+        {
+            Debug.Log($"Paste: {pasteString}");
+            ClearClipboard();
+            if (pasteString.Length != 6) return;
+            SelectCodeInput();
+            Debug.Log($"attempted");
+            codeInputField.text = pasteString;
+        }
+
         public void OnCodeInputValueChanged()
         {
             OnCodeInputSelected();
             codeInputField.text = codeInputField.text.ToUpper();
+            Debug.Log(codeInputField.text);
             TryToJoin();
             DisplayCode();
         }
@@ -55,9 +93,10 @@ namespace UI
 
             try
             {
-                Debug.Log("Attempting to join lobby");
+                information.text = "Attempting to join lobby";
                 MainMenuUIManager.Instance.SetCode(codeInputField.text.Trim());
                 MainMenuUIManager.Instance.HandleJoinLobbyClicked("id");
+                codeInputField.text = "";
             }
             catch (Exception)
             {
