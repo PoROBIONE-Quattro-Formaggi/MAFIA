@@ -297,5 +297,12 @@ namespace Managers
             var reconvertedOptions = options.Select(v => v.ToString()).ToList();
             GameSessionManager.Instance.CurrentNightResidentsAnswerOptions = reconvertedOptions;
         }
+
+        [ClientRpc]
+        public void SendNarratorCommentClientRpc(FixedString64Bytes comment)
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.NarratorComment = comment.ToString();
+        }
     }
 }
