@@ -293,8 +293,9 @@ namespace Managers
 
         private void SendNewResidentsNightPoll()
         {
-            CurrentNightResidentsQuestion = "NEW QUESTION"; //TODO
-            CurrentNightResidentsAnswerOptions = new List<string>(); //TODO
+            var questionAnswersPair = ResidentsNightQuestions.GetRandomQuestionWithAnswers();
+            CurrentNightResidentsQuestion = questionAnswersPair.Key;
+            CurrentNightResidentsAnswerOptions = questionAnswersPair.Value;
             NetworkCommunicationManager.Instance.SendNightResidentsQuestionClientRpc(CurrentNightResidentsQuestion);
             var options = CurrentNightResidentsAnswerOptions
                 .Select(value => new FixedString64Bytes(value))
@@ -448,9 +449,16 @@ namespace Managers
         /// <summary>
         /// Host-only function
         /// </summary>
+        /// <param name="comment">Comment to set</param>
         public void SetNarratorComment(string comment)
         {
             NarratorComment = comment;
+            NetworkCommunicationManager.Instance.SendNarratorCommentClientRpc(new FixedString64Bytes(comment));
+        }
+
+        public string GetNarratorComment()
+        {
+            return NarratorComment;
         }
 
         public void SetLastWords(string lastWords)
