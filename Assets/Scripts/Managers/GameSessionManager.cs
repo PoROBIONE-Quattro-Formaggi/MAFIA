@@ -104,11 +104,6 @@ namespace Managers
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
                 NetworkManager.Singleton.OnClientConnectedCallback += OnNewClientConnected;
-                // IDToRole.CollectionChanged += OnIDToRoleChanged;
-                // IDToPlayerName.CollectionChanged += OnIDToPlayerNameChanged;
-                // IDToIsPlayerAlive.CollectionChanged += OnIDToIsPlayerAliveChanged;
-                // IDToAlibi.CollectionChanged += OnIDToIsAlibiChanged;
-                // MafiaIDToVotedForID.CollectionChanged += OnMafiaIDToVoteForIDChanged;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
@@ -128,55 +123,13 @@ namespace Managers
             }
         }
 
-        // private void OnIDToRoleChanged(object sender, NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
-        // {
-        //     var keys = IDToRole.Keys.ToArray();
-        //     var values = IDToRole.Values.Select(value => new FixedString32Bytes(value)).ToArray();
-        //     NetworkCommunicationManager.Instance.SendNewIDToRoleClientRpc(keys, values);
-        // }
-        //
-        // private void OnIDToPlayerNameChanged(object sender,
-        //     NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
-        // {
-        //     var keys = IDToPlayerName.Keys.ToArray();
-        //     var values = IDToRole.Values.Select(value => new FixedString32Bytes(value)).ToArray();
-        //     NetworkCommunicationManager.Instance.SendNewIDToPlayerNameClientRpc(keys, values);
-        // }
-        //
-        // private void OnIDToIsPlayerAliveChanged(object sender,
-        //     NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
-        // {
-        //     var keys = IDToIsPlayerAlive.Keys.ToArray();
-        //     var values = IDToIsPlayerAlive.Values.ToArray();
-        //     NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
-        // }
-        //
-        // private void OnIDToIsAlibiChanged(object sender,
-        //     NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
-        // {
-        //     var keys = IDToAlibi.Keys.ToArray();
-        //     var values = IDToAlibi.Values.Select(value => new FixedString128Bytes(value)).ToArray();
-        //     NetworkCommunicationManager.Instance.SendNewIDToAlibiClientRpc(keys, values);
-        // }
-        //
-        // private void OnMafiaIDToVoteForIDChanged(object sender,
-        //     NotifyCollectionChangedEventArgs notifyCollectionChangedEventArgs)
-        // {
-        //     var keys = MafiaIDToVotedForID.Keys.ToArray();
-        //     var values = MafiaIDToVotedForID.Values.ToArray();
-        //     var clientRpcParams = new ClientRpcParams
-        //     {
-        //         Send = new ClientRpcSendParams
-        //         {
-        //             TargetClientIds = keys.ToList()
-        //         }
-        //     };
-        //     NetworkCommunicationManager.Instance.SendNewMafiaIDToVotedForIDClientRpc(keys, values, clientRpcParams);
-        // }
-
         private void OnNewClientConnected(ulong clientId)
         {
             Debug.Log($"New client connected with id: {clientId}");
+            IDToIsPlayerAlive[clientId] = true;
+            var keys = IDToIsPlayerAlive.Keys.ToArray();
+            var values = IDToIsPlayerAlive.Values.ToArray();
+            NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             AssignPlayersToRoles();
         }
 
