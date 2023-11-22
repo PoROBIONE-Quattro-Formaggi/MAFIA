@@ -25,6 +25,7 @@ namespace UI
             InvokeRepeating(nameof(AnimateEnterNamePlaceholder), 0f, 0.5f);
             MainMenuUIManager.ToggleCarat(enterNameField);
             MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
+            keyboard.ShowKeyboard();
         }
 
         public void OnNameFieldDeselected()

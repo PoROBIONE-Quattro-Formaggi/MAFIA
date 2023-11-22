@@ -40,6 +40,7 @@ namespace UI
             CancelInvoke(nameof(TogglePlaceholder));
             _blockAnimateCodeInputInvoke = false;
             codeInputPlaceholder.text = "<mspace=2.95em>......";
+            HideClipboard();
         }
 
         public void OnCodeInputSelected()
@@ -54,6 +55,7 @@ namespace UI
                 CancelInvoke(nameof(TogglePlaceholder));
                 _blockAnimateCodeInputInvoke = false;
             }
+            ShowClipboard();
         }
 
         public void SelectCodeInput()
