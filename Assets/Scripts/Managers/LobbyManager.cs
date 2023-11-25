@@ -80,6 +80,7 @@ namespace Managers
                 catch (LobbyServiceException e)
                 {
                     Debug.LogError(e);
+                    _polling = false;
                 }
             }
             else
