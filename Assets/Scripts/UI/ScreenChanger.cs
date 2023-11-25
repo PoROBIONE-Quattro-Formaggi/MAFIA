@@ -24,11 +24,10 @@ namespace UI
         public void ChangeTo(string screenName)
         {
             DisableAll();
+            Debug.Log("Change to clicked");
             foreach (Transform screenTransform in screensParent.transform)
             {
-                Debug.Log(screenTransform.gameObject.name);
                 if (screenTransform.gameObject.name != screenName) continue;
-                Debug.Log(screenTransform.name);
                 screenTransform.gameObject.SetActive(true);
             }
         }

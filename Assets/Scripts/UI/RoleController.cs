@@ -84,4 +84,9 @@ public class RoleController : MonoBehaviour
         citizenRole.SetActive(true);
     }
 
+    public void D_OnOkButtonClicked()
+    {
+        Debug.Log("Ok button clicked");
+    }
+
 }
