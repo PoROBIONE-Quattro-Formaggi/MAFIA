@@ -137,7 +137,13 @@ namespace Managers
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
+            var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
+            Debug.Log($"expected number of players: {expectedNumberOfPlayers}");
+            var currentNumberOfPlayers = IDToIsPlayerAlive.Count;
+            Debug.Log($"current number of players: {currentNumberOfPlayers}");
+            if (expectedNumberOfPlayers != currentNumberOfPlayers) return;
             AssignPlayersToRoles();
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -146,11 +152,14 @@ namespace Managers
 
         private void AssignPlayersToRoles()
         {
-            var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
+            var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
+            var playersIDs = NetworkCommunicationManager
+                .GetAllConnectedPlayersIDs()
+                .Where(id => id != hostID)
+                .ToList();
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             if (expectedNumberOfPlayers != playersIDs.Count) return;
-            var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
-            foreach (var id in playersIDs.Where(id => id != hostID))
+            foreach (var id in playersIDs)
             {
                 ClientsIDs.Add(id);
             }
@@ -179,7 +188,6 @@ namespace Managers
             }
 
             OnPlayersAssignedToRoles?.Invoke();
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
             return;
 
             List<string> GetRolesList(int playerNumber)
@@ -232,9 +240,15 @@ namespace Managers
 
         private ulong GetWhoMafiaVotedID()
         {
+            Debug.Log($"count of mafia vote dictionary: {MafiaIDToVotedForID.Count}");
             var occurrences = MafiaIDToVotedForID.Values
                 .GroupBy(v => v)
                 .ToDictionary(g => g.Key, g => g.Count());
+
+            foreach (var occurrence in occurrences)
+            {
+                Debug.Log($"Occurrence key: {occurrence.Key}, value: {occurrence.Value}");
+            }
             var mafiaChoice = occurrences.OrderByDescending(x => x.Value).First().Key;
             return mafiaChoice;
         }
@@ -339,12 +353,25 @@ namespace Managers
             return alivePlayerNames;
         }
         
-        public List<ulong> GetAlivePlayersIDs()
+        public List<ulong> GetAlivePlayersIDs(bool includeYourself = true)
         {
+            if (includeYourself)
+            {
+                return IDToIsPlayerAlive
+                    .Where(keyVal => keyVal.Value)
+                    .Select(keyVal => keyVal.Key)
+                    .ToList();
+            }
             return IDToIsPlayerAlive
-                .Where(keyVal => keyVal.Value)
+                .Where(keyVal => keyVal.Value && keyVal.Key != PlayerData.ClientID)
                 .Select(keyVal => keyVal.Key)
                 .ToList();
+        }
+
+        public List<ulong> GetAliveNonMafiaPlayersIDs()
+        {
+            var aliveIDs = GetAlivePlayersIDs(false);
+            return aliveIDs.Where(id => IDToRole[id] != Roles.Mafia).ToList();
         }
 
         public string GetCurrentNightResidentsQuestion()
@@ -359,6 +386,7 @@ namespace Managers
 
         public void MafiaVoteFor(ulong votedForID)
         {
+            Debug.Log($"Sending server RPC with mafia vote for: {votedForID}");
             NetworkCommunicationManager.Instance.MafiaVoteForServerRpc(votedForID);
         }
 
@@ -438,6 +466,7 @@ namespace Managers
             }
 
             AssignNightResidentsPollChosenAnswer();
+            NetworkCommunicationManager.Instance.BeginDayForClientsClientRpc();
         }
 
         public string GetLastKilledName()
