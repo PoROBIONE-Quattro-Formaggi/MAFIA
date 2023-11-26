@@ -18,7 +18,7 @@ namespace UI
         
         public TextMeshProUGUI information;
 
-        public async void CopyCode()
+        public void CopyCode()
         {
             CopyToClipboard(LobbyManager.Instance.GetLobbyCode());
             information.text = "CODE COPIED - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();

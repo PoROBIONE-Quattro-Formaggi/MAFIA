@@ -9,6 +9,7 @@ namespace Managers
     {
         [SerializeField] private GameObject playerCanvas;
         [SerializeField] private GameObject playerCamera;
+        [SerializeField] private GameObject eventSystem;
 
         private void Start()
         {
@@ -16,6 +17,7 @@ namespace Managers
             Debug.Log("Canvas set active");
             playerCanvas.SetActive(true);
             playerCamera.SetActive(true);
+            eventSystem.SetActive(true);
             if (PlayerPrefs.GetInt(PpKeys.KeyIsHost) == 1)
             {
                 GetComponentInChildren<HostGameSessionUIManager>(true).gameObject.SetActive(true);

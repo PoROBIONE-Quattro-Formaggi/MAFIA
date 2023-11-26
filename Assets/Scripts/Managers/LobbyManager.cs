@@ -71,14 +71,16 @@ namespace Managers
                     _lastLobbyServiceCall = Time.time;
                     _polling = true;
                     if (_hostLobby == null || _joinedLobby == null) return;
-                    _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
-                    _hostLobby = _joinedLobby;
+                    var lobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+                    _joinedLobby = lobby;
+                    _hostLobby = lobby;
                     Debug.Log("New host lobby polled");
                     _polling = false;
                 }
                 catch (LobbyServiceException e)
                 {
                     Debug.LogError(e);
+                    _polling = false;
                 }
             }
             else
@@ -110,7 +112,8 @@ namespace Managers
             {
                 _lastLobbyServiceCall = Time.time;
                 if (_joinedLobby == null) return;
-                _joinedLobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+                var lobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
+                _joinedLobby = lobby;
             }
             catch (LobbyServiceException e)
             {
@@ -341,6 +344,8 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                _hostLobby = null;
+                _joinedLobby = null;
             }
         }
 

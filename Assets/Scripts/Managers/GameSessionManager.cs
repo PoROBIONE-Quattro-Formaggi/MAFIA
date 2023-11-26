@@ -126,7 +126,14 @@ namespace Managers
         private void OnNewClientConnected(ulong clientId)
         {
             Debug.Log($"New client connected with id: {clientId}");
+            if (NetworkCommunicationManager.GetOwnClientID() == clientId) return;
+            Debug.Log($"After if isHost");
             IDToIsPlayerAlive[clientId] = true;
+            Debug.Log("CURRENT ALIVE IDS:");
+            foreach (var key in IDToIsPlayerAlive.Keys )
+            {
+                Debug.Log(key);
+            }
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
@@ -142,7 +149,6 @@ namespace Managers
             var playersIDs = NetworkCommunicationManager.GetAllConnectedPlayersIDs();
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             if (expectedNumberOfPlayers != playersIDs.Count) return;
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
             var hostID = NetworkCommunicationManager.Instance.OwnerClientId;
             foreach (var id in playersIDs.Where(id => id != hostID))
             {
@@ -150,21 +156,20 @@ namespace Managers
             }
 
             var playersIDsToAssignRoles = ClientsIDs.ToList();
-            if (playersIDsToAssignRoles.Count <
-                mafiaNumber + doctorNumber + 1) //TODO delete later (debug case when players < 3
-            {
-                for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
-                {
-                    playersIDsToAssignRoles.Add((ulong)(i + 100));
-                }
-            }
+            // if (playersIDsToAssignRoles.Count <
+            //     mafiaNumber + doctorNumber + 1) //TODO delete later (debug case when players < 3
+            // {
+            //     for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
+            //     {
+            //         playersIDsToAssignRoles.Add((ulong)(i + 100));
+            //     }
+            // }
 
             Shuffle(playersIDsToAssignRoles);
             var rolesList = GetRolesList(playersIDsToAssignRoles.Count);
             for (var i = 0; i < rolesList.Count; i++)
             {
                 IDToRole[playersIDsToAssignRoles[i]] = rolesList[i];
-                IDToIsPlayerAlive[(ulong)i] = true;
             }
 
             Debug.Log("Players assigned with roles like:");
@@ -174,6 +179,7 @@ namespace Managers
             }
 
             OnPlayersAssignedToRoles?.Invoke();
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
             return;
 
             List<string> GetRolesList(int playerNumber)
@@ -222,14 +228,6 @@ namespace Managers
                     (listToShuffle[k], listToShuffle[n]) = (listToShuffle[n], listToShuffle[k]);
                 }
             }
-        }
-
-        private List<ulong> GetAlivePlayersIDs()
-        {
-            return IDToIsPlayerAlive
-                .Where(keyVal => keyVal.Value)
-                .Select(keyVal => keyVal.Key)
-                .ToList();
         }
 
         private ulong GetWhoMafiaVotedID()
@@ -340,6 +338,14 @@ namespace Managers
                 .ToList();
             return alivePlayerNames;
         }
+        
+        public List<ulong> GetAlivePlayersIDs()
+        {
+            return IDToIsPlayerAlive
+                .Where(keyVal => keyVal.Value)
+                .Select(keyVal => keyVal.Key)
+                .ToList();
+        }
 
         public string GetCurrentNightResidentsQuestion()
         {
@@ -374,6 +380,36 @@ namespace Managers
         public void SetAlibi(string alibi)
         {
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
+        }
+        
+        public int GetCurrentAmountOfMafiaThatVoted()
+        {
+            return MafiaIDToVotedForID.Count;
+        }
+
+        public int GetAmountOfAliveMafia()
+        {
+            Debug.Log("ALL ALIVE PLAYERS IDS BELOW:");
+            foreach (var id in GetAlivePlayersIDs())
+            {
+                Debug.Log(id);
+            }
+            return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Mafia);
+        }
+
+        public int GetCurrentAmountOfDoctorsThatVoted()
+        {
+            return DoctorIDToVotedForID.Count;
+        }
+
+        public int GetAmountOfAliveDoctors()
+        {
+            Debug.Log("ALL ALIVE PLAYERS IDS BELOW:");
+            foreach (var id in GetAlivePlayersIDs())
+            {
+                Debug.Log(id);
+            }
+            return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Doctor);
         }
 
         /// <summary>
