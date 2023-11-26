@@ -1,0 +1,112 @@
+using DataStorage;
+using Managers;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace UI
+{
+    public class VoteController : MonoBehaviour
+    {
+        public GameObject nightVotePrompt;
+        public TextMeshProUGUI nightVotePromptText;
+    
+        // Night vote
+        public GameObject voteButton;
+        public GameObject voteOptionsParent;
+        public GameObject voteOptionPrefab;
+        public GameObject goVoteButton;
+        public TextMeshProUGUI playerQuoteText;
+
+        private ulong _currentChosenID;
+    
+        private void OnEnable()
+        {
+            GenerateVotingOptions();
+            nightVotePromptText.text = PlayerData.Role switch
+            {
+                // Assign question to information prompt
+                "Mafia" => "Who to kill?",
+                "Doctor" => "Who to save?",
+                "Resident" => "Who is sus?", // TODO we should display here the 'funny questions' polls I think (?)
+                _ => nightVotePromptText.text
+            };
+            voteOptionsParent.SetActive(true);
+            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+        }
+        private void GenerateVotingOptions()
+        {
+            var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs();
+            var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
+            foreach (var playerID in alivePlayersIDs)
+            {
+                var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
+                Debug.Log(idToPlayerName[playerID]);
+                // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
+                voteOption.GetComponentInChildren<TextMeshProUGUI>().text = $"{idToPlayerName[playerID]} - {playerID.ToString()}";
+                voteOption.SetActive(true);
+                var toggle = voteOption.GetComponent<Toggle>();
+                toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
+                toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
+            }
+            voteOptionsParent.SetActive(true);
+        }
+
+        private void OnDisable()
+        {
+            // CLEAR LOBBIES LIST BEFORE REFRESH
+            var buttonsDisplayedNo = voteOptionsParent.transform.childCount;
+            for (var i = buttonsDisplayedNo - 1; i >= 0; i--)
+            {
+                DestroyImmediate(voteOptionsParent.transform.GetChild(i).gameObject);
+            }
+            voteButton.SetActive(false);
+        }
+
+        private void OnVoteOptionClicked(ulong currentClickedID, Toggle toggle)
+        {
+            if (!toggle.isOn) return;
+            voteButton.SetActive(true);
+            _currentChosenID = currentClickedID;
+            SetPlayerQuoteString(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
+        }
+        
+        private void SetPlayerQuoteString(string voteOptionName)
+        {
+            var playerQuoteString = $"[{PlayerData.Name}] ";
+        
+            playerQuoteString += PlayerData.Role switch
+            {
+                // Assign question to information prompt
+                "Mafia" => $"I vote for to kill {voteOptionName}",
+                "Doctor" => $"I vote to save {voteOptionName}",
+                "Resident" => $"I think that {voteOptionName} is sus", // TODO we should display here the 'funny questions' polls I think (?)
+                _ => playerQuoteString
+            };
+            PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
+            PlayerPrefs.Save();
+        }
+
+
+        public void OnVoteClicked()
+        {
+            switch (PlayerData.Role)
+            {
+                case Roles.Mafia:
+                    GameSessionManager.Instance.MafiaVoteFor(_currentChosenID);
+                    break;
+                case Roles.Doctor:
+                    GameSessionManager.Instance.DoctorVoteFor(_currentChosenID);
+                    break;
+                case Roles.Resident:
+                    //TODO 
+                    // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
+                    break;
+            }
+            voteOptionsParent.SetActive(false);
+            voteButton.SetActive(false);
+            goVoteButton.SetActive(false);
+            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+        }
+    }
+}

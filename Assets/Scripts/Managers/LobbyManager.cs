@@ -344,6 +344,8 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                _hostLobby = null;
+                _joinedLobby = null;
             }
         }
 

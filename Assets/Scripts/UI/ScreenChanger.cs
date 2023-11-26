@@ -24,7 +24,6 @@ namespace UI
         public void ChangeTo(string screenName)
         {
             DisableAll();
-            Debug.Log("Change to clicked");
             foreach (Transform screenTransform in screensParent.transform)
             {
                 if (screenTransform.gameObject.name != screenName) continue;
@@ -34,7 +33,7 @@ namespace UI
 
         public void ChangeToPlayerRoleScreen()
         {
-            ChangeTo(Screens.BrowseLobbies);
+            ChangeTo(Screens.PlayerRoleScreen);
         }
 
         public void ChangeToBrowseLobbiesScreen()

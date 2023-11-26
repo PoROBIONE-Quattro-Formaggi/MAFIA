@@ -27,7 +27,9 @@ namespace Managers
         private static NetworkCommunicationManager _instance;
 
         public event Action OnPlayerRoleAssigned;
-
+        public event Action OnOneMafiaVoted;
+        public event Action OnOneDoctorVoted;
+        
         private void Awake()
         {
             if (_instance == null)
@@ -64,6 +66,7 @@ namespace Managers
             PlayerData.Name = playerName;
             PlayerData.IsAlive = true;
             PlayerData.ClientID = clientId;
+            Debug.Log($"SEnding serverrpc with player name {playerName}");
             AddClientNameToListServerRpc(playerName);
         }
 
@@ -97,6 +100,11 @@ namespace Managers
             return NetworkManager.Singleton.ConnectedClientsIds.ToList();
         }
 
+        public static ulong GetOwnClientID()
+        {
+            return NetworkManager.Singleton.LocalClientId;
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // SERVER RPCs //////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -104,11 +112,13 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
+            Debug.Log($"Sender clientID: {rpcParams.Receive.SenderClientId}");
             GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             var keys = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToPlayerName.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
+            Debug.Log("Sending all names to clientRPC");
             SendNewIDToPlayerNameClientRpc(keys, values);
         }
 
@@ -143,6 +153,7 @@ namespace Managers
                     TargetClientIds = keys.ToList()
                 }
             };
+            OnOneMafiaVoted?.Invoke();
             SendNewMafiaIDToVotedForIDClientRpc(keys, values, clientRpcParams);
         }
 
@@ -151,6 +162,7 @@ namespace Managers
         public void DoctorVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.DoctorIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+            OnOneDoctorVoted?.Invoke();
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -191,10 +203,12 @@ namespace Managers
         private void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
             if (IsHost) return;
+            Debug.Log("Writing new player names to dict");
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
+            Debug.Log("Finished writing player names to dict");
         }
 
         [ClientRpc]
