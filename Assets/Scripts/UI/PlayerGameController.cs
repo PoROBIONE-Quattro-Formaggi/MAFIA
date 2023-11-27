@@ -15,7 +15,6 @@ namespace UI
         public TextMeshProUGUI informationText;
         public GameObject deadPrompt;
         public RectTransform parentScreenRectTransform;
-        public ClientGameSessionUIManager clientGameManager;
         public string Time { get; set; } = "night";
 
 

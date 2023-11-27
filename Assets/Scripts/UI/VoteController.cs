@@ -26,10 +26,12 @@ namespace UI
 
         private void OnEnable()
         {
-            _time = FindObjectOfType<PlayerGameController>().Time;
+            _time = FindObjectOfType<PlayerGameController>(false).Time;
+            Debug.Log(_time);
             switch (_time)
             {
                 case "night":
+                    Debug.Log("OnEnableNight called");
                     OnEnableNight();
                     break;
                 case "day":
