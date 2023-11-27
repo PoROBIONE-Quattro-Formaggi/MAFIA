@@ -78,9 +78,9 @@ namespace UI
             playerQuoteString += PlayerData.Role switch
             {
                 // Assign question to information prompt
-                "Mafia" => "I vote for to kill _",
-                "Doctor" => "I vote to save _",
-                "Resident" => "I think that _ is sus", // TODO we should display here the 'funny questions' polls I think (?)
+                Roles.Mafia => "I vote for to kill _",
+                Roles.Doctor => "I vote to save _",
+                Roles.Resident => "I think that _ is sus", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => playerQuoteString
             };
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);

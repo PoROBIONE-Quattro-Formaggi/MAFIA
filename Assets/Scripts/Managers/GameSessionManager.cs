@@ -268,6 +268,11 @@ namespace Managers
                 var occurrences = ResidentIDToVotedForOption.Values
                     .GroupBy(v => v)
                     .ToDictionary(g => g.Key, g => g.Count());
+                if (occurrences.Count == 0)
+                {
+                    return 0;
+                }
+
                 var chosenOption = occurrences.OrderByDescending(x => x.Value).First().Key;
                 return chosenOption;
             }
@@ -462,7 +467,7 @@ namespace Managers
             // 4. Update 'lastDeath' (show to all who is dead) - DONE
             // 5. Show the winner in the night residents' poll - DONE
             // 5.1 Show players' alibis - DONE
-            if (NetworkCommunicationManager.Instance.IsHost)
+            if (!NetworkCommunicationManager.Instance.IsHost)
             {
                 Toast.Show("You are not a host - you don't have permission to end night");
                 return;
@@ -481,7 +486,8 @@ namespace Managers
                 NetworkCommunicationManager.Instance.SendLastKilledNameClientRpc(LastKilledName);
             }
 
-            AssignNightResidentsPollChosenAnswer();
+            // AssignNightResidentsPollChosenAnswer(); TODO TURN ON LATER
+            NightResidentsPollChosenAnswer = "[TEST] Chosen poll answer";
             NetworkCommunicationManager.Instance.BeginDayForClientsClientRpc();
         }
 
