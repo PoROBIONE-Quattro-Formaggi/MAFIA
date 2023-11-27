@@ -19,7 +19,7 @@ namespace UI
 
 
         private float _currentX;
-        private RectTransform _parentScreenRectTransform;
+        public RectTransform parentScreenRectTransform;
         private RectTransform _textRectTransform;
 
         private void Start()
@@ -32,7 +32,7 @@ namespace UI
             if (goVoteButton.activeSelf) SetPlayerQuoteStringNight();
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
 
-            _parentScreenRectTransform = GetComponent<RectTransform>();
+            // parentScreenRectTransform = GetComponent<RectTransform>();
             _textRectTransform = informationText.GetComponent<RectTransform>();
             
             SetInformationText("test set information");
@@ -92,10 +92,9 @@ namespace UI
             informationText.text = text;
             _textRectTransform.sizeDelta = new Vector2(informationText.preferredWidth, _textRectTransform.sizeDelta.y);
         }
-
         private void RollInformation()
         {
-            if (_currentX < -_parentScreenRectTransform.sizeDelta.x - informationText.preferredWidth)
+            if (_currentX < -parentScreenRectTransform.sizeDelta.x - informationText.preferredWidth)
             {
                 _currentX = 0;
             }
