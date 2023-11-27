@@ -14,12 +14,15 @@ namespace UI
         public GameObject information;
         public TextMeshProUGUI informationText;
         public GameObject deadPrompt;
+        public RectTransform parentScreenRectTransform;
+        public ClientGameSessionUIManager clientGameManager;
+        public string Time { get; set; } = "night";
+
 
         [Header("VARIABLES")] public float animationSpeed;
 
 
         private float _currentX;
-        public RectTransform parentScreenRectTransform;
         private RectTransform _textRectTransform;
 
         private void Start()
@@ -45,6 +48,7 @@ namespace UI
 
         private void Sunrise()
         {
+            Time = "day";
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
     
             if (!PlayerData.IsAlive)

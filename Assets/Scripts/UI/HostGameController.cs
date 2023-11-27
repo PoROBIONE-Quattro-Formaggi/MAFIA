@@ -9,11 +9,13 @@ namespace UI
     {
         public TextMeshProUGUI mafiaStatus;
         public TextMeshProUGUI doctorStatus;
+        public TextMeshProUGUI townStatus;
         public GameObject lastDeath;
         public GameObject forwardButton;
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
+        private string _time = "night";
         
 
         private void OnEnable()
@@ -66,7 +68,40 @@ namespace UI
 
         public void OnForwardClicked()
         {
-            GameSessionManager.Instance.EndNight();
+            switch (_time)
+            {
+                case "night":
+                    GameSessionManager.Instance.EndNight();
+                    break;
+                case "day":
+                    //TODO: handle forward during day
+                    break;
+                case "evening":
+                    //TODO: handle forward during evening
+                    break;
+            }
+            UpdateTime();
+        }
+
+        private void Sunrise()
+        {
+            mafiaStatus.gameObject.SetActive(false);
+            mafiaStatus.text = "The mafia has not voted.";
+            doctorStatus.gameObject.SetActive(false);
+            doctorStatus.text = "The doctor has not voted.";
+
+            townStatus.gameObject.SetActive(true);
+        }
+
+        private void UpdateTime()
+        {
+            _time = _time switch
+            {
+                "night" => "day",
+                "day" => "evening",
+                "evening" => "night",
+                _ => _time
+            };
         }
     }
 }
