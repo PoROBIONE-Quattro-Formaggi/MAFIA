@@ -29,6 +29,8 @@ namespace Managers
         public event Action OnPlayerRoleAssigned;
         public event Action OnOneMafiaVoted;
         public event Action OnOneDoctorVoted;
+        public event Action OnDayBegan;
+        public event Action OnNightBegan;
         
         private void Awake()
         {
@@ -143,9 +145,11 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void MafiaVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
+            Debug.Log($"Received mafia voted for ID: {votedForID}");
             GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
             var keys = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
             var values = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
+            //TODO: send to all mafia clients always
             var clientRpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -317,6 +321,20 @@ namespace Managers
         {
             if (IsHost) return;
             GameSessionManager.Instance.NarratorComment = comment.ToString();
+        }
+        
+        [ClientRpc]
+        public void BeginDayForClientsClientRpc()
+        {
+            if (IsHost) return;
+            OnDayBegan?.Invoke();
+        }
+
+        [ClientRpc]
+        public void BeginNightForClientsClientRpc()
+        {
+            if (IsHost) return;
+            OnNightBegan?.Invoke();
         }
     }
 }

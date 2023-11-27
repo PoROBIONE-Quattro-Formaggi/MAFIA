@@ -63,5 +63,10 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
         }
+
+        public void OnForwardClicked()
+        {
+            GameSessionManager.Instance.EndNight();
+        }
     }
 }

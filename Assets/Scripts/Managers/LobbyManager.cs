@@ -74,7 +74,6 @@ namespace Managers
                     var lobby = await LobbyService.Instance.GetLobbyAsync(_joinedLobby.Id);
                     _joinedLobby = lobby;
                     _hostLobby = lobby;
-                    Debug.Log("New host lobby polled");
                     _polling = false;
                 }
                 catch (LobbyServiceException e)
@@ -387,7 +386,7 @@ namespace Managers
                 return;
             }
 
-            SetPlayerPrefsForGameSession(relayCode, 1, _hostLobby.Players.Count, Roles.Narrator);
+            SetPlayerPrefsForGameSession(relayCode, 1, _hostLobby.Players.Count - 1, Roles.Narrator);
             var data = new Dictionary<string, DataObject>
             {
                 {

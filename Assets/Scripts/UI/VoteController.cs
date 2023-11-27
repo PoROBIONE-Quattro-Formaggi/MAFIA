@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using DataStorage;
 using Managers;
 using TMPro;
@@ -26,9 +27,9 @@ namespace UI
             nightVotePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
-                "Mafia" => "Who to kill?",
-                "Doctor" => "Who to save?",
-                "Resident" => "Who is sus?", // TODO we should display here the 'funny questions' polls I think (?)
+                Roles.Mafia => "Who to kill?",
+                Roles.Doctor => "Who to save?",
+                Roles.Resident => "Who is sus?", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => nightVotePromptText.text
             };
             voteOptionsParent.SetActive(true);
@@ -36,12 +37,25 @@ namespace UI
         }
         private void GenerateVotingOptions()
         {
-            var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs();
+            List<ulong> alivePlayersIDs;
+            switch (PlayerData.Role)
+            {
+                case Roles.Mafia:
+                    alivePlayersIDs = GameSessionManager.Instance.GetAliveNonMafiaPlayersIDs();
+                    break;
+                case Roles.Doctor:
+                case Roles.Resident:
+                    alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
+                    break;
+                default:
+                    alivePlayersIDs = new List<ulong>();
+                    break;
+            }
+            
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
-                Debug.Log(idToPlayerName[playerID]);
                 // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text = $"{idToPlayerName[playerID]} - {playerID.ToString()}";
                 voteOption.SetActive(true);
