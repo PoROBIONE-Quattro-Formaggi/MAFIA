@@ -31,7 +31,7 @@ namespace Managers
         public event Action OnOneDoctorVoted;
         public event Action OnDayBegan;
         public event Action OnNightBegan;
-        
+
         private void Awake()
         {
             if (_instance == null)
@@ -212,6 +212,7 @@ namespace Managers
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
+
             Debug.Log("Finished writing player names to dict");
         }
 
@@ -276,18 +277,26 @@ namespace Managers
 
         [ClientRpc]
         [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
-        public void ClearDataFromLastVotingClientRpc()
+        public void ClearDataFromLastNightVotingClientRpc()
         {
             if (IsHost) return;
             GameSessionManager.Instance.MafiaIDToVotedForID.Clear();
             GameSessionManager.Instance.DoctorIDToVotedForID.Clear();
-            GameSessionManager.Instance.IDToVotedForID.Clear();
             GameSessionManager.Instance.IDToAlibi.Clear();
             GameSessionManager.Instance.LastKilledName = "";
-            GameSessionManager.Instance.LastWords = "";
             GameSessionManager.Instance.CurrentNightResidentsQuestion = "";
             GameSessionManager.Instance.CurrentNightResidentsAnswerOptions.Clear();
             GameSessionManager.Instance.NightResidentsPollChosenAnswer = "";
+        }
+
+        [ClientRpc]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
+        public void ClearDataFromLastDayVotingClientRpc()
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.IDToVotedForID.Clear();
+            GameSessionManager.Instance.LastKilledName = "";
+            GameSessionManager.Instance.LastWords = "";
         }
 
         [ClientRpc]
@@ -322,7 +331,7 @@ namespace Managers
             if (IsHost) return;
             GameSessionManager.Instance.NarratorComment = comment.ToString();
         }
-        
+
         [ClientRpc]
         public void BeginDayForClientsClientRpc()
         {

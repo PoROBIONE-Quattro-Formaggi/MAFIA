@@ -130,10 +130,11 @@ namespace Managers
             Debug.Log($"After if isHost");
             IDToIsPlayerAlive[clientId] = true;
             Debug.Log("CURRENT ALIVE IDS:");
-            foreach (var key in IDToIsPlayerAlive.Keys )
+            foreach (var key in IDToIsPlayerAlive.Keys)
             {
                 Debug.Log(key);
             }
+
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
@@ -249,6 +250,7 @@ namespace Managers
             {
                 Debug.Log($"Occurrence key: {occurrence.Key}, value: {occurrence.Value}");
             }
+
             var mafiaChoice = occurrences.OrderByDescending(x => x.Value).First().Key;
             return mafiaChoice;
         }
@@ -271,17 +273,22 @@ namespace Managers
             }
         }
 
-        private void ClearDataFromLastVoting()
+        private void ClearDataFromLastNightVoting()
         {
             MafiaIDToVotedForID.Clear();
             DoctorIDToVotedForID.Clear();
-            IDToVotedForID.Clear();
             IDToAlibi.Clear();
             LastKilledName = "";
-            LastWords = "";
             ResidentIDToVotedForOption.Clear();
             NightResidentsPollChosenAnswer = "";
-            NetworkCommunicationManager.Instance.ClearDataFromLastVotingClientRpc();
+            NetworkCommunicationManager.Instance.ClearDataFromLastNightVotingClientRpc();
+        }
+
+        private void ClearDataFromLastDayVoting()
+        {
+            IDToVotedForID.Clear();
+            LastKilledName = "";
+            LastWords = "";
         }
 
         private void KillPlayerWithID(ulong id)
@@ -352,7 +359,7 @@ namespace Managers
                 .ToList();
             return alivePlayerNames;
         }
-        
+
         public List<ulong> GetAlivePlayersIDs(bool includeYourself = true)
         {
             if (includeYourself)
@@ -362,6 +369,7 @@ namespace Managers
                     .Select(keyVal => keyVal.Key)
                     .ToList();
             }
+
             return IDToIsPlayerAlive
                 .Where(keyVal => keyVal.Value && keyVal.Key != PlayerData.ClientID)
                 .Select(keyVal => keyVal.Key)
@@ -409,7 +417,7 @@ namespace Managers
         {
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
-        
+
         public int GetCurrentAmountOfMafiaThatVoted()
         {
             return MafiaIDToVotedForID.Count;
@@ -422,6 +430,7 @@ namespace Managers
             {
                 Debug.Log(id);
             }
+
             return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Mafia);
         }
 
@@ -437,6 +446,7 @@ namespace Managers
             {
                 Debug.Log(id);
             }
+
             return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Doctor);
         }
 
@@ -452,7 +462,13 @@ namespace Managers
             // 4. Update 'lastDeath' (show to all who is dead) - DONE
             // 5. Show the winner in the night residents' poll - DONE
             // 5.1 Show players' alibis - DONE
-            ClearDataFromLastVoting();
+            if (NetworkCommunicationManager.Instance.IsHost)
+            {
+                Toast.Show("You are not a host - you don't have permission to end night");
+                return;
+            }
+
+            ClearDataFromLastDayVoting();
             var mafiaChoice = GetWhoMafiaVotedID();
             if (!DoctorIDToVotedForID.Values.Contains(mafiaChoice))
             {
@@ -501,7 +517,7 @@ namespace Managers
             // - Check if game ended - DONE
             // - Show last words - TODO
             // - Send new night residents questions to clients (RCP) - DONE
-            ClearDataFromLastVoting();
+            ClearDataFromLastNightVoting();
             var playersChoiceID = GetWhoPlayersDayVotedID();
             CurrentDayVotedID = playersChoiceID;
             KillPlayerWithID(playersChoiceID);
