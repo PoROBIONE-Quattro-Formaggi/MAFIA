@@ -1,4 +1,6 @@
+using System;
 using System.Text.RegularExpressions;
+using UnityEngine;
 
 namespace UI
 {
@@ -6,35 +8,39 @@ namespace UI
     {
         public static bool CheckIfNameCorrect(string fieldName)
         {
-            Regex regex = new Regex("^[\\s]*$|^.{0,1}$|^.{17,}$");
-            return (regex.matches(fieldName).Length > 0);
+            var regex = new Regex("^[\\s]*$|^.{0,1}$|^.{17,}$");
+            return (regex.Matches(fieldName).Count > 0);
         }
 
         public static bool CheckIfEndsWithNewline(string fieldName)
         {
-            Regex regex = new Regex("^.*\n$");
-            return (regex.matches(fieldName).Length > 0);
+            var regex = new Regex("^.*\n$");
+            return (regex.Matches(fieldName).Count > 0);
         }
+
         public static bool CheckIfTownPopulationCorrect(string fieldName)
         {
             try
             {
-                maxPlayersInt = int.Parse(fieldName.text);
+                // ReSharper disable once ReturnValueOfPureMethodIsNotUsed
+                int.Parse(fieldName);
                 return true;
             }
             catch (Exception)
             {
-                // Debug.Log("Can't convert to int");
+                Debug.Log("Can't convert to int");
                 return false;
             }
         }
 
         public static int CheckIfPopulationInRange(int fieldNum)
         {
-            if (fieldNum < 5)
-                fieldNum = 5;
-            else if (fieldNum > 99)
-                fieldNum = 99;
+            fieldNum = fieldNum switch
+            {
+                < 5 => 5,
+                > 99 => 99,
+                _ => fieldNum
+            };
             return fieldNum;
         }
     }

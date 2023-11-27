@@ -367,8 +367,14 @@ namespace Managers
         {
             if (_joinedLobby == null) return;
             if (!IsLobbyHost()) return;
-            string relayCode;
             var maxClientsNum = _hostLobby.Players.Count;
+            if (maxClientsNum < 5)
+            {
+                Toast.Show($"Cannot start the game. {maxClientsNum} out of 5 players required.");
+                return;
+            }
+
+            string relayCode;
             try
             {
                 relayCode = await RelayManager.Instance.GetRelayCode(maxClientsNum);
