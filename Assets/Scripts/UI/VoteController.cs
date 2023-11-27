@@ -11,7 +11,7 @@ namespace UI
     {
         public GameObject nightVotePrompt;
         public TextMeshProUGUI nightVotePromptText;
-    
+
         // Night vote
         public GameObject voteButton;
         public GameObject voteOptionsParent;
@@ -20,7 +20,7 @@ namespace UI
         public TextMeshProUGUI playerQuoteText;
 
         private ulong _currentChosenID;
-    
+
         private void OnEnable()
         {
             GenerateVotingOptions();
@@ -35,6 +35,7 @@ namespace UI
             voteOptionsParent.SetActive(true);
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
+
         private void GenerateVotingOptions()
         {
             List<ulong> alivePlayersIDs;
@@ -51,18 +52,20 @@ namespace UI
                     alivePlayersIDs = new List<ulong>();
                     break;
             }
-            
+
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
                 // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
-                voteOption.GetComponentInChildren<TextMeshProUGUI>().text = $"{idToPlayerName[playerID]} - {playerID.ToString()}";
+                voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
+                    $"{idToPlayerName[playerID]} - {playerID.ToString()}";
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
+
             voteOptionsParent.SetActive(true);
         }
 
@@ -74,6 +77,7 @@ namespace UI
             {
                 DestroyImmediate(voteOptionsParent.transform.GetChild(i).gameObject);
             }
+
             voteButton.SetActive(false);
         }
 
@@ -84,17 +88,18 @@ namespace UI
             _currentChosenID = currentClickedID;
             SetPlayerQuoteString(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
         }
-        
+
         private void SetPlayerQuoteString(string voteOptionName)
         {
             var playerQuoteString = $"[{PlayerData.Name}] ";
-        
+
             playerQuoteString += PlayerData.Role switch
             {
                 // Assign question to information prompt
-                "Mafia" => $"I vote for to kill {voteOptionName}",
-                "Doctor" => $"I vote to save {voteOptionName}",
-                "Resident" => $"I think that {voteOptionName} is sus", // TODO we should display here the 'funny questions' polls I think (?)
+                Roles.Mafia => $"I vote for to kill {voteOptionName}",
+                Roles.Doctor => $"I vote to save {voteOptionName}",
+                Roles.Resident =>
+                    $"I think that {voteOptionName} is sus", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => playerQuoteString
             };
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
@@ -117,8 +122,8 @@ namespace UI
                     // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
                     break;
             }
+
             voteOptionsParent.SetActive(false);
-            voteButton.SetActive(false);
             goVoteButton.SetActive(false);
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
