@@ -5,7 +5,7 @@ namespace UI
 {
     public class EnterNameController : MonoBehaviour
     {
-        [Header("Input")] 
+        [Header("Input")]
         public TextMeshProUGUI enterNamePlaceholder;
         public TMP_InputField enterNameField;
 
@@ -18,7 +18,7 @@ namespace UI
         {
             MainMenuUIManager.Instance.AnimatePlaceholder(enterNamePlaceholder);
         }
-        
+
 
         public void OnNameFieldSelected()
         {
@@ -54,7 +54,7 @@ namespace UI
             confirmNameButton.SetActive(enterNameField.text != "");
 
             // Enter shortcut key implementation
-            if (!enterNameField.text.EndsWith("\n") || enterNameField.text.Length <= 2) return;
+            if (!Validators.CheckIfNameCorrect(enterNameField.text) && !Validators.CheckIfEndsWithNewline(enterNameField.text)) return;
             OnConfirmNameButtonClicked();
         }
 

@@ -9,13 +9,13 @@ namespace UI
     {
         [DllImport("__Internal")]
         private static extern void CopyToClipboard(string str);
-        
+
         [DllImport("__Internal")]
         private static extern void HandlePermission(string str);
-        
-        
-        
-        
+
+
+
+
         public TextMeshProUGUI information;
 
         public void CopyCode()
@@ -23,9 +23,10 @@ namespace UI
             CopyToClipboard(LobbyManager.Instance.GetLobbyCode());
             information.text = "CODE COPIED - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
         }
+
     }
-    
-    
+
+
 
     public static class ClipboardExtension
     {
