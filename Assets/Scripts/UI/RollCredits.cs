@@ -12,8 +12,7 @@ namespace UI
         public GameObject credits;
         public TextMeshProUGUI subtitle;
         public TextMeshProUGUI lobbyCodeText;
-        public TextMeshProUGUI informationText;
-
+    
         //parameters
         public float scrollSpeed;
         public List<TextMeshProUGUI> nameTexts;
@@ -47,7 +46,6 @@ namespace UI
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;
             GetComponent<RectTransform>().anchoredPosition = new Vector2(0, _currentY);
-            informationText.text = $"You are {MainMenuUIManager.Instance.GetName()}, please wait";
             InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
         }
 
@@ -58,9 +56,6 @@ namespace UI
 
             // Display town name
             subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
-
-            // Display lobby code
-            lobbyCodeText.text = "LOBBY CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
 
             // Spawn text objects for all possible players 
             for (var i = 0; i < _maxPlayers; i++)

@@ -15,8 +15,6 @@ namespace UI
 
         [Header("Variables")] public bool caps;
         public float heightOnScreen;
-        public float spacingRatio;
-
         private RectTransform _keyboardTransform;
         private readonly List<HorizontalLayoutGroup> _rows = new();
         private readonly List<TextMeshProUGUI> _chars = new();
@@ -40,13 +38,6 @@ namespace UI
             }
         }
 
-        private void Update()
-        {
-            foreach (var row in _rows)
-            {
-                row.spacing = screenRect.sizeDelta.x / spacingRatio;
-            }
-        }
 
         public void DisplayNumpad()
         {
@@ -85,13 +76,13 @@ namespace UI
 
         public void ShowKeyboard()
         {
-            if (!Application.isMobilePlatform) return;
+            //if (!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, _keyboardTransform.sizeDelta.y + heightOnScreen);
         }
 
         public void HideKeyboard()
         {
-            if (!Application.isMobilePlatform) return;
+            //if (!Application.isMobilePlatform) return;
             _keyboardTransform.anchoredPosition = new Vector2(0, 0);
         }
 
