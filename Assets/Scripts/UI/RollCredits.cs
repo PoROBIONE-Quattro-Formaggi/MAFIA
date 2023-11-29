@@ -11,7 +11,6 @@ namespace UI
         public GameObject textPrefab;
         public GameObject credits;
         public TextMeshProUGUI subtitle;
-        public TextMeshProUGUI lobbyCodeText;
     
         //parameters
         public float scrollSpeed;

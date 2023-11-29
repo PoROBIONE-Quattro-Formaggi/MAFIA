@@ -33,6 +33,7 @@ namespace Managers
         public event Action OnDayBegan;
         public event Action OnEveningBegan;
         public event Action OnNightBegan;
+        public event Action OnGameEnded;
 
         private void Awake()
         {
@@ -359,6 +360,14 @@ namespace Managers
             if (IsHost) return;
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             OnNightBegan?.Invoke();
+        }
+        
+        [ClientRpc]
+        public void EndGameForClientsClientRpc(string winnerRole)
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.WinnerRole = winnerRole;
+            OnGameEnded?.Invoke();
         }
     }
 }

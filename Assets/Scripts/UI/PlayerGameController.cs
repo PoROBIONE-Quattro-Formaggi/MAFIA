@@ -16,6 +16,7 @@ namespace UI
         public RectTransform informationTextRectTransform;
         public GameObject deadPrompt;
         public RectTransform parentScreenRectTransform;
+        public GameObject endGameScreen;
         private string _time;
         
 
@@ -30,6 +31,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnDayBegan += Sunrise;
             NetworkCommunicationManager.Instance.OnEveningBegan += Sunset;
             NetworkCommunicationManager.Instance.OnNightBegan += MoonRise;
+            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
         }
 
         private void OnEnable()
@@ -124,6 +126,11 @@ namespace UI
             
         }
 
+        private void EndGame()
+        {
+            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+        }
+
         private void SetPlayerQuoteStringDay()
         {
             var playerQuoteString = $"[{PlayerData.Name}] I vote for _ to be executed";
@@ -171,6 +178,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnDayBegan -= Sunrise;
             NetworkCommunicationManager.Instance.OnEveningBegan -= Sunset;
             NetworkCommunicationManager.Instance.OnNightBegan -= MoonRise;
+            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
         }
     }
 }

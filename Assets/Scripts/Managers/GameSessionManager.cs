@@ -48,6 +48,7 @@ namespace Managers
         public List<string> CurrentNightResidentsAnswerOptions { get; set; } = new();
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
+        public string WinnerRole { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,6 +349,7 @@ namespace Managers
         {
             Debug.Log($"THE END\n{winnerRole} wins");
             // TODO implement ENDGAME functionality
+            NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -589,6 +591,11 @@ namespace Managers
         public string GetCurrentTimeOfDay()
         {
             return CurrentTimeOfDay;
+        }
+
+        public string GetWinnerRole()
+        {
+            return WinnerRole;
         }
     }
 }
