@@ -490,6 +490,7 @@ namespace Managers
 
             // AssignNightResidentsPollChosenAnswer(); TODO TURN ON LATER
             NightResidentsPollChosenAnswer = "[TEST] Chosen poll answer";
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Day;
             NetworkCommunicationManager.Instance.BeginDayForClientsClientRpc();
         }
 
@@ -529,12 +530,23 @@ namespace Managers
             KillPlayerWithID(playersChoiceID);
             EndGameIfApplicable();
             SendNewResidentsNightPoll();
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Evening;
             NetworkCommunicationManager.Instance.BeginEveningForClientsClientRpc();
         }
 
         public ulong GetCurrentDayVotedID()
         {
             return CurrentDayVotedID;
+        }
+
+        public int GetCurrentAmountOfResidentsThatDayVoted()
+        {
+            return IDToVotedForID.Count;
+        }
+
+        public int GetAmountOfAliveResidents()
+        {
+            return GetAlivePlayersIDs(false).Count;
         }
 
         /// <summary>
@@ -544,6 +556,7 @@ namespace Managers
         {
             // - Allow this player to put last words - DONE
             // - Show last words - DONE
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             NetworkCommunicationManager.Instance.BeginNightForClientsClientRpc();
         }
 

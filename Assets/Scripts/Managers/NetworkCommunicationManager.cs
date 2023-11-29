@@ -29,6 +29,7 @@ namespace Managers
         public event Action OnPlayerRoleAssigned;
         public event Action OnOneMafiaVoted;
         public event Action OnOneDoctorVoted;
+        public event Action OnOneResidentDayVoted;
         public event Action OnDayBegan;
         public event Action OnEveningBegan;
         public event Action OnNightBegan;
@@ -142,6 +143,7 @@ namespace Managers
         public void DayVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+            OnOneResidentDayVoted?.Invoke();
         }
 
         [ServerRpc(RequireOwnership = false)]

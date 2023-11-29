@@ -1,4 +1,5 @@
 using System;
+using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -10,18 +11,19 @@ namespace UI
         public TextMeshProUGUI mafiaStatus;
         public TextMeshProUGUI doctorStatus;
         public TextMeshProUGUI townStatus;
-        public GameObject lastDeath;
+        public TextMeshProUGUI executionStatus;
+        public TextMeshProUGUI lastDeath;
         public GameObject forwardButton;
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
-        private string _time = "night";
         
 
         private void OnEnable()
         {
             NetworkCommunicationManager.Instance.OnOneMafiaVoted += OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
         }
 
         private void OnOneMafiaVoted()
@@ -54,6 +56,22 @@ namespace UI
                 doctorStatus.text = $"Currently {currentAliveDoctorCount} out of {currentAliveDoctorCount} have voted.";
         }
 
+        private void OnOneResidentDayVoted()
+        {
+            var currentResidentsDayVoteCount = GameSessionManager.Instance.GetCurrentAmountOfResidentsThatDayVoted();
+            var currentAlivePlayers = GameSessionManager.Instance.GetAmountOfAliveResidents();
+
+            if (currentResidentsDayVoteCount == currentAlivePlayers)
+            {
+                townStatus.text = "The town has voted.";
+                forwardButton.SetActive(true);
+            }
+            else
+            {
+                townStatus.text = $"Currently {currentResidentsDayVoteCount} out of {currentAlivePlayers} have voted.";
+            }
+        }
+
         private void ShowForwardButton()
         {
             forwardButton.SetActive(_isMafiaDoneVoting && _isDoctorsDoneVoting);
@@ -68,19 +86,25 @@ namespace UI
 
         public void OnForwardClicked()
         {
-            switch (_time)
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
-                case "night":
+                case TimeIsAManMadeSocialConstruct.Night:
                     GameSessionManager.Instance.EndNight();
+                    forwardButton.SetActive(false);
+                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
+                    Sunrise();
                     break;
-                case "day":
-                    //TODO: handle forward during day
+                case TimeIsAManMadeSocialConstruct.Day:
+                    GameSessionManager.Instance.EndDay();
+                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    Sunset();
                     break;
-                case "evening":
-                    //TODO: handle forward during evening
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    GameSessionManager.Instance.EndEvening();
+                    forwardButton.SetActive(false);
+                    MoonRise();
                     break;
             }
-            UpdateTime();
         }
 
         private void Sunrise()
@@ -93,15 +117,22 @@ namespace UI
             townStatus.gameObject.SetActive(true);
         }
 
-        private void UpdateTime()
+        private void Sunset()
         {
-            _time = _time switch
-            {
-                "night" => "day",
-                "day" => "evening",
-                "evening" => "night",
-                _ => _time
-            };
+            townStatus.gameObject.SetActive(false);
+            townStatus.text = "The town has not voted.";
+            
+            executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+            executionStatus.gameObject.SetActive(true);
+        }
+
+        private void MoonRise()
+        {
+            executionStatus.gameObject.SetActive(false);
+            executionStatus.text = $"_ was executed by the town.";
+            
+            mafiaStatus.gameObject.SetActive(true);
+            doctorStatus.gameObject.SetActive(true);
         }
     }
 }

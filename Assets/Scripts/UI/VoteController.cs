@@ -22,20 +22,20 @@ namespace UI
         public TextMeshProUGUI playerQuoteText;
 
         private ulong _currentChosenID;
-        private string _time = "night";
+        //private string _time;
 
         private void OnEnable()
         {
-            _time = FindObjectOfType<PlayerGameController>(false).Time;
-            Debug.Log(_time);
-            switch (_time)
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
-                case "night":
-                    Debug.Log("OnEnableNight called");
+                case TimeIsAManMadeSocialConstruct.Night:
                     OnEnableNight();
                     break;
-                case "day":
+                case TimeIsAManMadeSocialConstruct.Day:
                     OnEnableDay();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    OnEnableEvening();
                     break;
             }
         }
@@ -61,6 +61,11 @@ namespace UI
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
+        private void OnEnableEvening()
+        {
+            //TODO: implement
+        }
+
         private void GenerateVotingOptionsNight()
         {
             List<ulong> alivePlayersIDs;
@@ -77,30 +82,21 @@ namespace UI
                     alivePlayersIDs = new List<ulong>();
                     break;
             }
-
-            var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
-            foreach (var playerID in alivePlayersIDs)
-            {
-                var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
-                // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
-                voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"{idToPlayerName[playerID]} - {playerID.ToString()}";
-                voteOption.SetActive(true);
-                var toggle = voteOption.GetComponent<Toggle>();
-                toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
-                toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
-            }
-            voteOptionsParent.SetActive(true);
+            GenerateVotingOptions(alivePlayersIDs);
         }
-
+        
         private void GenerateVotingOptionsDay()
         {
             var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
+            GenerateVotingOptions(alivePlayersIDs);
+        }
+
+        private void GenerateVotingOptions(List<ulong> alivePlayersIDs)
+        {
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
-                // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
                     $"{idToPlayerName[playerID]} - {playerID.ToString()}";
                 voteOption.SetActive(true);
@@ -127,12 +123,12 @@ namespace UI
             if (!toggle.isOn) return;
             voteButton.SetActive(true);
             _currentChosenID = currentClickedID;
-            switch (_time)
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
-                case "night":
+                case TimeIsAManMadeSocialConstruct.Night:
                     SetPlayerQuoteStringNight(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
                     break;
-                case "day":
+                case TimeIsAManMadeSocialConstruct.Day:
                     SetPlayerQuoteStringDay(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
                     break;
             }
@@ -165,7 +161,7 @@ namespace UI
 
         public void OnVoteClicked()
         {
-            if (_time == "night")
+            if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Night)
             {
                 switch (PlayerData.Role)
                 {
@@ -180,9 +176,9 @@ namespace UI
                         // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
                         break;
                 }
-            } else if (_time == "day")
+            } else if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Day)
             {
-                //TODO: implement day functionality
+                GameSessionManager.Instance.DayVoteFor(_currentChosenID);
             }
             
             voteOptionsParent.SetActive(false);
