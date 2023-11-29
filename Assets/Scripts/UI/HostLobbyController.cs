@@ -24,17 +24,4 @@ namespace UI
             information.text = "CODE COPIED - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
         }
     }
-    
-    
-
-    public static class ClipboardExtension
-    {
-        /// <summary>
-        /// Puts the string into the Clipboard.
-        /// </summary>
-        public static void CopyToClipboard(this string str)
-        {
-            GUIUtility.systemCopyBuffer = str;
-        }
-    }
 }

@@ -113,7 +113,15 @@ namespace UI
 
         private void MoonRise()
         {
-            goVoteButton.SetActive(true);
+            if (!PlayerData.IsAlive)
+            {
+                
+            }
+            else
+            {
+                goVoteButton.SetActive(true);
+            }
+            
         }
 
         private void SetPlayerQuoteStringDay()
@@ -143,9 +151,6 @@ namespace UI
         public void SetInformationText(string text)
         {
             informationText.text = text;
-            //TODO: double check this resize
-            Debug.Log(informationText.preferredWidth);
-            informationTextRectTransform.sizeDelta = new Vector2(informationText.preferredWidth, informationTextRectTransform.sizeDelta.y);
         }
         
         private void RollInformation()
