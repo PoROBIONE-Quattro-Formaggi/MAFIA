@@ -9,7 +9,7 @@ namespace UI
     {
         [DllImport("__Internal")]
         private static extern void CopyToClipboard(string str);
-        
+
         [DllImport("__Internal")]
         private static extern void HandlePermission(string str);
 
