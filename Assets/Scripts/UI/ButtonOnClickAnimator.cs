@@ -12,6 +12,7 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
 {
     public float animationTime;
     public bool changesScreen;
+    public bool returnes;
     public GameObject screenToChangeTo = null;
     public TextMeshProUGUI animationMaxWidthRender;
     public TextMeshProUGUI text;
@@ -57,6 +58,9 @@ public class ButtonOnClickAnimator : MonoBehaviour, IPointerClickHandler
         if (changesScreen)
         {
             ScreenChanger.Instance.ChangeTo(screenToChangeTo.name);
+        } else if (returnes)
+        {
+            ScreenChanger.Instance.ChangeToPreviousScreen();
         }
     }
 

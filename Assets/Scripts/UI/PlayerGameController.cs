@@ -124,6 +124,7 @@ namespace UI
             }
             else
             {
+                SetPlayerQuoteStringNight();
                 goVoteButton.SetActive(true);
             }
             
