@@ -10,12 +10,5 @@ namespace UI
         {
             ScreenChanger.Instance.ChangeToHostGameScreen();
         }
-
-        
-
-        private void OnDestroy()
-        {
-            
-        }
     }
 }
