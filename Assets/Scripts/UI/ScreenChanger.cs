@@ -32,6 +32,11 @@ namespace UI
             }
         }
 
+        public void ChangeToEndGameScreen()
+        {
+            ChangeTo(Screens.EndGameScreen);
+        }
+
         public void ChangeToPlayerRoleScreen()
         {
             ChangeTo(Screens.PlayerRoleScreen);

@@ -29,9 +29,11 @@ namespace Managers
         public event Action OnPlayerRoleAssigned;
         public event Action OnOneMafiaVoted;
         public event Action OnOneDoctorVoted;
+        public event Action OnOneResidentDayVoted;
         public event Action OnDayBegan;
         public event Action OnEveningBegan;
         public event Action OnNightBegan;
+        public event Action OnGameEnded;
 
         private void Awake()
         {
@@ -142,6 +144,7 @@ namespace Managers
         public void DayVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+            OnOneResidentDayVoted?.Invoke();
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -357,6 +360,14 @@ namespace Managers
             if (IsHost) return;
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             OnNightBegan?.Invoke();
+        }
+        
+        [ClientRpc]
+        public void EndGameForClientsClientRpc(string winnerRole)
+        {
+            //if (IsHost) return;
+            GameSessionManager.Instance.WinnerRole = winnerRole;
+            OnGameEnded?.Invoke();
         }
     }
 }

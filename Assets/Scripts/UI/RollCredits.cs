@@ -11,7 +11,6 @@ namespace UI
         public GameObject textPrefab;
         public GameObject credits;
         public TextMeshProUGUI subtitle;
-        public TextMeshProUGUI lobbyCodeText;
     
         //parameters
         public float scrollSpeed;
@@ -42,8 +41,6 @@ namespace UI
 
         private void OnEnable()
         {
-            //Application.targetFrameRate = 120;   // DEBUG: for testing different frame rates
-
             _screenRectTransform = screen.GetComponent<RectTransform>();
             _rectTransform = GetComponent<RectTransform>();
             _currentY = -screen.GetComponent<RectTransform>().sizeDelta.y;

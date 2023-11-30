@@ -13,29 +13,62 @@ namespace UI
         public GameObject goVoteButton;
         public GameObject information;
         public TextMeshProUGUI informationText;
+        public RectTransform informationTextRectTransform;
         public GameObject deadPrompt;
+        public RectTransform parentScreenRectTransform;
+        public GameObject endGameScreen;
+        private string _time;
+        
+
 
         [Header("VARIABLES")] public float animationSpeed;
 
 
         private float _currentX;
-        public RectTransform parentScreenRectTransform;
-        private RectTransform _textRectTransform;
 
         private void Start()
         {
             NetworkCommunicationManager.Instance.OnDayBegan += Sunrise;
+            NetworkCommunicationManager.Instance.OnEveningBegan += Sunset;
+            NetworkCommunicationManager.Instance.OnNightBegan += MoonRise;
+            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
         }
 
         private void OnEnable()
         {
+            _time = GameSessionManager.Instance.GetCurrentTimeOfDay();
+            switch (_time)
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    OnEnableNight();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    OnEnableDay();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    OnEnableEvening();
+                    break;
+            }
+            
+        }
+
+        private void OnEnableNight()
+        {
+            SetInformationText("NIGHT");
             if (goVoteButton.activeSelf) SetPlayerQuoteStringNight();
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+        }
 
-            // parentScreenRectTransform = GetComponent<RectTransform>();
-            _textRectTransform = informationText.GetComponent<RectTransform>();
-            
-            SetInformationText("test set information");
+        private void OnEnableDay()
+        {
+            SetInformationText("DAY");
+            if (goVoteButton.activeSelf) SetPlayerQuoteStringDay();
+            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+        }
+
+        private void OnEnableEvening()
+        {
+            SetInformationText("EVENING");
         }
 
         private void FixedUpdate()
@@ -61,6 +94,41 @@ namespace UI
                 SetPlayerQuoteStringDay();
                 playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
             }
+        }
+
+        private void Sunset()
+        {
+            var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
+            
+            if (!PlayerData.IsAlive)
+            {
+                //TODO: get last words etc.
+                playerQuote.SetActive(false);
+                information.SetActive(false);
+                deadPrompt.SetActive(true);
+            }
+            else
+            {
+                informationText.text = $"{lastKilledName} was executed by the town.";
+            }
+        }
+
+        private void MoonRise()
+        {
+            if (!PlayerData.IsAlive)
+            {
+                
+            }
+            else
+            {
+                goVoteButton.SetActive(true);
+            }
+            
+        }
+
+        private void EndGame()
+        {
+            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
 
         private void SetPlayerQuoteStringDay()
@@ -90,8 +158,8 @@ namespace UI
         public void SetInformationText(string text)
         {
             informationText.text = text;
-            _textRectTransform.sizeDelta = new Vector2(informationText.preferredWidth, _textRectTransform.sizeDelta.y);
         }
+        
         private void RollInformation()
         {
             if (_currentX < -parentScreenRectTransform.sizeDelta.x - informationText.preferredWidth)
@@ -102,12 +170,15 @@ namespace UI
             {
                 _currentX -= 1 * animationSpeed;
             }
-            _textRectTransform.anchoredPosition = new Vector2(_currentX, 0);
+            informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
         }
 
         private void OnDestroy()
         {
             NetworkCommunicationManager.Instance.OnDayBegan -= Sunrise;
+            NetworkCommunicationManager.Instance.OnEveningBegan -= Sunset;
+            NetworkCommunicationManager.Instance.OnNightBegan -= MoonRise;
+            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
         }
     }
 }

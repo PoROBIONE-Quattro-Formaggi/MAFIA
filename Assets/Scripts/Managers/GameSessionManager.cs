@@ -48,6 +48,7 @@ namespace Managers
         public List<string> CurrentNightResidentsAnswerOptions { get; set; } = new();
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
+        public string WinnerRole { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -348,6 +349,7 @@ namespace Managers
         {
             Debug.Log($"THE END\n{winnerRole} wins");
             // TODO implement ENDGAME functionality
+            NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -490,6 +492,7 @@ namespace Managers
 
             // AssignNightResidentsPollChosenAnswer(); TODO TURN ON LATER
             NightResidentsPollChosenAnswer = "[TEST] Chosen poll answer";
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Day;
             NetworkCommunicationManager.Instance.BeginDayForClientsClientRpc();
         }
 
@@ -529,12 +532,23 @@ namespace Managers
             KillPlayerWithID(playersChoiceID);
             EndGameIfApplicable();
             SendNewResidentsNightPoll();
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Evening;
             NetworkCommunicationManager.Instance.BeginEveningForClientsClientRpc();
         }
 
         public ulong GetCurrentDayVotedID()
         {
             return CurrentDayVotedID;
+        }
+
+        public int GetCurrentAmountOfResidentsThatDayVoted()
+        {
+            return IDToVotedForID.Count;
+        }
+
+        public int GetAmountOfAliveResidents()
+        {
+            return GetAlivePlayersIDs(false).Count;
         }
 
         /// <summary>
@@ -544,6 +558,7 @@ namespace Managers
         {
             // - Allow this player to put last words - DONE
             // - Show last words - DONE
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             NetworkCommunicationManager.Instance.BeginNightForClientsClientRpc();
         }
 
@@ -576,6 +591,11 @@ namespace Managers
         public string GetCurrentTimeOfDay()
         {
             return CurrentTimeOfDay;
+        }
+
+        public string GetWinnerRole()
+        {
+            return WinnerRole;
         }
     }
 }

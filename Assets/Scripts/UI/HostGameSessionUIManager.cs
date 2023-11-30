@@ -1,3 +1,5 @@
+using System;
+using Managers;
 using UnityEngine;
 
 namespace UI
@@ -7,6 +9,13 @@ namespace UI
         private void OnEnable()
         {
             ScreenChanger.Instance.ChangeToHostGameScreen();
+        }
+
+        
+
+        private void OnDestroy()
+        {
+            
         }
     }
 }
