@@ -34,6 +34,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
         }
 
+        // ON ENABLE FUNCTIONS
         private void OnEnable()
         {
             _time = GameSessionManager.Instance.GetCurrentTimeOfDay();
@@ -70,12 +71,14 @@ namespace UI
         {
             SetInformationText("EVENING");
         }
-
+        
+        
         private void FixedUpdate()
         {
             RollInformation();
         }
 
+        
         private void Sunrise()
         {
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
@@ -130,7 +133,8 @@ namespace UI
         {
             ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
-
+        
+        // HELPER FUNCTIONS
         private void SetPlayerQuoteStringDay()
         {
             var playerQuoteString = $"[{PlayerData.Name}] I vote for _ to be executed";
