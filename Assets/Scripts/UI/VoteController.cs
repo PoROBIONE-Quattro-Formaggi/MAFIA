@@ -1,16 +1,18 @@
+using System;
 using System.Collections.Generic;
 using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
 {
     public class VoteController : MonoBehaviour
     {
-        public GameObject nightVotePrompt;
-        public TextMeshProUGUI nightVotePromptText;
+        public GameObject votePrompt;
+        public TextMeshProUGUI votePromptText;
 
         // Night vote
         public GameObject voteButton;
@@ -20,23 +22,51 @@ namespace UI
         public TextMeshProUGUI playerQuoteText;
 
         private ulong _currentChosenID;
+        //private string _time;
 
         private void OnEnable()
         {
-            GenerateVotingOptions();
-            nightVotePromptText.text = PlayerData.Role switch
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    OnEnableNight();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    OnEnableDay();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    OnEnableEvening();
+                    break;
+            }
+        }
+
+        private void OnEnableNight()
+        {
+            GenerateVotingOptionsNight();
+            votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
                 Roles.Mafia => "Who to kill?",
                 Roles.Doctor => "Who to save?",
                 Roles.Resident => "Who is sus?", // TODO we should display here the 'funny questions' polls I think (?)
-                _ => nightVotePromptText.text
+                _ => votePromptText.text
             };
-            voteOptionsParent.SetActive(true);
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
-        private void GenerateVotingOptions()
+        private void OnEnableDay()
+        {
+            GenerateVotingOptionsDay();
+            votePromptText.text = "Who to execute?";
+            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+        }
+
+        private void OnEnableEvening()
+        {
+            //TODO: implement
+        }
+
+        private void GenerateVotingOptionsNight()
         {
             List<ulong> alivePlayersIDs;
             switch (PlayerData.Role)
@@ -52,12 +82,21 @@ namespace UI
                     alivePlayersIDs = new List<ulong>();
                     break;
             }
+            GenerateVotingOptions(alivePlayersIDs);
+        }
+        
+        private void GenerateVotingOptionsDay()
+        {
+            var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
+            GenerateVotingOptions(alivePlayersIDs);
+        }
 
+        private void GenerateVotingOptions(List<ulong> alivePlayersIDs)
+        {
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
-                // voteOption.GetComponentInChildren<TextMeshProUGUI>().text = idToPlayerName[playerID];
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
                     $"{idToPlayerName[playerID]} - {playerID.ToString()}";
                 voteOption.SetActive(true);
@@ -65,7 +104,6 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
-
             voteOptionsParent.SetActive(true);
         }
 
@@ -77,7 +115,6 @@ namespace UI
             {
                 DestroyImmediate(voteOptionsParent.transform.GetChild(i).gameObject);
             }
-
             voteButton.SetActive(false);
         }
 
@@ -86,10 +123,25 @@ namespace UI
             if (!toggle.isOn) return;
             voteButton.SetActive(true);
             _currentChosenID = currentClickedID;
-            SetPlayerQuoteString(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    SetPlayerQuoteStringNight(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    SetPlayerQuoteStringDay(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
+                    break;
+            }
         }
 
-        private void SetPlayerQuoteString(string voteOptionName)
+        private void SetPlayerQuoteStringDay(string voteOptionName)
+        {
+            var playerQuoteString = $"[{PlayerData.Name}] I vote for {voteOptionName} to be executed.";
+            PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
+            PlayerPrefs.Save();
+        }
+
+        private void SetPlayerQuoteStringNight(string voteOptionName)
         {
             var playerQuoteString = $"[{PlayerData.Name}] ";
 
@@ -109,20 +161,26 @@ namespace UI
 
         public void OnVoteClicked()
         {
-            switch (PlayerData.Role)
+            if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Night)
             {
-                case Roles.Mafia:
-                    GameSessionManager.Instance.MafiaVoteFor(_currentChosenID);
-                    break;
-                case Roles.Doctor:
-                    GameSessionManager.Instance.DoctorVoteFor(_currentChosenID);
-                    break;
-                case Roles.Resident:
-                    //TODO 
-                    // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
-                    break;
+                switch (PlayerData.Role)
+                {
+                    case Roles.Mafia:
+                        GameSessionManager.Instance.MafiaVoteFor(_currentChosenID);
+                        break;
+                    case Roles.Doctor:
+                        GameSessionManager.Instance.DoctorVoteFor(_currentChosenID);
+                        break;
+                    case Roles.Resident:
+                        //TODO 
+                        // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
+                        break;
+                }
+            } else if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Day)
+            {
+                GameSessionManager.Instance.DayVoteFor(_currentChosenID);
             }
-
+            
             voteOptionsParent.SetActive(false);
             goVoteButton.SetActive(false);
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);

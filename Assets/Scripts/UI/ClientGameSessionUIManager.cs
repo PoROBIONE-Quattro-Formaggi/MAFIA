@@ -17,8 +17,6 @@ namespace UI
 
         public RoleController roleController;
         
-        
-
         private void OnEnable()
         {
             ScreenChanger.Instance.ChangeToPlayerRoleScreen();

@@ -41,13 +41,14 @@ namespace Managers
         public Dictionary<ulong, ulong> DoctorIDToVotedForID { get; } = new();
         public Dictionary<ulong, int> ResidentIDToVotedForOption { get; } = new();
         public Dictionary<ulong, ulong> IDToVotedForID { get; } = new();
-        public ulong CurrentDayVotedID { get; set; }
         public string LastKilledName { get; set; } = "";
         public string LastWords { get; set; } = "";
         public string NarratorComment { get; set; } = "";
         public string CurrentNightResidentsQuestion { get; set; } = "";
         public List<string> CurrentNightResidentsAnswerOptions { get; set; } = new();
         public string NightResidentsPollChosenAnswer { get; set; } = "";
+        public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
+        public string WinnerRole { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,7 @@ namespace Managers
 
         private static GameSessionManager _instance;
         private List<ulong> ClientsIDs { get; } = new();
+        private ulong CurrentDayVotedID { get; set; }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // MONO BEHAVIOUR FUNCTIONS /////////////////////////////////////////////////////////////////////////////////////////
@@ -167,7 +169,7 @@ namespace Managers
 
             var playersIDsToAssignRoles = ClientsIDs.ToList();
             // if (playersIDsToAssignRoles.Count <
-            //     mafiaNumber + doctorNumber + 1) //TODO delete later (debug case when players < 3
+            //     mafiaNumber + doctorNumber + 1) // TODO delete later (debug case when players < 3
             // {
             //     for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
             //     {
@@ -294,6 +296,7 @@ namespace Managers
             IDToVotedForID.Clear();
             LastKilledName = "";
             LastWords = "";
+            CurrentDayVotedID = 0;
         }
 
         private void KillPlayerWithID(ulong id)
@@ -345,7 +348,8 @@ namespace Managers
         private void EndGame(string winnerRole)
         {
             Debug.Log($"THE END\n{winnerRole} wins");
-            //TODO implement functionality
+            // TODO implement ENDGAME functionality
+            NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -488,6 +492,7 @@ namespace Managers
 
             // AssignNightResidentsPollChosenAnswer(); TODO TURN ON LATER
             NightResidentsPollChosenAnswer = "[TEST] Chosen poll answer";
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Day;
             NetworkCommunicationManager.Instance.BeginDayForClientsClientRpc();
         }
 
@@ -514,14 +519,12 @@ namespace Managers
         /// <summary>
         /// Host-only function
         /// </summary>
-        public ulong GetIDWhoWasVotedDay()
+        public void EndDay()
         {
             // - Clear all the voting variables to be ready for next voting - DONE
             // - Calculate who won the voting - DONE
-            // - Allow this player to put last words - TODO
             // - Kill player - DONE
             // - Check if game ended - DONE
-            // - Show last words - TODO
             // - Send new night residents questions to clients (RCP) - DONE
             ClearDataFromLastNightVoting();
             var playersChoiceID = GetWhoPlayersDayVotedID();
@@ -529,7 +532,34 @@ namespace Managers
             KillPlayerWithID(playersChoiceID);
             EndGameIfApplicable();
             SendNewResidentsNightPoll();
-            return playersChoiceID;
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Evening;
+            NetworkCommunicationManager.Instance.BeginEveningForClientsClientRpc();
+        }
+
+        public ulong GetCurrentDayVotedID()
+        {
+            return CurrentDayVotedID;
+        }
+
+        public int GetCurrentAmountOfResidentsThatDayVoted()
+        {
+            return IDToVotedForID.Count;
+        }
+
+        public int GetAmountOfAliveResidents()
+        {
+            return GetAlivePlayersIDs(false).Count;
+        }
+
+        /// <summary>
+        /// Host-only function
+        /// </summary>
+        public void EndEvening()
+        {
+            // - Allow this player to put last words - DONE
+            // - Show last words - DONE
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
+            NetworkCommunicationManager.Instance.BeginNightForClientsClientRpc();
         }
 
 
@@ -556,6 +586,16 @@ namespace Managers
         public string GetLastWords()
         {
             return LastWords;
+        }
+
+        public string GetCurrentTimeOfDay()
+        {
+            return CurrentTimeOfDay;
+        }
+
+        public string GetWinnerRole()
+        {
+            return WinnerRole;
         }
     }
 }

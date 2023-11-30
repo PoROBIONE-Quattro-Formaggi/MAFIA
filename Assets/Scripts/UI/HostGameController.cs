@@ -1,4 +1,5 @@
 using System;
+using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -9,7 +10,9 @@ namespace UI
     {
         public TextMeshProUGUI mafiaStatus;
         public TextMeshProUGUI doctorStatus;
-        public GameObject lastDeath;
+        public TextMeshProUGUI townStatus;
+        public TextMeshProUGUI executionStatus;
+        public TextMeshProUGUI lastDeath;
         public GameObject forwardButton;
 
         private bool _isMafiaDoneVoting;
@@ -20,6 +23,14 @@ namespace UI
         {
             NetworkCommunicationManager.Instance.OnOneMafiaVoted += OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
+        }
+        
+        private void EndGame()
+        {
+            Debug.Log("Change to end game called");
+            ScreenChanger.Instance.ChangeToEndGameScreen();
         }
 
         private void OnOneMafiaVoted()
@@ -52,21 +63,84 @@ namespace UI
                 doctorStatus.text = $"Currently {currentAliveDoctorCount} out of {currentAliveDoctorCount} have voted.";
         }
 
+        private void OnOneResidentDayVoted()
+        {
+            var currentResidentsDayVoteCount = GameSessionManager.Instance.GetCurrentAmountOfResidentsThatDayVoted();
+            var currentAlivePlayers = GameSessionManager.Instance.GetAmountOfAliveResidents();
+
+            if (currentResidentsDayVoteCount == currentAlivePlayers)
+            {
+                townStatus.text = "The town has voted.";
+                forwardButton.SetActive(true);
+            }
+            else
+            {
+                townStatus.text = $"Currently {currentResidentsDayVoteCount} out of {currentAlivePlayers} have voted.";
+            }
+        }
+
         private void ShowForwardButton()
         {
             forwardButton.SetActive(_isMafiaDoneVoting && _isDoctorsDoneVoting);
         }
-        
 
+        public void OnForwardClicked()
+        {
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    GameSessionManager.Instance.EndNight();
+                    forwardButton.SetActive(false);
+                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
+                    Sunrise();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    GameSessionManager.Instance.EndDay();
+                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    Sunset();
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    GameSessionManager.Instance.EndEvening();
+                    forwardButton.SetActive(false);
+                    MoonRise();
+                    break;
+            }
+        }
+
+        private void Sunrise()
+        {
+            mafiaStatus.gameObject.SetActive(false);
+            mafiaStatus.text = "The mafia has not voted.";
+            doctorStatus.gameObject.SetActive(false);
+            doctorStatus.text = "The doctor has not voted.";
+
+            townStatus.gameObject.SetActive(true);
+        }
+
+        private void Sunset()
+        {
+            townStatus.gameObject.SetActive(false);
+            townStatus.text = "The town has not voted.";
+            
+            executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+            executionStatus.gameObject.SetActive(true);
+        }
+
+        private void MoonRise()
+        {
+            executionStatus.gameObject.SetActive(false);
+            executionStatus.text = $"_ was executed by the town.";
+            
+            mafiaStatus.gameObject.SetActive(true);
+            doctorStatus.gameObject.SetActive(true);
+        }
+        
         private void OnDestroy()
         {
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
-        }
-
-        public void OnForwardClicked()
-        {
-            GameSessionManager.Instance.EndNight();
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
         }
     }
 }

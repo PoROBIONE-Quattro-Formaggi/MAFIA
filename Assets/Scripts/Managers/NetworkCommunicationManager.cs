@@ -29,8 +29,11 @@ namespace Managers
         public event Action OnPlayerRoleAssigned;
         public event Action OnOneMafiaVoted;
         public event Action OnOneDoctorVoted;
+        public event Action OnOneResidentDayVoted;
         public event Action OnDayBegan;
+        public event Action OnEveningBegan;
         public event Action OnNightBegan;
+        public event Action OnGameEnded;
 
         private void Awake()
         {
@@ -68,7 +71,8 @@ namespace Managers
             PlayerData.Name = playerName;
             PlayerData.IsAlive = true;
             PlayerData.ClientID = clientId;
-            Debug.Log($"SEnding serverrpc with player name {playerName}");
+            GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
+            Debug.Log($"Sending ServerRPC with player name {playerName}");
             AddClientNameToListServerRpc(playerName);
         }
 
@@ -140,6 +144,7 @@ namespace Managers
         public void DayVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
             GameSessionManager.Instance.IDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
+            OnOneResidentDayVoted?.Invoke();
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -149,12 +154,13 @@ namespace Managers
             GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
             var keys = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
             var values = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
-            //TODO: send to all mafia clients always
+            var mafiaIDs = GameSessionManager.Instance.GetAlivePlayersIDs()
+                .Where(id => GameSessionManager.Instance.IDToRole[id] == Roles.Mafia).ToList();
             var clientRpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
                 {
-                    TargetClientIds = keys.ToList()
+                    TargetClientIds = mafiaIDs
                 }
             };
             OnOneMafiaVoted?.Invoke();
@@ -336,14 +342,32 @@ namespace Managers
         public void BeginDayForClientsClientRpc()
         {
             if (IsHost) return;
+            GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Day;
             OnDayBegan?.Invoke();
+        }
+
+        [ClientRpc]
+        public void BeginEveningForClientsClientRpc()
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Evening;
+            OnEveningBegan?.Invoke();
         }
 
         [ClientRpc]
         public void BeginNightForClientsClientRpc()
         {
             if (IsHost) return;
+            GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             OnNightBegan?.Invoke();
+        }
+        
+        [ClientRpc]
+        public void EndGameForClientsClientRpc(string winnerRole)
+        {
+            //if (IsHost) return;
+            GameSessionManager.Instance.WinnerRole = winnerRole;
+            OnGameEnded?.Invoke();
         }
     }
 }

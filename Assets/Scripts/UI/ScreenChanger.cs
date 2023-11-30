@@ -7,7 +7,8 @@ namespace UI
     {
         public static ScreenChanger Instance { get; private set; }
         public GameObject screensParent;
-
+        private string lastScreenName;
+    
         private void Awake()
         {
             Instance = this;
@@ -29,6 +30,11 @@ namespace UI
                 if (screenTransform.gameObject.name != screenName) continue;
                 screenTransform.gameObject.SetActive(true);
             }
+        }
+
+        public void ChangeToEndGameScreen()
+        {
+            ChangeTo(Screens.EndGameScreen);
         }
 
         public void ChangeToPlayerRoleScreen()
@@ -84,6 +90,21 @@ namespace UI
         public void ChangeToPlayerVoteScreen()
         {
             ChangeTo(Screens.PlayerVoteScreen);
+        }
+
+        public void ChangeToInstructionScreen()
+        {
+            
+            lastScreenName = screensParent.GetComponentInChildren<GameObject>(false).name;
+            ChangeTo(Screens.InstructionScreen);
+
+        }
+
+        public void ChangeToPreviousScreen() {
+            if (lastScreenName == ""){
+                ChangeTo(Screens.MainScreen);
+            }
+            ChangeTo(lastScreenName);
         }
     }
 }
