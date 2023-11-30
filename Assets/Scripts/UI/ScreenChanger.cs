@@ -18,6 +18,8 @@ namespace UI
         {
             foreach (Transform screenTransform in screensParent.transform)
             {
+                if (!screenTransform.gameObject.activeSelf) continue;
+                lastScreenName = screenTransform.gameObject.name;
                 screenTransform.gameObject.SetActive(false);
             }
         }
@@ -94,8 +96,6 @@ namespace UI
 
         public void ChangeToInstructionScreen()
         {
-            
-            lastScreenName = screensParent.GetComponentInChildren<GameObject>(false).name;
             ChangeTo(Screens.InstructionScreen);
 
         }

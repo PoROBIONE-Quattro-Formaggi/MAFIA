@@ -26,12 +26,6 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
         }
-        
-        private void EndGame()
-        {
-            Debug.Log("Change to end game called");
-            ScreenChanger.Instance.ChangeToEndGameScreen();
-        }
 
         private void OnOneMafiaVoted()
         {
@@ -79,6 +73,7 @@ namespace UI
             }
         }
 
+        // used at night
         private void ShowForwardButton()
         {
             forwardButton.SetActive(_isMafiaDoneVoting && _isDoctorsDoneVoting);
@@ -107,6 +102,7 @@ namespace UI
             }
         }
 
+        // TRANSITION FROM NIGHT TO DAY
         private void Sunrise()
         {
             mafiaStatus.gameObject.SetActive(false);
@@ -117,6 +113,7 @@ namespace UI
             townStatus.gameObject.SetActive(true);
         }
 
+        // TRANSITION FROM DAY TO EVENING
         private void Sunset()
         {
             townStatus.gameObject.SetActive(false);
@@ -126,6 +123,7 @@ namespace UI
             executionStatus.gameObject.SetActive(true);
         }
 
+        // TRANSITION FROM EVENING TO NIGHT
         private void MoonRise()
         {
             executionStatus.gameObject.SetActive(false);
@@ -133,6 +131,11 @@ namespace UI
             
             mafiaStatus.gameObject.SetActive(true);
             doctorStatus.gameObject.SetActive(true);
+        }
+        
+        private void EndGame()
+        {
+            ScreenChanger.Instance.ChangeToEndGameScreen();
         }
         
         private void OnDestroy()
