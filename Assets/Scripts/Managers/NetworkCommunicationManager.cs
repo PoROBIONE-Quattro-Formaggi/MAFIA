@@ -365,7 +365,7 @@ namespace Managers
         [ClientRpc]
         public void EndGameForClientsClientRpc(string winnerRole)
         {
-            if (IsHost) return;
+            //if (IsHost) return;
             GameSessionManager.Instance.WinnerRole = winnerRole;
             OnGameEnded?.Invoke();
         }

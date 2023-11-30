@@ -24,6 +24,13 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted += OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
+        }
+        
+        private void EndGame()
+        {
+            Debug.Log("Change to end game called");
+            ScreenChanger.Instance.ChangeToEndGameScreen();
         }
 
         private void OnOneMafiaVoted()
@@ -76,13 +83,6 @@ namespace UI
         {
             forwardButton.SetActive(_isMafiaDoneVoting && _isDoctorsDoneVoting);
         }
-        
-
-        private void OnDestroy()
-        {
-            NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
-            NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
-        }
 
         public void OnForwardClicked()
         {
@@ -133,6 +133,14 @@ namespace UI
             
             mafiaStatus.gameObject.SetActive(true);
             doctorStatus.gameObject.SetActive(true);
+        }
+        
+        private void OnDestroy()
+        {
+            NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
+            NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
         }
     }
 }
