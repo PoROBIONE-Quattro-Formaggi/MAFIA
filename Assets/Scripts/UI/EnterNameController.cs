@@ -1,3 +1,4 @@
+using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ namespace UI
 {
     public class EnterNameController : MonoBehaviour
     {
-        [Header("Input")] 
+        [Header("Input")]
         public TextMeshProUGUI enterNamePlaceholder;
         public TMP_InputField enterNameField;
 
@@ -18,7 +19,7 @@ namespace UI
         {
             MainMenuUIManager.Instance.AnimatePlaceholder(enterNamePlaceholder);
         }
-        
+
 
         public void OnNameFieldSelected()
         {
@@ -54,14 +55,22 @@ namespace UI
             confirmNameButton.SetActive(enterNameField.text != "");
 
             // Enter shortcut key implementation
-            if (!enterNameField.text.EndsWith("\n") || enterNameField.text.Length <= 2) return;
-            OnConfirmNameButtonClicked();
+            if (Validators.CheckIfEndsWithNewline(enterNameField.text))
+            {
+                OnConfirmNameButtonClicked();
+            }
         }
 
         public void OnConfirmNameButtonClicked()
         {
-            MainMenuUIManager.Instance.SetName(enterNameField.text.Trim());
-            ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
+            if (Validators.CheckIfNameCorrect(enterNameField.text)){
+                MainMenuUIManager.Instance.SetName(enterNameField.text.Trim());
+                ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
+            }
+            else
+            {
+                Toast.Show("Your name should be at least 2 characters long and no longer than 16");
+            }
         }
     }
 }
