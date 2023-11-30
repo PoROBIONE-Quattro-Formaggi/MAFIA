@@ -1,5 +1,6 @@
 using DataStorage;
 using Managers;
+using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -149,8 +150,16 @@ namespace UI
             }
             else
             {
-                information.text = "Create lobby, and";
-                hostButton.gameObject.SetActive(true);
+                if (Validators.CheckIfTownPopulationCorrect(populationInputField.text))
+                {
+                    if (!Validators.CheckIfPopulationInRange(int.Parse(populationInputField.text)))
+                        information.text= "Choose from values 5 - 99";
+                    else
+                    {
+                        information.text = "Create lobby, and";
+                        hostButton.gameObject.SetActive(true);
+                    }
+                }
             }
         }
 
@@ -221,10 +230,10 @@ namespace UI
 
         public void OnCreateLobbyClicked()
         {
-            var playersInt = 5;
-            if (Validators.CheckIfTownPopulationCorrect(populationInputField.text))
-                playersInt = Validators.CheckIfPopulationInRange(int.Parse(populationInputField.text));
-            LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), playersInt, _isPrivate, "");
+            var playersInt = 10;
+            playersInt = int.Parse(populationInputField.text);
+            LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), playersInt,
+                _isPrivate, "");
         }
 
 

@@ -9,7 +9,12 @@ namespace UI
         public static bool CheckIfNameCorrect(string fieldName)
         {
             var regex = new Regex("^[\\s]*$|^.{0,1}$|^.{17,}$");
-            return (regex.Matches(fieldName).Count > 0);
+            fieldName = fieldName.Trim();
+            if (regex.Matches(fieldName).Count > 0)
+            {
+                return false;
+            }
+            return true;
         }
 
         public static bool CheckIfEndsWithNewline(string fieldName)
@@ -33,15 +38,9 @@ namespace UI
             }
         }
 
-        public static int CheckIfPopulationInRange(int fieldNum)
+        public static bool CheckIfPopulationInRange(int fieldNum)
         {
-            fieldNum = fieldNum switch
-            {
-                < 5 => 5,
-                > 99 => 99,
-                _ => fieldNum
-            };
-            return fieldNum;
+            return !(fieldNum < 5 || fieldNum > 99);
         }
     }
 }
