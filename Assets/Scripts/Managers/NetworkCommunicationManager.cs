@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DataStorage;
+using Third_Party.Toast_UI.Scripts;
+using UI;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -49,6 +51,7 @@ namespace Managers
             NetworkManager.Singleton.OnServerStarted += OnHostStarted;
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
 
         private void OnHostStarted()
@@ -61,6 +64,11 @@ namespace Managers
             PlayerData.ClientID = OwnerClientId;
             PlayerData.Role = Roles.Narrator;
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
+        }
+
+        private static void OnHostStopped(bool obj)
+        {
+            Debug.Log("Server stopped");
         }
 
         private void OnClientConnected(ulong clientId)
@@ -76,10 +84,13 @@ namespace Managers
             AddClientNameToListServerRpc(playerName);
         }
 
-        private static void OnHostStopped(bool obj)
+        private void OnClientDisconnected(ulong clientId)
         {
-            Debug.Log("Server stopped");
+            if (IsHost) return;
+            Toast.Show("You were disconnected. Trying to reconnect.");
+            LobbyManager.Instance.IsCurrentlyInGame = false;
         }
+
 
         public static bool StartHost()
         {
@@ -361,13 +372,24 @@ namespace Managers
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             OnNightBegan?.Invoke();
         }
-        
+
         [ClientRpc]
         public void EndGameForClientsClientRpc(string winnerRole)
         {
-            //if (IsHost) return;
+            if (IsHost) return;
             GameSessionManager.Instance.WinnerRole = winnerRole;
             OnGameEnded?.Invoke();
+        }
+
+        [ClientRpc]
+        public void GoBackToLobbyClientRpc()
+        {
+            Debug.Log("GoBackToLobbyClientRpc called");
+            if (IsHost) return;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
+            NetworkManager.Singleton.DisconnectClient(PlayerData.ClientID);
+            SceneChanger.ChangeToMainSceneToLobbyPlayerScreen();
         }
     }
 }
