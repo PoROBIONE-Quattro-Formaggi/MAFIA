@@ -2,7 +2,10 @@ using System;
 using DataStorage;
 using Managers;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Serialization;
+using UnityEngine.UIElements;
 
 namespace UI
 {
@@ -17,7 +20,12 @@ namespace UI
         public GameObject deadPrompt;
         public RectTransform parentScreenRectTransform;
         public GameObject endGameScreen;
+        public GameObject prompt;
+        public GameObject comfirmInputButton;
+        public TextMeshProUGUI promptText;
+        public TMP_InputField input;
         private string _time;
+        private Animator _playerGameAnimator;
         
 
 
@@ -32,12 +40,15 @@ namespace UI
             NetworkCommunicationManager.Instance.OnEveningBegan += Sunset;
             NetworkCommunicationManager.Instance.OnNightBegan += MoonRise;
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
+
+            _playerGameAnimator = GetComponent<Animator>();
         }
 
         // ON ENABLE FUNCTIONS
         private void OnEnable()
         {
             _time = GameSessionManager.Instance.GetCurrentTimeOfDay();
+            if (!PlayerData.IsAlive) return;
             switch (_time)
             {
                 case TimeIsAManMadeSocialConstruct.Night:
@@ -56,20 +67,45 @@ namespace UI
         private void OnEnableNight()
         {
             SetInformationText("NIGHT");
-            if (goVoteButton.activeSelf) SetPlayerQuoteStringNight();
+            if (goVoteButton.activeSelf)
+            {
+                SetPlayerQuoteStringNight();
+                DisableInput();
+            }
+            else
+            {
+                EnableAlibiInput();
+            }
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableDay()
         {
             SetInformationText("DAY");
-            if (goVoteButton.activeSelf) SetPlayerQuoteStringDay();
+            if (goVoteButton.activeSelf)
+            {
+                SetPlayerQuoteStringDay();
+                DisableInput();
+            }
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableEvening()
         {
             SetInformationText("EVENING");
+        }
+
+        private void EnableAlibiInput()
+        {
+            promptText.text = "Enter alibi:";
+            prompt.SetActive(true);
+            input.gameObject.SetActive(true);
+        }
+
+        private void DisableInput()
+        {
+            prompt.SetActive(false);
+            input.gameObject.SetActive(false);
         }
         
         
@@ -81,16 +117,19 @@ namespace UI
         
         private void Sunrise()
         {
+            _playerGameAnimator.ResetTrigger("Sunset");
+            _playerGameAnimator.SetTrigger("Sunrise");
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
     
             if (!PlayerData.IsAlive)
             {
-                playerQuote.SetActive(false);
-                information.SetActive(false);
-                deadPrompt.SetActive(true);
+                OnPlayerDead();
             }
             else
             {
+                prompt.SetActive(false);
+                input.gameObject.SetActive(false);
+                
                 informationText.text = $"{lastKilledName} was killed last night";
             
                 goVoteButton.SetActive(true);
@@ -101,14 +140,20 @@ namespace UI
 
         private void Sunset()
         {
+            _playerGameAnimator.ResetTrigger("Sunrise");
+            _playerGameAnimator.SetTrigger("Sunset");
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
             
             if (!PlayerData.IsAlive)
             {
-                //TODO: get last words etc.
-                playerQuote.SetActive(false);
-                information.SetActive(false);
-                deadPrompt.SetActive(true);
+                if (PlayerData.Name == lastKilledName)
+                {
+                    EnableLastWords();
+                }
+                else
+                {
+                    OnPlayerDead();
+                }
             }
             else
             {
@@ -120,7 +165,7 @@ namespace UI
         {
             if (!PlayerData.IsAlive)
             {
-                
+                OnPlayerDead();
             }
             else
             {
@@ -133,6 +178,29 @@ namespace UI
         private void EndGame()
         {
             ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+        }
+
+        private void EnableLastWords()
+        {
+            promptText.text = "Any last words?";
+            input.gameObject.SetActive(true);
+            prompt.SetActive(true);
+            comfirmInputButton.SetActive(true);
+        }
+
+        private void OnPlayerDead()
+        {
+            playerQuote.SetActive(false);
+            information.SetActive(false);
+            DisableInput();
+            deadPrompt.SetActive(true);
+        }
+
+        public void OnConfirmInputButtonClicked()
+        {
+            playerQuoteText.text += ".";
+            prompt.SetActive(false);
+            input.gameObject.SetActive(false);
         }
         
         // HELPER FUNCTIONS
@@ -151,7 +219,7 @@ namespace UI
             playerQuoteString += PlayerData.Role switch
             {
                 // Assign question to information prompt
-                Roles.Mafia => "I vote for to kill _",
+                Roles.Mafia => "I vote to kill _",
                 Roles.Doctor => "I vote to save _",
                 Roles.Resident => "I think that _ is sus", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => playerQuoteString
@@ -176,6 +244,12 @@ namespace UI
                 _currentX -= 1 * animationSpeed;
             }
             informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
+        }
+
+        public void OnInputValueChanged()
+        {
+            playerQuoteText.text = $"[{PlayerData.Name}] " + input.text;
+            comfirmInputButton.SetActive(input.text.Length != 0);
         }
 
         private void OnDestroy()

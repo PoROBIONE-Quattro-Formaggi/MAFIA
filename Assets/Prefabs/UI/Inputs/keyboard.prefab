@@ -588,7 +588,6 @@ MonoBehaviour:
   defaultKeyboard: {fileID: 5454841337176810145}
   caps: 0
   heightOnScreen: 152
-  spacingRatio: 100
 --- !u!222 &1668923734399039357
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5791,6 +5790,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 8361136392160370908}
     m_Modifications:
+    - target: {fileID: 2521898396280775156, guid: ba0ab13031dc0454abb7bc26e9ab4917, type: 3}
+      propertyPath: m_MinWidth
+      value: 56
+      objectReference: {fileID: 0}
     - target: {fileID: 8891550114214237741, guid: ba0ab13031dc0454abb7bc26e9ab4917, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
