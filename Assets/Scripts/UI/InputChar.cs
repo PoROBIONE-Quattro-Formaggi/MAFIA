@@ -11,6 +11,7 @@ namespace UI
         public void OnKeyPressed()
         {
             if (inputField.text.Length == inputField.characterLimit) return;
+            Debug.Log($"key pressed: {charText.text}");
             inputField.text += charText.text;
         }
     }

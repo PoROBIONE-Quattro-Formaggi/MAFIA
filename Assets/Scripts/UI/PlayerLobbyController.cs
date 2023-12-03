@@ -18,22 +18,12 @@ public class PlayerLobbyController : MonoBehaviour
 
     private void Update() {
         ResizePrompt();
-        Debug.Log("Rezised");
         
     }
 
     private void ResizePrompt()
     {
-         Debug.Log($"{informationText.preferredWidth} + {screenRect.sizeDelta.x}");
-        if (informationText.preferredWidth < screenRect.sizeDelta.x)
-        {
-            informationRect.sizeDelta = new Vector2(informationText.preferredWidth, informationRect.sizeDelta.y);
-        }
-        else
-        {
-            Debug.Log($"SECOND CASE{informationText.preferredWidth} + {screenRect.sizeDelta.x}");
-            informationRect.sizeDelta = new Vector2(screenRect.sizeDelta.x, informationRect.sizeDelta.y);
-        }
+        informationRect.sizeDelta = informationText.preferredWidth < screenRect.sizeDelta.x ? new Vector2(informationText.preferredWidth, informationRect.sizeDelta.y) : new Vector2(screenRect.sizeDelta.x, informationRect.sizeDelta.y);
     }
     
 }

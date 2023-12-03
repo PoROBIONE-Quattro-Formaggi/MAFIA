@@ -132,11 +132,12 @@ namespace UI
                     SetPlayerQuoteStringDay(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
                     break;
             }
+            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void SetPlayerQuoteStringDay(string voteOptionName)
         {
-            var playerQuoteString = $"[{PlayerData.Name}] I vote for {voteOptionName} to be executed.";
+            var playerQuoteString = $"[{PlayerData.Name}] I vote for {voteOptionName} to be executed";
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
@@ -183,7 +184,10 @@ namespace UI
             
             voteOptionsParent.SetActive(false);
             goVoteButton.SetActive(false);
-            playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
+            var quote = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote) + ".";
+            PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, quote);
+            PlayerPrefs.Save();
+            playerQuoteText.text = quote;
         }
     }
 }
