@@ -26,6 +26,8 @@ namespace Managers
             }
         }
 
+        public bool IsCurrentlyInGame { get; set; }
+
         private static LobbyManager _instance;
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
@@ -78,6 +80,12 @@ namespace Managers
                 }
                 catch (LobbyServiceException e)
                 {
+                    if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+                    {
+                        _joinedLobby = null;
+                        _hostLobby = null;
+                    }
+
                     Debug.LogError(e);
                     _polling = false;
                 }
@@ -96,7 +104,14 @@ namespace Managers
                 }
                 catch (LobbyServiceException e)
                 {
+                    if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+                    {
+                        _joinedLobby = null;
+                        _hostLobby = null;
+                    }
+
                     Debug.LogError(e);
+                    _sendingHeartbeat = false;
                 }
             }
         }
@@ -116,20 +131,27 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
+                if (e.Reason == LobbyExceptionReason.LobbyNotFound)
+                {
+                    _joinedLobby = null;
+                }
+
                 Debug.LogError(e);
                 return;
             }
 
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
             if (relayCode == "0") return;
+            if (IsCurrentlyInGame) return;
+            IsCurrentlyInGame = true;
             var playersNumber = _joinedLobby.Players.Count;
-            LeaveLobby();
             SetPlayerPrefsForGameSession(relayCode, 0, playersNumber, _playerName);
             SceneChanger.ChangeToGameScene();
         }
 
         public bool IsLobbyHost()
         {
+            if (_joinedLobby == null) return false;
             return AuthenticationService.Instance.PlayerId == _joinedLobby.HostId;
         }
 
@@ -140,6 +162,8 @@ namespace Managers
                 if (IsLobbyHost() && _hostLobby == null)
                 {
                     _hostLobby = _joinedLobby;
+                    Toast.Show("You are new lobby host");
+                    //TODO change to host UI here
                 }
             }
 
@@ -189,6 +213,7 @@ namespace Managers
             var createLobbyOptions = new CreateLobbyOptions
             {
                 IsPrivate = isPrivate,
+                IsLocked = false,
                 Player = player,
                 Data = data
             };
@@ -199,6 +224,7 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                Toast.Show("Cannot create lobby. Try again.");
                 return;
             }
 
@@ -212,7 +238,8 @@ namespace Managers
         {
             var filters = new List<QueryFilter>
             {
-                new(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT)
+                new(QueryFilter.FieldOptions.AvailableSlots, "0", QueryFilter.OpOptions.GT),
+                new(QueryFilter.FieldOptions.IsLocked, false.ToString(), QueryFilter.OpOptions.EQ)
             };
             var order = new List<QueryOrder>
             {
@@ -232,6 +259,7 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                Toast.Show("Cannot get lobbies. Try again.");
                 return new List<Lobby>();
             }
 
@@ -304,6 +332,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
+                Toast.Show("Cannot join to lobby. Try again.");
                 Debug.LogError(e);
             }
         }
@@ -317,6 +346,7 @@ namespace Managers
             }
             catch (LobbyServiceException e)
             {
+                Toast.Show("Cannot join to lobby. Try again.");
                 Debug.LogError(e);
             }
         }
@@ -405,7 +435,8 @@ namespace Managers
             };
             var updateLobbyOption = new UpdateLobbyOptions
             {
-                Data = data
+                Data = data,
+                IsLocked = true
             };
             try
             {
@@ -414,10 +445,43 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                return;
             }
 
-            LeaveLobby();
             SceneChanger.ChangeToGameScene();
+        }
+
+        public async Task<bool> EndGame()
+        {
+            if (_joinedLobby == null) return false;
+            if (!IsLobbyHost()) return false;
+            SetPlayerPrefsForGameSession("0", 1, _hostLobby.Players.Count - 1, Roles.Narrator);
+            var data = new Dictionary<string, DataObject>
+            {
+                {
+                    PpKeys.KeyStartGame,
+                    new DataObject(
+                        DataObject.VisibilityOptions.Member,
+                        "0"
+                    )
+                }
+            };
+            var updateLobbyOption = new UpdateLobbyOptions
+            {
+                Data = data,
+                IsLocked = false
+            };
+            try
+            {
+                await Lobbies.Instance.UpdateLobbyAsync(_joinedLobby.Id, updateLobbyOption);
+            }
+            catch (LobbyServiceException e)
+            {
+                Debug.LogError(e);
+                return false;
+            }
+
+            return true;
         }
 
         private static void SetPlayerPrefsForGameSession(
