@@ -349,6 +349,7 @@ namespace Managers
         private void EndGame(string winnerRole)
         {
             Debug.Log($"THE END\n{winnerRole} wins");
+            WinnerRole = winnerRole;
             // TODO implement ENDGAME functionality
             OnHostEndGame?.Invoke();
             NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
@@ -582,6 +583,7 @@ namespace Managers
 
         public void SetLastWords(string lastWords)
         {
+            Debug.Log($"Sending server rpc with {lastWords}");
             NetworkCommunicationManager.Instance.SetLastWordsServerRpc(lastWords);
         }
 

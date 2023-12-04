@@ -21,12 +21,18 @@ namespace UI
         public RectTransform parentScreenRectTransform;
         public GameObject endGameScreen;
         public GameObject prompt;
-        public GameObject comfirmInputButton;
+        public GameObject confirmInputButton;
         public TextMeshProUGUI promptText;
         public TMP_InputField input;
         public KeyboardController keyboard;
+        public GameObject lastWords;
+        public TextMeshProUGUI lastWordsText;
+        public float scrollSpeed;
+        public Animator playerGameAnimator;
+        public RectTransform lastWordsRectTransform;
+        
         private string _time;
-        private Animator _playerGameAnimator;
+        
         
 
 
@@ -42,7 +48,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnNightBegan += MoonRise;
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
 
-            _playerGameAnimator = GetComponent<Animator>();
+            lastWordsRectTransform = lastWords.GetComponent<RectTransform>();
             
             OnEnableNight();
         }
@@ -70,7 +76,7 @@ namespace UI
         private void OnEnableNight()
         {
             SetInformationText("NIGHT");
-            _playerGameAnimator.Play("night");
+            playerGameAnimator.Play("night");
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringNight();
@@ -86,7 +92,7 @@ namespace UI
         private void OnEnableDay()
         {
             SetInformationText("DAY");
-            _playerGameAnimator.Play("day");
+            playerGameAnimator.Play("day");
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringDay();
@@ -103,6 +109,7 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Enter alibi:";
+            input.text = DefaultAlibis.GetRandomAlibi();
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
         }
@@ -111,6 +118,7 @@ namespace UI
         {
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
+            input.text = "";
         }
         
         
@@ -122,8 +130,11 @@ namespace UI
         
         private void Sunrise()
         {
-            _playerGameAnimator.ResetTrigger("Sunset");
-            _playerGameAnimator.SetTrigger("Sunrise");
+            playerGameAnimator.ResetTrigger("Sunset");
+            playerGameAnimator.SetTrigger("Sunrise");
+            //OnConfirmInputButtonClicked();
+            confirmInputButton.SetActive(false);
+            
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
     
             if (!PlayerData.IsAlive)
@@ -166,8 +177,27 @@ namespace UI
 
         private void MoonRise()
         {
-            _playerGameAnimator.ResetTrigger("Sunrise");
-            _playerGameAnimator.SetTrigger("Sunset");
+            //OnConfirmInputButtonClicked();
+            confirmInputButton.SetActive(false);
+            
+            // ANIMATE LAST WORDS
+            lastWordsText.text = GameSessionManager.Instance.GetLastWords();
+            Debug.Log($"Last words returned: {lastWordsText.text}");
+            Debug.Log(lastWordsRectTransform.anchoredPosition.y);
+            Debug.Log(parentScreenRectTransform.sizeDelta.y);
+            
+            while (lastWordsRectTransform.anchoredPosition.y <
+                   lastWordsRectTransform.sizeDelta.y + parentScreenRectTransform.sizeDelta.y)
+            {
+                lastWordsRectTransform.anchoredPosition = new Vector2(lastWordsRectTransform.anchoredPosition.x,
+                    lastWordsRectTransform.anchoredPosition.y + 1 * scrollSpeed);
+            }
+
+            lastWordsRectTransform.anchoredPosition = new Vector2(lastWordsRectTransform.anchoredPosition.x, 0);
+            lastWordsText.text = "";
+            
+            playerGameAnimator.ResetTrigger("Sunrise");
+            playerGameAnimator.SetTrigger("Sunset");
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -188,9 +218,10 @@ namespace UI
         private void EnableLastWords()
         {
             promptText.text = "Any last words?";
+            input.text = ""; //TODO: generate last words?
             input.gameObject.SetActive(true);
             prompt.SetActive(true);
-            comfirmInputButton.SetActive(true);
+            confirmInputButton.SetActive(true);
         }
 
         private void OnPlayerDead()
@@ -215,13 +246,15 @@ namespace UI
         {
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
-            switch (_time)
+            Debug.Log($"Attempt to send to server {playerQuoteText.text}");
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
-                    GameSessionManager.Instance.SetAlibi(PlayerPrefs.GetString(PpKeys.KeyPlayerQuote));
+                    GameSessionManager.Instance.SetAlibi(input.text);
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetLastWords(PlayerPrefs.GetString(PpKeys.KeyPlayerQuote));
+                    Debug.Log($"Saved last words: {playerQuoteText.text}");
+                    GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
                     break;
             }
         }
@@ -275,8 +308,7 @@ namespace UI
         {
             playerQuoteText.text = $"[{PlayerData.Name}] " + input.text;
             if (input.text.Length == 0) return;
-            comfirmInputButton.SetActive(true);
-            SendInputToServer();
+            confirmInputButton.SetActive(true);
         }
 
         private void OnDestroy()

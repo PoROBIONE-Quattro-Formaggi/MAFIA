@@ -14,6 +14,7 @@ namespace UI
         public TextMeshProUGUI executionStatus;
         public TextMeshProUGUI lastDeath;
         public GameObject forwardButton;
+        public GameObject endGameScreen;
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
@@ -135,8 +136,7 @@ namespace UI
         
         private void EndGame()
         {
-            Debug.Log("Endgame for host called");
-            ScreenChanger.Instance.ChangeToEndGameScreen();
+            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
         
         private void OnDestroy()

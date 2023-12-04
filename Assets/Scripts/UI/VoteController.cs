@@ -17,18 +17,18 @@ namespace UI
         // Night vote
         public GameObject voteButton;
         public GameObject voteOptionsParent;
-        public GameObject voteOptionPrefab;
+        public GameObject voteOptionNightPrefab;
+        public GameObject voteOptionDayPrefab;
         public GameObject goVoteButton;
         public TextMeshProUGUI playerQuoteText;
+        public Animator voteAnimator;
 
         private ulong _currentChosenID;
 
-        private Animator _voteAnimator;
         //private string _time;
 
         private void Start()
         {
-            _voteAnimator = GetComponent<Animator>();
             OnEnableNight();
         }
 
@@ -51,7 +51,7 @@ namespace UI
         private void OnEnableNight()
         {
             GenerateVotingOptionsNight();
-            _voteAnimator.Play("night");
+            voteAnimator.Play("night");
             votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -65,7 +65,7 @@ namespace UI
 
         private void OnEnableDay()
         {
-            _voteAnimator.Play("day");
+            voteAnimator.Play("day");
             GenerateVotingOptionsDay();
             votePromptText.text = "Who to execute?";
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
@@ -78,6 +78,8 @@ namespace UI
 
         private void GenerateVotingOptionsNight()
         {
+            ClearVotingOptions();
+            
             List<ulong> alivePlayersIDs;
             switch (PlayerData.Role)
             {
@@ -92,23 +94,12 @@ namespace UI
                     alivePlayersIDs = new List<ulong>();
                     break;
             }
-            GenerateVotingOptions(alivePlayersIDs);
-        }
-        
-        private void GenerateVotingOptionsDay()
-        {
-            var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
-            GenerateVotingOptions(alivePlayersIDs);
-        }
-
-        private void GenerateVotingOptions(List<ulong> alivePlayersIDs)
-        {
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
-                var voteOption = Instantiate(voteOptionPrefab, voteOptionsParent.transform);
+                var voteOption = Instantiate(voteOptionNightPrefab, voteOptionsParent.transform);
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"{idToPlayerName[playerID]} - {playerID.ToString()}";
+                    $"{idToPlayerName[playerID]}";
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
@@ -116,8 +107,36 @@ namespace UI
             }
             voteOptionsParent.SetActive(true);
         }
+        
+        private void GenerateVotingOptionsDay()
+        {
+            ClearVotingOptions();
+            
+            var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
+            var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
+            var idToAlibis = GameSessionManager.Instance.GetAlibis();
+            
+            Debug.Log("BEFORE FOREACH LOOP IN GENERATE OPTIONS DAY");
+            foreach (var playerID in alivePlayersIDs)
+            {
+                var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
+                voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
+                    $"[{idToPlayerName[playerID]}] {idToAlibis[playerID]}";
+                voteOption.SetActive(true);
+                var toggle = voteOption.GetComponent<Toggle>();
+                toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
+                toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
+            }
+            Debug.Log("AFTER FOREACH LOOP IN GENERATE OPTIONS DAY");
+            voteOptionsParent.SetActive(true);
+        }
 
         private void OnDisable()
+        {
+            ClearVotingOptions();
+        }
+
+        private void ClearVotingOptions()
         {
             // CLEAR LOBBIES LIST BEFORE REFRESH
             var buttonsDisplayedNo = voteOptionsParent.transform.childCount;

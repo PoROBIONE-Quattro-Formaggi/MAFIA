@@ -196,7 +196,9 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void SetLastWordsServerRpc(string lastWords)
         {
+            Debug.Log("Received last words RPC");
             GameSessionManager.Instance.LastWords = lastWords;
+            Debug.Log("Sending last words to all clients RPC");
             SendLastWordsClientRpc(lastWords);
         }
 
@@ -281,6 +283,7 @@ namespace Managers
         private void SendLastWordsClientRpc(string lastWords)
         {
             if (IsHost) return;
+            Debug.Log($"Received RPC with last words {lastWords}");
             GameSessionManager.Instance.LastWords = lastWords;
         }
 
