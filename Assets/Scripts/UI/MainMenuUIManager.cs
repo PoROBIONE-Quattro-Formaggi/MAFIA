@@ -117,7 +117,6 @@ namespace UI
         
         public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
         {
-            Debug.Log("Animate called");
             placeholderText.text = placeholderText.text.Length switch
             {
                 0 => ".",

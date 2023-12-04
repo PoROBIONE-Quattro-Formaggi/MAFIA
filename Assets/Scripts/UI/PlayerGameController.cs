@@ -67,6 +67,7 @@ namespace UI
         private void OnEnableNight()
         {
             SetInformationText("NIGHT");
+            _playerGameAnimator.Play("night");
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringNight();
@@ -82,6 +83,7 @@ namespace UI
         private void OnEnableDay()
         {
             SetInformationText("DAY");
+            _playerGameAnimator.Play("day");
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringDay();
@@ -192,6 +194,7 @@ namespace UI
         {
             playerQuote.SetActive(false);
             information.SetActive(false);
+            goVoteButton.SetActive(false);
             DisableInput();
             deadPrompt.SetActive(true);
         }

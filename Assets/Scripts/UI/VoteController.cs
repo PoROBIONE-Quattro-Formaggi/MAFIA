@@ -22,7 +22,14 @@ namespace UI
         public TextMeshProUGUI playerQuoteText;
 
         private ulong _currentChosenID;
+
+        private Animator _voteAnimator;
         //private string _time;
+
+        private void Start()
+        {
+            _voteAnimator = GetComponent<Animator>();
+        }
 
         private void OnEnable()
         {
@@ -43,6 +50,7 @@ namespace UI
         private void OnEnableNight()
         {
             GenerateVotingOptionsNight();
+            _voteAnimator.Play("night");
             votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -56,6 +64,7 @@ namespace UI
 
         private void OnEnableDay()
         {
+            _voteAnimator.Play("day");
             GenerateVotingOptionsDay();
             votePromptText.text = "Who to execute?";
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
