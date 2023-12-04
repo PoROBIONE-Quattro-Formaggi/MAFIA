@@ -24,6 +24,7 @@ namespace UI
         public GameObject comfirmInputButton;
         public TextMeshProUGUI promptText;
         public TMP_InputField input;
+        public KeyboardController keyboard;
         private string _time;
         private Animator _playerGameAnimator;
         
@@ -204,12 +205,14 @@ namespace UI
             playerQuoteText.text += ".";
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
+            keyboard.HideKeyboard();
         }
         
         // HELPER FUNCTIONS
         private void SetPlayerQuoteStringDay()
         {
             var playerQuoteString = $"[{PlayerData.Name}] I vote for _ to be executed";
+            playerQuoteText.text = playerQuoteString;
             
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
@@ -218,6 +221,7 @@ namespace UI
         private void SetPlayerQuoteStringNight()
         {
             var playerQuoteString = $"[{PlayerData.Name}] ";
+            playerQuoteText.text = playerQuoteString;
         
             playerQuoteString += PlayerData.Role switch
             {
