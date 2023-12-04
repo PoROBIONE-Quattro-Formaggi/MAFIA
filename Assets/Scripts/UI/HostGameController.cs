@@ -24,7 +24,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted += OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
-            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
+            GameSessionManager.Instance.OnHostEndGame += EndGame;
         }
 
         private void OnOneMafiaVoted()
@@ -135,6 +135,7 @@ namespace UI
         
         private void EndGame()
         {
+            Debug.Log("Endgame for host called");
             ScreenChanger.Instance.ChangeToEndGameScreen();
         }
         
@@ -143,7 +144,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
-            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
+            GameSessionManager.Instance.OnHostEndGame -= EndGame;
         }
     }
 }

@@ -54,6 +54,12 @@ namespace Managers
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
 
+        public override void OnDestroy()
+        {
+            gameObject.GetComponent<NetworkObject>().Despawn();
+            base.OnDestroy();
+        }
+        
         private void OnHostStarted()
         {
             if (!IsHost) return;
@@ -84,7 +90,7 @@ namespace Managers
             AddClientNameToListServerRpc(playerName);
         }
 
-        private void OnClientDisconnected(ulong clientId)
+        private void  OnClientDisconnected(ulong clientId)
         {
             if (IsHost) return;
             Toast.Show("You were disconnected. Trying to reconnect.");
@@ -388,7 +394,7 @@ namespace Managers
             if (IsHost) return;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             LobbyManager.Instance.IsCurrentlyInGame = false;
-            NetworkManager.Singleton.DisconnectClient(PlayerData.ClientID);
+            NetworkManager.Singleton.Shutdown();
             SceneChanger.ChangeToMainSceneToLobbyPlayerScreen();
         }
     }

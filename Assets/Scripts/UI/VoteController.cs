@@ -29,6 +29,7 @@ namespace UI
         private void Start()
         {
             _voteAnimator = GetComponent<Animator>();
+            OnEnableNight();
         }
 
         private void OnEnable()

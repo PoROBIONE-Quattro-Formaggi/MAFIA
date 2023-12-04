@@ -50,6 +50,7 @@ namespace Managers
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
         public string WinnerRole { get; set; } = "";
         public event Action OnPlayersAssignedToRoles;
+        public event Action OnHostEndGame;
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // PRIVATE FIELDS ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -349,6 +350,7 @@ namespace Managers
         {
             Debug.Log($"THE END\n{winnerRole} wins");
             // TODO implement ENDGAME functionality
+            OnHostEndGame?.Invoke();
             NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }
 

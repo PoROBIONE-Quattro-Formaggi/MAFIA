@@ -43,6 +43,8 @@ namespace UI
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
 
             _playerGameAnimator = GetComponent<Animator>();
+            
+            OnEnableNight();
         }
 
         // ON ENABLE FUNCTIONS
