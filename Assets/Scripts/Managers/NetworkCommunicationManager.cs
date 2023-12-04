@@ -53,12 +53,6 @@ namespace Managers
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
-
-        public override void OnDestroy()
-        {
-            gameObject.GetComponent<NetworkObject>().Despawn();
-            base.OnDestroy();
-        }
         
         private void OnHostStarted()
         {
@@ -395,7 +389,9 @@ namespace Managers
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             LobbyManager.Instance.IsCurrentlyInGame = false;
             NetworkManager.Singleton.Shutdown();
-            SceneChanger.ChangeToMainSceneToLobbyPlayerScreen();
+            LobbyManager.Instance.LeaveLobby();
+            SceneChanger.ChangeToMainScene();
+            // SceneChanger.ChangeToMainSceneToLobbyPlayerScreen(); TODO back to lobby functionality maybe later
         }
     }
 }

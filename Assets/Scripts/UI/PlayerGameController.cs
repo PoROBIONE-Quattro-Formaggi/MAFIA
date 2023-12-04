@@ -208,6 +208,22 @@ namespace UI
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
             keyboard.HideKeyboard();
+            SendInputToServer();
+        }
+
+        private void SendInputToServer()
+        {
+            PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
+            PlayerPrefs.Save();
+            switch (_time)
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    GameSessionManager.Instance.SetAlibi(PlayerPrefs.GetString(PpKeys.KeyPlayerQuote));
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    GameSessionManager.Instance.SetLastWords(PlayerPrefs.GetString(PpKeys.KeyPlayerQuote));
+                    break;
+            }
         }
         
         // HELPER FUNCTIONS
@@ -258,7 +274,9 @@ namespace UI
         public void OnInputValueChanged()
         {
             playerQuoteText.text = $"[{PlayerData.Name}] " + input.text;
-            comfirmInputButton.SetActive(input.text.Length != 0);
+            if (input.text.Length == 0) return;
+            comfirmInputButton.SetActive(true);
+            SendInputToServer();
         }
 
         private void OnDestroy()
