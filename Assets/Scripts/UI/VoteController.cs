@@ -147,6 +147,7 @@ namespace UI
         private void SetPlayerQuoteStringDay(string voteOptionName)
         {
             var playerQuoteString = $"[{PlayerData.Name}] I vote for {voteOptionName} to be executed";
+            playerQuoteText.text = playerQuoteString;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
@@ -164,6 +165,7 @@ namespace UI
                     $"I think that {voteOptionName} is sus", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => playerQuoteString
             };
+            playerQuoteText.text = playerQuoteString;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
@@ -194,9 +196,9 @@ namespace UI
             voteOptionsParent.SetActive(false);
             goVoteButton.SetActive(false);
             var quote = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote) + ".";
+            playerQuoteText.text = quote;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, quote);
             PlayerPrefs.Save();
-            playerQuoteText.text = quote;
         }
     }
 }

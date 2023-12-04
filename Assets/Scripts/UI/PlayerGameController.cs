@@ -143,8 +143,6 @@ namespace UI
 
         private void Sunset()
         {
-            _playerGameAnimator.ResetTrigger("Sunrise");
-            _playerGameAnimator.SetTrigger("Sunset");
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
             
             if (!PlayerData.IsAlive)
@@ -166,6 +164,8 @@ namespace UI
 
         private void MoonRise()
         {
+            _playerGameAnimator.ResetTrigger("Sunrise");
+            _playerGameAnimator.SetTrigger("Sunset");
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -221,7 +221,6 @@ namespace UI
         private void SetPlayerQuoteStringNight()
         {
             var playerQuoteString = $"[{PlayerData.Name}] ";
-            playerQuoteText.text = playerQuoteString;
         
             playerQuoteString += PlayerData.Role switch
             {
@@ -231,6 +230,7 @@ namespace UI
                 Roles.Resident => "I think that _ is sus", // TODO we should display here the 'funny questions' polls I think (?)
                 _ => playerQuoteString
             };
+            playerQuoteText.text = playerQuoteString;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
