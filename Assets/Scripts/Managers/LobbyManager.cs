@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
+using UI;
 using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
@@ -86,7 +87,11 @@ namespace Managers
                         _hostLobby = null;
                     }
 
-                    Debug.LogError(e);
+                    if (e.Reason != LobbyExceptionReason.RateLimited)
+                    {
+                        Debug.LogError(e);
+                    }
+                    
                     _polling = false;
                 }
             }
@@ -110,7 +115,11 @@ namespace Managers
                         _hostLobby = null;
                     }
 
-                    Debug.LogError(e);
+                    if (e.Reason != LobbyExceptionReason.RateLimited)
+                    {
+                        Debug.LogError(e);
+                    }
+                    
                     _sendingHeartbeat = false;
                 }
             }
@@ -136,7 +145,10 @@ namespace Managers
                     _joinedLobby = null;
                 }
 
-                Debug.LogError(e);
+                if (e.Reason != LobbyExceptionReason.RateLimited)
+                {
+                    Debug.LogError(e);
+                }
                 return;
             }
 
@@ -361,7 +373,19 @@ namespace Managers
             return _joinedLobby.Players;
         }
 
-        public async void LeaveLobby()
+        public void LeaveLobby()
+        {
+            if (GetPlayersListInLobby().Count <= 1)
+            {
+                HandleDeleteLobby();
+            }
+            else
+            {
+                HandleLeaveLobby();
+            }
+        }
+
+        private async void HandleLeaveLobby()
         {
             try
             {
@@ -378,7 +402,7 @@ namespace Managers
             }
         }
 
-        public async void DeleteLobby()
+        private async void HandleDeleteLobby()
         {
             if (!IsLobbyHost()) return;
             try
@@ -390,6 +414,8 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
+                _hostLobby = null;
+                _joinedLobby = null;
             }
         }
 

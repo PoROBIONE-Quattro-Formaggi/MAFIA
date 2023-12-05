@@ -199,7 +199,7 @@ namespace UI
         public void OnTownNameInputDeselected()
         {
             CancelInvoke(nameof(AnimateTownNamePlaceholder));
-            townNameInputPlaceholder.text = ". . .";
+            townNameInputPlaceholder.text = ". . . . . . . .";
         }
 
         public void OnPopulationInputDeselected()

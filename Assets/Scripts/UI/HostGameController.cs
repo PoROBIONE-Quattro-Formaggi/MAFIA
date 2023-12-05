@@ -14,6 +14,7 @@ namespace UI
         public TextMeshProUGUI executionStatus;
         public TextMeshProUGUI lastDeath;
         public GameObject forwardButton;
+        public GameObject endGameScreen;
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
@@ -24,7 +25,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted += OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
-            NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
+            GameSessionManager.Instance.OnHostEndGame += EndGame;
         }
 
         private void OnOneMafiaVoted()
@@ -135,7 +136,7 @@ namespace UI
         
         private void EndGame()
         {
-            ScreenChanger.Instance.ChangeToEndGameScreen();
+            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
         
         private void OnDestroy()
@@ -143,7 +144,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
-            NetworkCommunicationManager.Instance.OnGameEnded -= EndGame;
+            GameSessionManager.Instance.OnHostEndGame -= EndGame;
         }
     }
 }

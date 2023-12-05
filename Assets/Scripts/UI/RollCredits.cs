@@ -24,7 +24,6 @@ namespace UI
         private float _currentY;
         private RectTransform _rectTransform;
         private RectTransform _screenRectTransform;
-        private RectTransform _rectTransform2;
 
         private List<string> _currentNames;
 

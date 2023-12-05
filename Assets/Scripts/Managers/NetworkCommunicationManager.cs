@@ -53,7 +53,7 @@ namespace Managers
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
-
+        
         private void OnHostStarted()
         {
             if (!IsHost) return;
@@ -84,7 +84,7 @@ namespace Managers
             AddClientNameToListServerRpc(playerName);
         }
 
-        private void OnClientDisconnected(ulong clientId)
+        private void  OnClientDisconnected(ulong clientId)
         {
             if (IsHost) return;
             Toast.Show("You were disconnected. Trying to reconnect.");
@@ -196,7 +196,9 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void SetLastWordsServerRpc(string lastWords)
         {
+            Debug.Log("Received last words RPC");
             GameSessionManager.Instance.LastWords = lastWords;
+            Debug.Log("Sending last words to all clients RPC");
             SendLastWordsClientRpc(lastWords);
         }
 
@@ -281,6 +283,7 @@ namespace Managers
         private void SendLastWordsClientRpc(string lastWords)
         {
             if (IsHost) return;
+            Debug.Log($"Received RPC with last words {lastWords}");
             GameSessionManager.Instance.LastWords = lastWords;
         }
 
@@ -388,8 +391,10 @@ namespace Managers
             if (IsHost) return;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             LobbyManager.Instance.IsCurrentlyInGame = false;
-            NetworkManager.Singleton.DisconnectClient(PlayerData.ClientID);
-            SceneChanger.ChangeToMainSceneToLobbyPlayerScreen();
+            NetworkManager.Singleton.Shutdown();
+            LobbyManager.Instance.LeaveLobby();
+            SceneChanger.ChangeToMainScene();
+            // SceneChanger.ChangeToMainSceneToLobbyPlayerScreen(); TODO back to lobby functionality maybe later
         }
     }
 }

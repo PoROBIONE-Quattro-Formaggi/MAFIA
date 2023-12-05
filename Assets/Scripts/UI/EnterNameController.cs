@@ -32,7 +32,7 @@ namespace UI
         public void OnNameFieldDeselected()
         {
             CancelInvoke(nameof(AnimateEnterNamePlaceholder));
-            enterNamePlaceholder.text = ". . .";
+            enterNamePlaceholder.text = ". . . . . . . . . . . . . . . . . . . . . . . . . . .";
             enterNameField.text = enterNameField.text.Trim();
         }
 

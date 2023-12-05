@@ -17,6 +17,11 @@ namespace UI
 
         private int _maxPlayers;
 
+        public void StartGame()
+        {
+            LobbyManager.Instance.StartGame();
+        }
+
         public void CopyCode()
         {
             CopyToClipboard(LobbyManager.Instance.GetLobbyCode());

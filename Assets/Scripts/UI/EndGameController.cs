@@ -1,6 +1,7 @@
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -30,7 +31,10 @@ namespace UI
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
             NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
-            SceneChanger.ChangeToMainSceneToLobbyHostScreen();
+            LobbyManager.Instance.LeaveLobby();
+            SceneChanger.ChangeToMainScene();
+            // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
+            NetworkManager.Singleton.Shutdown();
         }
     }
 }

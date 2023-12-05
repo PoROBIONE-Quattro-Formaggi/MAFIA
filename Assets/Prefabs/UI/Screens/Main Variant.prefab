@@ -1206,7 +1206,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7195981568041134710, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 960
+      value: 856.53625
       objectReference: {fileID: 0}
     - target: {fileID: 7195981568041134710, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -1528,6 +1528,9 @@ PrefabInstance:
     - {fileID: 2185323475552416398, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
     - {fileID: 8880328732412695499, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
     - {fileID: 4524765581312286798, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
+    - {fileID: 8057305812861421056, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
+    - {fileID: 3663977216603509809, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
+    - {fileID: 6499636030686550720, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1365602351583429054, guid: ff848c5ebe8e61e40b82c54dd098c479, type: 3}
       insertIndex: -1
@@ -1630,6 +1633,30 @@ PrefabInstance:
     - target: {fileID: 653495643157986437, guid: fee006f31d2832448baeffa68e90c063, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ChangeToInstructionScreen
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UI.ScreenChanger, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 3158844413065833261, guid: fee006f31d2832448baeffa68e90c063, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 8831280456630073374, guid: fee006f31d2832448baeffa68e90c063, type: 3}
       propertyPath: m_Name

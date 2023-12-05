@@ -29,8 +29,8 @@ namespace UI
             if (_instance == null)
             {
                 _instance = this;
-                transform.SetParent(null);
-                DontDestroyOnLoad(gameObject);
+                // transform.SetParent(null);
+                // DontDestroyOnLoad(gameObject);
             }
             else
             {
@@ -81,6 +81,7 @@ namespace UI
 
         public void LeaveLobby()
         {
+            LobbyManager.Instance.LeaveLobby();
             if (LobbyManager.Instance.IsLobbyHost())
             {
                 ScreenChanger.Instance.ChangeToCreateLobbyScreen();
@@ -88,15 +89,6 @@ namespace UI
             else
             {
                 ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
-            }
-
-            if (LobbyManager.Instance.GetPlayersListInLobby().Count == 1)
-            {
-                LobbyManager.Instance.DeleteLobby();
-            }
-            else
-            {
-                LobbyManager.Instance.LeaveLobby();
             }
         }
 
@@ -123,7 +115,7 @@ namespace UI
                 1 => ". .",
                 3 => ". . .",
                 5 => "",
-                _ => placeholderText.text
+                _ => "."
             };
         }
     }
