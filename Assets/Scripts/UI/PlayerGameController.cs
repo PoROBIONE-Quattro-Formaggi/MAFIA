@@ -286,7 +286,7 @@ namespace UI
         // HELPER FUNCTIONS
         private void SetPlayerQuoteStringDay()
         {
-            var playerQuoteString = $"[{PlayerData.Name}] I vote for _ to be executed";
+            var playerQuoteString = $"<b>[{PlayerData.Name}]</b> I vote for _ to be executed";
             playerQuoteText.text = playerQuoteString;
             
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
@@ -295,7 +295,7 @@ namespace UI
 
         private void SetPlayerQuoteStringNight()
         {
-            var playerQuoteString = $"[{PlayerData.Name}] ";
+            var playerQuoteString = $"<b>[{PlayerData.Name}]</b> ";
         
             playerQuoteString += PlayerData.Role switch
             {
@@ -312,7 +312,7 @@ namespace UI
 
         private void SetPlayerQuoteString(string quote)
         {
-            playerQuoteText.text = $"[{PlayerData.Name}] " + quote;
+            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + quote;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
         }
@@ -337,7 +337,7 @@ namespace UI
 
         public void OnInputValueChanged()
         {
-            playerQuoteText.text = $"[{PlayerData.Name}] " + input.text;
+            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             if (input.text.Length == 0) return;
             confirmInputButton.SetActive(true);
         }

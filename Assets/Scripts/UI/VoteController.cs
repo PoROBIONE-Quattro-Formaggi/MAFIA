@@ -99,7 +99,7 @@ namespace UI
             {
                 var voteOption = Instantiate(voteOptionNightPrefab, voteOptionsParent.transform);
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"{idToPlayerName[playerID]}";
+                    $"<b>[{idToPlayerName[playerID]}]</b>";
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
@@ -121,7 +121,7 @@ namespace UI
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"[{idToPlayerName[playerID]}] {idToAlibis[playerID]}";
+                    $"<b>[{idToPlayerName[playerID]}]</b> {idToAlibis[playerID]}";
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
