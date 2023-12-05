@@ -32,6 +32,8 @@ namespace UI
         public RectTransform lastWordsRectTransform;
         
         private string _time;
+        private bool _notYet;
+        private bool _rollLastWords;
         
         
 
@@ -109,7 +111,9 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Enter alibi:";
-            input.text = DefaultAlibis.GetRandomAlibi();
+            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
+            input.text = alibi;
+            SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
         }
@@ -125,6 +129,10 @@ namespace UI
         private void FixedUpdate()
         {
             RollInformation();
+            if (_rollLastWords)
+            {
+                RollLastWords();
+            }
         }
 
         
@@ -175,29 +183,47 @@ namespace UI
             }
         }
 
-        private void MoonRise()
+        private void RollLastWords()
         {
-            //OnConfirmInputButtonClicked();
-            confirmInputButton.SetActive(false);
-            
             // ANIMATE LAST WORDS
-            lastWordsText.text = GameSessionManager.Instance.GetLastWords();
-            Debug.Log($"Last words returned: {lastWordsText.text}");
-            Debug.Log(lastWordsRectTransform.anchoredPosition.y);
-            Debug.Log(parentScreenRectTransform.sizeDelta.y);
-            
-            while (lastWordsRectTransform.anchoredPosition.y <
-                   lastWordsRectTransform.sizeDelta.y + parentScreenRectTransform.sizeDelta.y)
+            if (lastWordsRectTransform.anchoredPosition.y <
+                lastWordsRectTransform.sizeDelta.y + parentScreenRectTransform.sizeDelta.y)
             {
                 lastWordsRectTransform.anchoredPosition = new Vector2(lastWordsRectTransform.anchoredPosition.x,
                     lastWordsRectTransform.anchoredPosition.y + 1 * scrollSpeed);
             }
+            else
+            {
+                lastWordsRectTransform.anchoredPosition = new Vector2(lastWordsRectTransform.anchoredPosition.x, 0);
+                lastWordsText.text = "";
+                _notYet = false;
+                _rollLastWords = false;
+            }
+        }
 
-            lastWordsRectTransform.anchoredPosition = new Vector2(lastWordsRectTransform.anchoredPosition.x, 0);
-            lastWordsText.text = "";
+        private void MoonRise()
+        {
+            // HIDE INPUT
+            //OnConfirmInputButtonClicked();
+            confirmInputButton.SetActive(false);
+            
+            // ROLL LAST WORDS
+            lastWordsText.text = GameSessionManager.Instance.GetLastWords();
+            _notYet = true;
+            _rollLastWords = true;
+            playerQuote.SetActive(false);
+            
+            InvokeRepeating(nameof(WaxingCrescentMoon), 0f,0.5f);
+        }
+
+        private void WaxingCrescentMoon()
+        {
+            if (_notYet) return;
+            CancelInvoke(nameof(WaxingCrescentMoon));
             
             playerGameAnimator.ResetTrigger("Sunrise");
             playerGameAnimator.SetTrigger("Sunset");
+            
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -205,9 +231,9 @@ namespace UI
             else
             {
                 SetPlayerQuoteStringNight();
+                playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
             }
-            
         }
 
         private void EndGame()
@@ -246,14 +272,12 @@ namespace UI
         {
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
-            Debug.Log($"Attempt to send to server {playerQuoteText.text}");
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
                     GameSessionManager.Instance.SetAlibi(input.text);
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    Debug.Log($"Saved last words: {playerQuoteText.text}");
                     GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
                     break;
             }
@@ -283,6 +307,13 @@ namespace UI
             };
             playerQuoteText.text = playerQuoteString;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
+            PlayerPrefs.Save();
+        }
+
+        private void SetPlayerQuoteString(string quote)
+        {
+            playerQuoteText.text = $"[{PlayerData.Name}] " + quote;
+            PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
         }
 
