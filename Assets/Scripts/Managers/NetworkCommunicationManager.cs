@@ -67,6 +67,7 @@ namespace Managers
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
+            IsPlayerRoleAssigned = false;
         }
         
         private void OnHostStarted()
@@ -398,10 +399,9 @@ namespace Managers
                 Debug.Log($"{keyVal.Key} - {keyVal.Value}");
             }
 
-            PlayerData.IsAlive = GameSessionManager.Instance.IDToIsPlayerAlive[PlayerData.ClientID];
-            if (!PlayerData.IsAlive)
+            if (GameSessionManager.Instance.IDToIsPlayerAlive.TryGetValue(PlayerData.ClientID, out var isAlive))
             {
-                // TODO Player death here
+                PlayerData.IsAlive = isAlive;
             }
         }
 

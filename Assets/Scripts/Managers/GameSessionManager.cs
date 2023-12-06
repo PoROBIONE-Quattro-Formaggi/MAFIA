@@ -77,6 +77,11 @@ namespace Managers
             }
         }
 
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            Toast.Show("Application focus back");
+        }
+
         private void OnEnable()
         {
             SceneManager.sceneLoaded += OnSceneChanged;
@@ -126,7 +131,6 @@ namespace Managers
 
         public void OnNewClientConnected(ulong clientId)
         {
-            Debug.Log($"New client connected with id: {clientId}");
             if (NetworkCommunicationManager.GetOwnClientID() == clientId) return;
             IDToIsPlayerAlive[clientId] = true;
             Debug.Log("CURRENT ALIVE IDS:");
