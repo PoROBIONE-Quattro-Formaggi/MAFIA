@@ -39,7 +39,7 @@ namespace UI
         {
             CancelInvoke(nameof(TogglePlaceholder));
             _blockAnimateCodeInputInvoke = false;
-            codeInputPlaceholder.text = "<mspace=2.95em>......";
+            codeInputPlaceholder.text = "<mspace=2.52em>......";
             HideClipboard();
         }
 
@@ -108,7 +108,7 @@ namespace UI
 
         private void DisplayCode()
         {
-            codeDisplay.text = "<mspace=2.95em>" + codeInputField.text;
+            codeDisplay.text = "<mspace=2.52em>" + codeInputField.text;
         }
 
         public void ClearCodeInput()
@@ -120,13 +120,13 @@ namespace UI
         {
             codeInputPlaceholder.text = codeInputPlaceholder.text switch
             {
-                "<mspace=2.95em>......" => codeInputPlaceholder.text = "<mspace=2.95em> .....",
-                "<mspace=2.95em> ....." => codeInputPlaceholder.text = "<mspace=2.95em>. ....",
-                "<mspace=2.95em>. ...." => codeInputPlaceholder.text = "<mspace=2.95em>.. ...",
-                "<mspace=2.95em>.. ..." => codeInputPlaceholder.text = "<mspace=2.95em>... ..",
-                "<mspace=2.95em>... .." => codeInputPlaceholder.text = "<mspace=2.95em>.... .",
-                "<mspace=2.95em>.... ." => codeInputPlaceholder.text = "<mspace=2.95em>..... ",
-                "<mspace=2.95em>..... " => codeInputPlaceholder.text = "<mspace=2.95em>......",
+                "<mspace=2.52em>......" => codeInputPlaceholder.text = "<mspace=2.52em> .....",
+                "<mspace=2.52em> ....." => codeInputPlaceholder.text = "<mspace=2.52em>. ....",
+                "<mspace=2.52em>. ...." => codeInputPlaceholder.text = "<mspace=2.52em>.. ...",
+                "<mspace=2.52em>.. ..." => codeInputPlaceholder.text = "<mspace=2.52em>... ..",
+                "<mspace=2.52em>... .." => codeInputPlaceholder.text = "<mspace=2.52em>.... .",
+                "<mspace=2.52em>.... ." => codeInputPlaceholder.text = "<mspace=2.52em>..... ",
+                "<mspace=2.52em>..... " => codeInputPlaceholder.text = "<mspace=2.52em>......",
                 _ => codeInputPlaceholder.text
             };
         }
