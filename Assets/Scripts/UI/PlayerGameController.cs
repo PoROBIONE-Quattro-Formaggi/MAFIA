@@ -212,6 +212,7 @@ namespace UI
             _notYet = true;
             _rollLastWords = true;
             playerQuote.SetActive(false);
+            deadPrompt.SetActive(false);
             
             InvokeRepeating(nameof(WaxingCrescentMoon), 0f,0.5f);
         }
