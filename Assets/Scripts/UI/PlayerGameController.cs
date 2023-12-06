@@ -1,6 +1,7 @@
 using System;
 using DataStorage;
 using Managers;
+using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -51,7 +52,7 @@ namespace UI
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
 
             lastWordsRectTransform = lastWords.GetComponent<RectTransform>();
-            
+            SetAlibiInput();
             OnEnableNight();
         }
 
@@ -111,17 +112,27 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Enter alibi:";
-            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
-            input.text = alibi;
+            var alibi = input.text;
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
+            if (input.text.Length != 0) confirmInputButton.SetActive(true);
+        }
+
+        private void SetAlibiInput()
+        {
+            Toast.Show("SET ALIBI");
+            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
+            GameSessionManager.Instance.SetAlibi(alibi);
+            input.SetTextWithoutNotify(alibi);
         }
 
         private void DisableInput()
         {
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
+            confirmInputButton.SetActive(false);
+            keyboard.HideKeyboard();
             input.text = "";
         }
         
@@ -205,7 +216,7 @@ namespace UI
         {
             // HIDE INPUT
             //OnConfirmInputButtonClicked();
-            confirmInputButton.SetActive(false);
+            DisableInput();
             
             // ROLL LAST WORDS
             lastWordsText.text = GameSessionManager.Instance.GetLastWords();
@@ -230,7 +241,10 @@ namespace UI
             }
             else
             {
+                // ALIVE PLAYERS DO THIS
                 SetPlayerQuoteStringNight();
+                SetAlibiInput();
+                
                 playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
             }

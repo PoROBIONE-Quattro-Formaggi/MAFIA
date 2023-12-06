@@ -30,6 +30,7 @@ namespace UI
             }
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
+            GameSessionManager.Instance.ClearAllDataForEndGame();
             NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             LobbyManager.Instance.LeaveLobby();
             SceneChanger.ChangeToMainScene();

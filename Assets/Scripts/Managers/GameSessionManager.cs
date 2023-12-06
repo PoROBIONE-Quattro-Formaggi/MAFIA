@@ -49,6 +49,7 @@ namespace Managers
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
         public string WinnerRole { get; set; } = "";
+        public List<ulong> ClientsIDs { get; } = new();
         public event Action OnPlayersAssignedToRoles;
         public event Action OnHostEndGame;
 
@@ -57,7 +58,6 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static GameSessionManager _instance;
-        private List<ulong> ClientsIDs { get; } = new();
         private ulong CurrentDayVotedID { get; set; }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,6 @@ namespace Managers
             else if (isHost == 1)
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
-                NetworkManager.Singleton.OnClientConnectedCallback += OnNewClientConnected;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
@@ -126,11 +125,10 @@ namespace Managers
             }
         }
 
-        private void OnNewClientConnected(ulong clientId)
+        public void OnNewClientConnected(ulong clientId)
         {
             Debug.Log($"New client connected with id: {clientId}");
             if (NetworkCommunicationManager.GetOwnClientID() == clientId) return;
-            Debug.Log($"After if isHost");
             IDToIsPlayerAlive[clientId] = true;
             Debug.Log("CURRENT ALIVE IDS:");
             foreach (var key in IDToIsPlayerAlive.Keys)
@@ -147,7 +145,6 @@ namespace Managers
             Debug.Log($"current number of players: {currentNumberOfPlayers}");
             if (expectedNumberOfPlayers != currentNumberOfPlayers) return;
             AssignPlayersToRoles();
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,15 +166,6 @@ namespace Managers
             }
 
             var playersIDsToAssignRoles = ClientsIDs.ToList();
-            // if (playersIDsToAssignRoles.Count <
-            //     mafiaNumber + doctorNumber + 1) // TODO delete later (debug case when players < 3
-            // {
-            //     for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
-            //     {
-            //         playersIDsToAssignRoles.Add((ulong)(i + 100));
-            //     }
-            // }
-
             Shuffle(playersIDsToAssignRoles);
             var rolesList = GetRolesList(playersIDsToAssignRoles.Count);
             for (var i = 0; i < rolesList.Count; i++)
@@ -298,6 +286,7 @@ namespace Managers
             LastKilledName = "";
             LastWords = "";
             CurrentDayVotedID = 0;
+            NetworkCommunicationManager.Instance.ClearDataFromLastDayVotingClientRpc();
         }
 
         private void KillPlayerWithID(ulong id)
@@ -427,6 +416,7 @@ namespace Managers
 
         public void SetAlibi(string alibi)
         {
+            Debug.Log($"alibi sent to server: {alibi}");
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
 
@@ -600,6 +590,32 @@ namespace Managers
         public string GetWinnerRole()
         {
             return WinnerRole;
+        }
+
+        public void ClearAllDataForEndGame()
+        {
+            IDToRole.Clear();
+            IDToPlayerName.Clear();
+            IDToIsPlayerAlive.Clear();
+            IDToAlibi.Clear();
+            MafiaIDToVotedForID.Clear();
+            DoctorIDToVotedForID.Clear();
+            ResidentIDToVotedForOption.Clear();
+            IDToVotedForID.Clear();
+            LastKilledName = "";
+            LastWords = "";
+            NarratorComment = "";
+            CurrentNightResidentsQuestion = "";
+            CurrentNightResidentsAnswerOptions.Clear();
+            NightResidentsPollChosenAnswer = "";
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
+            WinnerRole = "";
+            ClientsIDs.Clear();
+            CurrentDayVotedID = 0;
+            PlayerData.ClientID = ulong.MaxValue;
+            PlayerData.Name = "";
+            PlayerData.Role = "";
+            PlayerData.IsAlive = false;
         }
     }
 }

@@ -2,7 +2,7 @@ namespace DataStorage
 {
     public static class PlayerData
     {
-        public static ulong ClientID;
+        public static ulong ClientID = ulong.MaxValue;
         public static string Name;
         public static string Role;
         public static bool IsAlive;

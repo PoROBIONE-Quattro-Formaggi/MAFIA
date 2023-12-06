@@ -387,6 +387,7 @@ namespace Managers
 
         private async void HandleLeaveLobby()
         {
+            Debug.Log("Leaving lobby");
             try
             {
                 await LobbyService.Instance.RemovePlayerAsync(_joinedLobby.Id,
@@ -400,11 +401,13 @@ namespace Managers
                 _hostLobby = null;
                 _joinedLobby = null;
             }
+            Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
         private async void HandleDeleteLobby()
         {
             if (!IsLobbyHost()) return;
+            Debug.Log("Deleting lobby");
             try
             {
                 await LobbyService.Instance.DeleteLobbyAsync(_joinedLobby.Id);
@@ -417,6 +420,7 @@ namespace Managers
                 _hostLobby = null;
                 _joinedLobby = null;
             }
+            Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
         public async void StartGame()
@@ -495,7 +499,7 @@ namespace Managers
             var updateLobbyOption = new UpdateLobbyOptions
             {
                 Data = data,
-                IsLocked = false
+                IsLocked = true
             };
             try
             {

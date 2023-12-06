@@ -74,6 +74,7 @@ namespace Managers
         private void OnClientConnected(ulong clientId)
         {
             if (IsHost) return;
+            var oldID = PlayerData.ClientID;
             Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
             var playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
             PlayerData.Name = playerName;
@@ -82,6 +83,7 @@ namespace Managers
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             Debug.Log($"Sending ServerRPC with player name {playerName}");
             AddClientNameToListServerRpc(playerName);
+            ReassignPlayerDataAfterReconnectionServerRpc(oldID, PlayerData.ClientID);
         }
 
         private void  OnClientDisconnected(ulong clientId)
@@ -202,6 +204,19 @@ namespace Managers
             SendLastWordsClientRpc(lastWords);
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
+        private void ReassignPlayerDataAfterReconnectionServerRpc(ulong oldId, ulong newId)
+        {
+            if (oldId != ulong.MaxValue)
+            {
+                GameSessionManager.Instance.IDToPlayerName.Remove(oldId);
+                GameSessionManager.Instance.IDToIsPlayerAlive.Remove(oldId);
+            }
+
+            GameSessionManager.Instance.OnNewClientConnected(newId);
+        }
+
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // CLIENT RPCs //////////////////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,13 +241,11 @@ namespace Managers
         private void SendNewIDToPlayerNameClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
             if (IsHost) return;
-            Debug.Log("Writing new player names to dict");
+            GameSessionManager.Instance.IDToPlayerName.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
-
-            Debug.Log("Finished writing player names to dict");
         }
 
         [ClientRpc]
@@ -240,6 +253,7 @@ namespace Managers
         public void SendNewIDToIsPlayerAliveClientRpc(ulong[] keys, bool[] values)
         {
             if (IsHost) return;
+            GameSessionManager.Instance.IDToIsPlayerAlive.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
@@ -389,6 +403,7 @@ namespace Managers
         {
             Debug.Log("GoBackToLobbyClientRpc called");
             if (IsHost) return;
+            GameSessionManager.Instance.ClearAllDataForEndGame();
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             LobbyManager.Instance.IsCurrentlyInGame = false;
             NetworkManager.Singleton.Shutdown();
