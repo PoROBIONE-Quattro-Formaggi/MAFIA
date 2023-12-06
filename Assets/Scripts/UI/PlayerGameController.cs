@@ -25,6 +25,7 @@ namespace UI
         public GameObject confirmInputButton;
         public TextMeshProUGUI promptText;
         public TMP_InputField input;
+        public TextMeshProUGUI inputPlaceholder;
         public KeyboardController keyboard;
         public GameObject lastWords;
         public TextMeshProUGUI lastWordsText;
@@ -52,8 +53,6 @@ namespace UI
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
 
             lastWordsRectTransform = lastWords.GetComponent<RectTransform>();
-            SetAlibiInput();
-            OnEnableNight();
         }
 
         // ON ENABLE FUNCTIONS
@@ -112,7 +111,9 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Enter alibi:";
-            var alibi = input.text;
+            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
+            GameSessionManager.Instance.SetAlibi(alibi);
+            inputPlaceholder.text = alibi;
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
@@ -121,19 +122,16 @@ namespace UI
 
         private void SetAlibiInput()
         {
-            Toast.Show("SET ALIBI");
             var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
             GameSessionManager.Instance.SetAlibi(alibi);
-            input.SetTextWithoutNotify(alibi);
+            inputPlaceholder.text = alibi;
         }
 
         private void DisableInput()
         {
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
-            confirmInputButton.SetActive(false);
             keyboard.HideKeyboard();
-            input.text = "";
         }
         
         
@@ -152,6 +150,7 @@ namespace UI
             playerGameAnimator.ResetTrigger("Sunset");
             playerGameAnimator.SetTrigger("Sunrise");
             //OnConfirmInputButtonClicked();
+            DisableInput();
             confirmInputButton.SetActive(false);
             
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
@@ -162,9 +161,6 @@ namespace UI
             }
             else
             {
-                prompt.SetActive(false);
-                input.gameObject.SetActive(false);
-                
                 informationText.text = $"{lastKilledName} was killed last night";
             
                 goVoteButton.SetActive(true);
@@ -243,7 +239,6 @@ namespace UI
             {
                 // ALIVE PLAYERS DO THIS
                 SetPlayerQuoteStringNight();
-                SetAlibiInput();
                 
                 playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
@@ -258,6 +253,7 @@ namespace UI
         private void EnableLastWords()
         {
             promptText.text = "Any last words?";
+            inputPlaceholder.text = ". . .";
             input.text = ""; //TODO: generate last words?
             input.gameObject.SetActive(true);
             prompt.SetActive(true);
@@ -276,10 +272,8 @@ namespace UI
         public void OnConfirmInputButtonClicked()
         {
             playerQuoteText.text += ".";
-            prompt.SetActive(false);
-            input.gameObject.SetActive(false);
-            keyboard.HideKeyboard();
             SendInputToServer();
+            DisableInput();
         }
 
         private void SendInputToServer()
@@ -352,6 +346,7 @@ namespace UI
         public void OnInputValueChanged()
         {
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
+            inputPlaceholder.text = ". . .";
             if (input.text.Length == 0) return;
             confirmInputButton.SetActive(true);
         }

@@ -4,7 +4,6 @@ using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using Unity.Collections;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -138,6 +137,11 @@ namespace Managers
 
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
+            Debug.Log($"[GameSessionManager] (OnNewClientConnected) all player 'isAlives':");
+            foreach (var keyVal in IDToIsPlayerAlive)
+            {
+                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
+            }
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             Debug.Log($"expected number of players: {expectedNumberOfPlayers}");
@@ -616,6 +620,7 @@ namespace Managers
             PlayerData.Name = "";
             PlayerData.Role = "";
             PlayerData.IsAlive = false;
+            NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEvents();
         }
     }
 }

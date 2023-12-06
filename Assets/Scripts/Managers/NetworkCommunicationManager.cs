@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
-using UI;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -28,6 +27,7 @@ namespace Managers
 
         private static NetworkCommunicationManager _instance;
 
+        public bool IsPlayerRoleAssigned { get; private set; }
         public event Action OnPlayerRoleAssigned;
         public event Action OnOneMafiaVoted;
         public event Action OnOneDoctorVoted;
@@ -52,6 +52,21 @@ namespace Managers
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            OnPlayerRoleAssigned += () =>
+            {
+                IsPlayerRoleAssigned = true;
+                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientReconnected;
+            };
+        }
+
+        public void UnsubscribeAllNetworkEvents()
+        {
+            NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
+            NetworkManager.Singleton.OnServerStopped -= OnHostStopped;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
         }
         
         private void OnHostStarted()
@@ -74,6 +89,7 @@ namespace Managers
         private void OnClientConnected(ulong clientId)
         {
             if (IsHost) return;
+            IsPlayerRoleAssigned = false;
             var oldID = PlayerData.ClientID;
             Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
             var playerName = PlayerPrefs.GetString(PpKeys.KeyPlayerName);
@@ -81,9 +97,17 @@ namespace Managers
             PlayerData.IsAlive = true;
             PlayerData.ClientID = clientId;
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
-            Debug.Log($"Sending ServerRPC with player name {playerName}");
+            Debug.Log($"[NetworkCommunicationManager] Sending ServerRPC with player name {playerName}");
             AddClientNameToListServerRpc(playerName);
             ReassignPlayerDataAfterReconnectionServerRpc(oldID, PlayerData.ClientID);
+        }
+
+        private void OnClientReconnected(ulong clientId)
+        {
+            if (IsHost) return;
+            var oldID = PlayerData.ClientID;
+            PlayerData.ClientID = clientId;
+            ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(oldID, clientId);
         }
 
         private void  OnClientDisconnected(ulong clientId)
@@ -131,13 +155,17 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
-            Debug.Log($"Sender clientID: {rpcParams.Receive.SenderClientId}");
+            Debug.Log($"[NetworkCommunicationManager] (in ServerRPC) Sender clientID: {rpcParams.Receive.SenderClientId}");
             GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             var keys = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToPlayerName.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
-            Debug.Log("Sending all names to clientRPC");
+            Debug.Log("[NetworkCommunicationManager] (in ServerRPC) Sending all names to clientRPC:");
+            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
+            {
+                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
+            }
             SendNewIDToPlayerNameClientRpc(keys, values);
         }
 
@@ -216,6 +244,105 @@ namespace Managers
 
             GameSessionManager.Instance.OnNewClientConnected(newId);
         }
+        
+        [ServerRpc(RequireOwnership = false)]
+        [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
+        private void ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(ulong oldId, ulong newId)
+        {
+            // ROLES
+            var role = GameSessionManager.Instance.IDToRole[oldId];
+            GameSessionManager.Instance.IDToRole.Remove(oldId);
+            GameSessionManager.Instance.IDToRole[newId] = role;
+            var keysForRoles = GameSessionManager.Instance.IDToRole.Keys.ToArray();
+            var valuesForRoles = GameSessionManager.Instance.IDToRole.Values
+                .Select(value => new FixedString32Bytes(value))
+                .ToArray();
+            SendNewIDToRoleClientRpc(keysForRoles, valuesForRoles);
+            
+            // NAMES
+            var playerName = GameSessionManager.Instance.IDToPlayerName[oldId];
+            GameSessionManager.Instance.IDToPlayerName.Remove(oldId);
+            GameSessionManager.Instance.IDToPlayerName[newId] = playerName;
+            var keysForNames = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
+            var valuesForNames = GameSessionManager.Instance.IDToPlayerName.Values
+                .Select(value => new FixedString32Bytes(value))
+                .ToArray();
+            SendNewIDToPlayerNameClientRpc(keysForNames, valuesForNames);
+            
+            // IS ALIVES
+            var isAlive = GameSessionManager.Instance.IDToIsPlayerAlive[oldId];
+            GameSessionManager.Instance.IDToIsPlayerAlive.Remove(oldId);
+            GameSessionManager.Instance.IDToIsPlayerAlive[newId] = isAlive;
+            var keysForIsPlayerAlive = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
+            var valuesForIsPlayerAlive = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
+            SendNewIDToIsPlayerAliveClientRpc(keysForIsPlayerAlive, valuesForIsPlayerAlive);
+            
+            // ALIBIS
+            if (GameSessionManager.Instance.IDToAlibi.TryGetValue(oldId, out var alibi))
+            {
+                GameSessionManager.Instance.IDToAlibi.Remove(oldId);
+                GameSessionManager.Instance.IDToAlibi[newId] = alibi;
+                var keysForAlibis = GameSessionManager.Instance.IDToAlibi.Keys.ToArray();
+                var valuesForAlibis = GameSessionManager.Instance.IDToAlibi.Values
+                    .Select(value => new FixedString128Bytes(value))
+                    .ToArray();
+                SendNewIDToAlibiClientRpc(keysForAlibis, valuesForAlibis);
+            }
+
+            // ROLES VOTES
+            switch (role)
+            {
+                case Roles.Mafia:
+                    if (GameSessionManager.Instance.MafiaIDToVotedForID.TryGetValue(oldId, out var mafiaVotedForID))
+                    {
+                        GameSessionManager.Instance.MafiaIDToVotedForID.Remove(oldId);
+                        GameSessionManager.Instance.MafiaIDToVotedForID[newId] = mafiaVotedForID;
+                        var keysForMafiaVotedFor = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
+                        var valuesForMafiaVotedFor = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
+                        var mafiaIDs = GameSessionManager.Instance.GetAlivePlayersIDs()
+                            .Where(id => GameSessionManager.Instance.IDToRole[id] == Roles.Mafia).ToList();
+                        var clientRpcParamsWithMafiaIDsOnly = new ClientRpcParams
+                        {
+                            Send = new ClientRpcSendParams
+                            {
+                                TargetClientIds = mafiaIDs
+                            }
+                        };
+                        SendNewMafiaIDToVotedForIDClientRpc(keysForMafiaVotedFor, valuesForMafiaVotedFor, clientRpcParamsWithMafiaIDsOnly);
+                    }
+                    break;
+                case Roles.Doctor:
+                    if (GameSessionManager.Instance.DoctorIDToVotedForID.TryGetValue(oldId,
+                            out var doctorVotedForID))
+                    {
+                        GameSessionManager.Instance.DoctorIDToVotedForID.Remove(oldId);
+                        GameSessionManager.Instance.DoctorIDToVotedForID[newId] = doctorVotedForID;
+                    }
+                    break;
+            }
+
+            if (GameSessionManager.Instance.IDToVotedForID.TryGetValue(oldId, out var votedForID))
+            {
+                GameSessionManager.Instance.IDToVotedForID.Remove(oldId);
+                GameSessionManager.Instance.IDToVotedForID[newId] = votedForID;
+            }
+
+            if (GameSessionManager.Instance.ResidentIDToVotedForOption.TryGetValue(oldId,
+                    out var votedForOption))
+            {
+                GameSessionManager.Instance.ResidentIDToVotedForOption.Remove(oldId);
+                GameSessionManager.Instance.ResidentIDToVotedForOption[newId] = votedForOption;
+            }
+            SendLastWordsClientRpc(GameSessionManager.Instance.LastWords);
+            SendLastKilledNameClientRpc(GameSessionManager.Instance.LastKilledName);
+            SendNightResidentsPollChosenAnswerClientRpc(GameSessionManager.Instance.NightResidentsPollChosenAnswer);
+            var options = GameSessionManager.Instance.CurrentNightResidentsAnswerOptions
+                .Select(value => new FixedString64Bytes(value))
+                .ToArray();
+            SendNightResidentsOptionsClientRpc(options);
+            SendNarratorCommentClientRpc(GameSessionManager.Instance.NarratorComment);
+            SetTimeForClientsClientRpc(GameSessionManager.Instance.CurrentTimeOfDay);
+        }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // CLIENT RPCs //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,6 +353,7 @@ namespace Managers
         private void SendNewIDToRoleClientRpc(ulong[] keys, FixedString32Bytes[] values)
         {
             if (IsHost) return;
+            GameSessionManager.Instance.IDToRole.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToRole[keys[i]] = values[i].ToString();
@@ -246,6 +374,11 @@ namespace Managers
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
+            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player names like:");
+            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
+            {
+                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
+            }
         }
 
         [ClientRpc]
@@ -256,7 +389,13 @@ namespace Managers
             GameSessionManager.Instance.IDToIsPlayerAlive.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
+                Debug.Log($"key is: {keys[i]}, value is: {values[i]}");
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
+            }
+            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player 'isAlives' like:");
+            foreach (var keyVal in GameSessionManager.Instance.IDToIsPlayerAlive)
+            {
+                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
             }
 
             PlayerData.IsAlive = GameSessionManager.Instance.IDToIsPlayerAlive[PlayerData.ClientID];
@@ -272,6 +411,7 @@ namespace Managers
         private void SendNewIDToAlibiClientRpc(ulong[] keys, FixedString128Bytes[] values)
         {
             if (IsHost) return;
+            GameSessionManager.Instance.IDToAlibi.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.IDToAlibi[keys[i]] = values[i].ToString();
@@ -286,6 +426,7 @@ namespace Managers
             ClientRpcParams clientRpcParams = default)
         {
             if (IsHost) return;
+            GameSessionManager.Instance.MafiaIDToVotedForID.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
                 GameSessionManager.Instance.MafiaIDToVotedForID[keys[i]] = values[i];
@@ -388,6 +529,13 @@ namespace Managers
             if (IsHost) return;
             GameSessionManager.Instance.CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
             OnNightBegan?.Invoke();
+        }
+
+        [ClientRpc]
+        private void SetTimeForClientsClientRpc(string newTime)
+        {
+            if (IsHost) return;
+            GameSessionManager.Instance.CurrentTimeOfDay = newTime;
         }
 
         [ClientRpc]

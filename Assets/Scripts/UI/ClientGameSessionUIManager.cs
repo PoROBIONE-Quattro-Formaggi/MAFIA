@@ -19,13 +19,21 @@ namespace UI
         
         private void OnEnable()
         {
-            ScreenChanger.Instance.ChangeToPlayerRoleScreen();
-            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetPlayerRoleToPrompt;
+            if (!NetworkCommunicationManager.Instance.IsPlayerRoleAssigned)
+            {
+                ScreenChanger.Instance.ChangeToPlayerRoleScreen();
+                NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetPlayerRoleToPrompt;
+            }
+            else
+            {
+                ScreenChanger.Instance.ChangeToPlayerGameScreen();
+            }
         }
 
         private void SetPlayerRoleToPrompt()
         {
             roleController.DisplayRole(PlayerData.Role);
+            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned -= SetPlayerRoleToPrompt;
         }
 
         // BUTTON ONCLICK FUNCTIONS
