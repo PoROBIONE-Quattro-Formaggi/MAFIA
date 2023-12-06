@@ -61,7 +61,6 @@ namespace UI
         public void SelectCodeInput()
         {
             codeInputField.Select();
-            Debug.Log("carat reset");
             codeInputField.caretPosition = codeInputField.text.Length;
         }
 
