@@ -79,6 +79,7 @@ namespace UI
         {
             SetInformationText("NIGHT");
             SetAlibiInput();
+            
             playerGameAnimator.Play("night");
             if (goVoteButton.activeSelf)
             {
@@ -118,11 +119,6 @@ namespace UI
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
             confirmInputButton.SetActive(true);
-        }
-
-        public void OnInputSelected()
-        {
-            inputPlaceholder.gameObject.SetActive(false);
         }
 
         private void SetAlibiInput()
