@@ -12,6 +12,7 @@ namespace UI
         public GameObject mafiaRole;
         public GameObject citizenRole;
         public GameObject doctorRole;
+        public TextMeshProUGUI dots;
 
         [Header("BUTTONS")] 
         public GameObject okButton;
@@ -24,21 +25,29 @@ namespace UI
         private void OnStart()
         {
             _roleScreen = GetComponent<GameObject>();
+            InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
+        }
+
+        private void AnimateDots()
+        {
+            MainMenuUIManager.Instance.AnimatePlaceholder(dots);
         }
 
         private void OnDisable()
         {
-            prompt.text = "You are ...";
-            mafiaRole.SetActive(false);
-            citizenRole.SetActive(false);
-            doctorRole.SetActive(false);
-            okButton.SetActive(false);
-            paragraph1.gameObject.SetActive(false);
-            paragraph2.gameObject.SetActive(false);
+            // prompt.text = "You are";
+            // mafiaRole.SetActive(false);
+            // citizenRole.SetActive(false);
+            // doctorRole.SetActive(false);
+            // okButton.SetActive(false);
+            // paragraph1.gameObject.SetActive(false);
+            // paragraph2.gameObject.SetActive(false);
         }
 
         public void DisplayRole(string role)
         {
+            CancelInvoke(nameof(AnimateDots));
+            dots.gameObject.SetActive(false);
             // Set text values for prompts
             switch (role)
             {
