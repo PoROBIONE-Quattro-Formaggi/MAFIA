@@ -14,7 +14,7 @@ namespace Managers
         private void Start()
         {
             if (!IsOwner) return;
-            Debug.Log("Canvas set active");
+            GameObject.Find("Loading").SetActive(false);
             playerCanvas.SetActive(true);
             playerCamera.SetActive(true);
             eventSystem.SetActive(true);

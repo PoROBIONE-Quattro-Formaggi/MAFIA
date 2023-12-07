@@ -120,6 +120,8 @@ namespace UI
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
+                Debug.Log($"[{idToPlayerName[playerID]}] with alibi VVV");
+                Debug.Log($"Alibi to ^^^: {idToAlibis[playerID]}");
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
                     $"<b>[{idToPlayerName[playerID]}]</b> {idToAlibis[playerID]}";
                 voteOption.SetActive(true);
@@ -204,7 +206,7 @@ namespace UI
                         GameSessionManager.Instance.DoctorVoteFor(_currentChosenID);
                         break;
                     case Roles.Resident:
-                        //TODO 
+                        //TODO turn on later
                         // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
                         break;
                 }

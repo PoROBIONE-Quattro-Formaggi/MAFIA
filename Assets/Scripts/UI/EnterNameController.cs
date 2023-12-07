@@ -39,8 +39,6 @@ namespace UI
 
         public void OnPlayerNameValueChanged()
         {
-            // TODO validate player name correctly later (ale jak lepiej??? - Wera)
-
             CancelInvoke(nameof(AnimateEnterNamePlaceholder));
             MainMenuUIManager.ToggleCapitalize(keyboard, enterNameField);
             MainMenuUIManager.ToggleCarat(enterNameField);

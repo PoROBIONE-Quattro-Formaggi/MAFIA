@@ -4,7 +4,6 @@ using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using Unity.Collections;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -49,6 +48,7 @@ namespace Managers
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
         public string WinnerRole { get; set; } = "";
+        public List<ulong> ClientsIDs { get; } = new();
         public event Action OnPlayersAssignedToRoles;
         public event Action OnHostEndGame;
 
@@ -57,7 +57,6 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static GameSessionManager _instance;
-        private List<ulong> ClientsIDs { get; } = new();
         private ulong CurrentDayVotedID { get; set; }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +105,6 @@ namespace Managers
             else if (isHost == 1)
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
-                NetworkManager.Singleton.OnClientConnectedCallback += OnNewClientConnected;
                 if (RelayManager.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
@@ -115,8 +113,8 @@ namespace Managers
             {
                 if (await RelayManager.JoinRelay(joinCode))
                 {
-                    PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
-                    PlayerPrefs.Save();
+                    // PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
+                    // PlayerPrefs.Save();
                     Debug.Log("[GameSessionManager] Joining to the Relay");
                     return;
                 }
@@ -126,11 +124,37 @@ namespace Managers
             }
         }
 
-        private void OnNewClientConnected(ulong clientId)
+        public async void ReconnectToGame()
         {
-            Debug.Log($"New client connected with id: {clientId}");
+            var joinCode = PlayerPrefs.GetString(PpKeys.KeyStartGame);
+            var isHost = PlayerPrefs.GetInt(PpKeys.KeyIsHost);
+            if (joinCode == "0" || isHost == 1)
+            {
+                Toast.Show("Cannot join to the game");
+                SceneChanger.ChangeToMainScene();
+            }
+            else
+            {
+                if (await RelayManager.JoinRelay(joinCode))
+                {
+                    Debug.Log("[GameSessionManager] Joining to the Relay");
+                    NetworkCommunicationManager.Instance.EmergencyEndGameServerRpc();
+                    return;
+                }
+
+                Toast.Show("Cannot join to the game");
+                SceneChanger.ChangeToMainScene();
+            }
+        }
+
+        public void EmergencyEndGame()
+        {
+            EndGame("DRAW");
+        }
+
+        public void OnNewClientConnected(ulong clientId)
+        {
             if (NetworkCommunicationManager.GetOwnClientID() == clientId) return;
-            Debug.Log($"After if isHost");
             IDToIsPlayerAlive[clientId] = true;
             Debug.Log("CURRENT ALIVE IDS:");
             foreach (var key in IDToIsPlayerAlive.Keys)
@@ -140,6 +164,12 @@ namespace Managers
 
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
+            Debug.Log($"[GameSessionManager] (OnNewClientConnected) all player 'isAlives':");
+            foreach (var keyVal in IDToIsPlayerAlive)
+            {
+                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
+            }
+
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             Debug.Log($"expected number of players: {expectedNumberOfPlayers}");
@@ -147,7 +177,6 @@ namespace Managers
             Debug.Log($"current number of players: {currentNumberOfPlayers}");
             if (expectedNumberOfPlayers != currentNumberOfPlayers) return;
             AssignPlayersToRoles();
-            NetworkManager.Singleton.OnClientConnectedCallback -= OnNewClientConnected;
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -169,15 +198,6 @@ namespace Managers
             }
 
             var playersIDsToAssignRoles = ClientsIDs.ToList();
-            // if (playersIDsToAssignRoles.Count <
-            //     mafiaNumber + doctorNumber + 1) // TODO delete later (debug case when players < 3
-            // {
-            //     for (var i = 0; i < (mafiaNumber + doctorNumber + 1) - playersIDsToAssignRoles.Count; i++)
-            //     {
-            //         playersIDsToAssignRoles.Add((ulong)(i + 100));
-            //     }
-            // }
-
             Shuffle(playersIDsToAssignRoles);
             var rolesList = GetRolesList(playersIDsToAssignRoles.Count);
             for (var i = 0; i < rolesList.Count; i++)
@@ -298,6 +318,7 @@ namespace Managers
             LastKilledName = "";
             LastWords = "";
             CurrentDayVotedID = 0;
+            NetworkCommunicationManager.Instance.ClearDataFromLastDayVotingClientRpc();
         }
 
         private void KillPlayerWithID(ulong id)
@@ -350,7 +371,6 @@ namespace Managers
         {
             Debug.Log($"THE END\n{winnerRole} wins");
             WinnerRole = winnerRole;
-            // TODO implement ENDGAME functionality
             OnHostEndGame?.Invoke();
             NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }
@@ -427,6 +447,7 @@ namespace Managers
 
         public void SetAlibi(string alibi)
         {
+            Debug.Log($"alibi sent to server: {alibi}");
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
 
@@ -600,6 +621,33 @@ namespace Managers
         public string GetWinnerRole()
         {
             return WinnerRole;
+        }
+
+        public void ClearAllDataForEndGame()
+        {
+            IDToRole.Clear();
+            IDToPlayerName.Clear();
+            IDToIsPlayerAlive.Clear();
+            IDToAlibi.Clear();
+            MafiaIDToVotedForID.Clear();
+            DoctorIDToVotedForID.Clear();
+            ResidentIDToVotedForOption.Clear();
+            IDToVotedForID.Clear();
+            LastKilledName = "";
+            LastWords = "";
+            NarratorComment = "";
+            CurrentNightResidentsQuestion = "";
+            CurrentNightResidentsAnswerOptions.Clear();
+            NightResidentsPollChosenAnswer = "";
+            CurrentTimeOfDay = TimeIsAManMadeSocialConstruct.Night;
+            WinnerRole = "";
+            ClientsIDs.Clear();
+            CurrentDayVotedID = 0;
+            PlayerData.ClientID = ulong.MaxValue;
+            PlayerData.Name = "";
+            PlayerData.Role = "";
+            PlayerData.IsAlive = false;
+            NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEvents();
         }
     }
 }
