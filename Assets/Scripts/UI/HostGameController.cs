@@ -13,8 +13,12 @@ namespace UI
         public TextMeshProUGUI townStatus;
         public TextMeshProUGUI executionStatus;
         public TextMeshProUGUI lastDeath;
+        public TextMeshProUGUI commentPrompt;
         public GameObject forwardButton;
         public GameObject endGameScreen;
+        public TMP_InputField input;
+        public TextMeshProUGUI inputPlaceholder;
+        
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
@@ -98,8 +102,23 @@ namespace UI
                 case TimeIsAManMadeSocialConstruct.Evening:
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
+                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text}.");
+                    DisableInput();
                     MoonRise();
                     break;
+            }
+        }
+
+        public void OnInputValueChanged()
+        {
+            lastDeath.text = $"[Narrator] " + input.text;
+        }
+
+        public void OnInputDeselected()
+        {
+            if (input.text.Length == 0)
+            {
+                inputPlaceholder.gameObject.SetActive(true);
             }
         }
 
@@ -122,6 +141,20 @@ namespace UI
             
             executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
             executionStatus.gameObject.SetActive(true);
+            EnableInput();
+        }
+
+        private void EnableInput()
+        {
+            commentPrompt.gameObject.SetActive(true);
+            input.text = "";
+            input.gameObject.SetActive(true);
+        }
+
+        private void DisableInput()
+        {
+            commentPrompt.gameObject.SetActive(false);
+            input.gameObject.SetActive(false);
         }
 
         // TRANSITION FROM EVENING TO NIGHT

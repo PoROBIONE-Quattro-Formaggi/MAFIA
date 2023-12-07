@@ -215,17 +215,17 @@ namespace UI
             DisableInput();
             
             // ROLL LAST WORDS
-            lastWordsText.text = GameSessionManager.Instance.GetLastWords();
-                playerQuote.SetActive(false);
-                deadPrompt.SetActive(false);
+            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
+            playerQuote.SetActive(false);
+            deadPrompt.SetActive(false);
 
-                string[] subs = lastWordsText.text.Split(']');
-                if (!(subs[1].Trim().Length > 1))
-                {
-                    _notYet = true;
-                    _rollLastWords = true;
-                }
-                InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
+            string[] subs = lastWordsText.text.Split(']');
+            if (!(subs[1].Trim().Length > 1))
+            {
+                _notYet = true;
+                _rollLastWords = true;
+            }
+            InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
         }
 
         private void WaxingCrescentMoon()
