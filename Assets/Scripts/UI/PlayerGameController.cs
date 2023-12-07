@@ -78,6 +78,7 @@ namespace UI
         private void OnEnableNight()
         {
             SetInformationText("NIGHT");
+            SetAlibiInput();
             playerGameAnimator.Play("night");
             if (goVoteButton.activeSelf)
             {
@@ -111,8 +112,7 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Click below to edit alibi, or";
-            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
-            GameSessionManager.Instance.SetAlibi(alibi);
+            var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
             inputPlaceholder.text = alibi;
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
@@ -122,7 +122,7 @@ namespace UI
 
         public void OnInputSelected()
         {
-            input.text = "";
+            inputPlaceholder.gameObject.SetActive(false);
         }
 
         private void SetAlibiInput()
@@ -277,8 +277,19 @@ namespace UI
         public void OnConfirmInputButtonClicked()
         {
             playerQuoteText.text += ".";
+            if (inputPlaceholder.text != ". . .")
+            {
+                input.text = inputPlaceholder.text;
+            }
             SendInputToServer();
             DisableInput();
+        }
+        
+        public void OnInputValueChanged()
+        {
+            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
+            inputPlaceholder.text = ". . .";
+            confirmInputButton.SetActive(input.text.Length == 0);
         }
 
         private void SendInputToServer()
@@ -294,6 +305,8 @@ namespace UI
                     GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
                     break;
             }
+
+            input.text = "";
         }
         
         // HELPER FUNCTIONS
@@ -346,14 +359,6 @@ namespace UI
                 _currentX -= 1 * animationSpeed;
             }
             informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
-        }
-
-        public void OnInputValueChanged()
-        {
-            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
-            inputPlaceholder.text = ". . .";
-            if (input.text.Length == 0) return;
-            confirmInputButton.SetActive(true);
         }
 
         private void OnDestroy()

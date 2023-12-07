@@ -77,11 +77,6 @@ namespace Managers
             }
         }
 
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            Toast.Show("Application focus back");
-        }
-
         private void OnEnable()
         {
             SceneManager.sceneLoaded += OnSceneChanged;
