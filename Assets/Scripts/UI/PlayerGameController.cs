@@ -108,6 +108,7 @@ namespace UI
         private void OnEnableEvening()
         {
             SetInformationText("EVENING");
+            playerGameAnimator.Play("day");
         }
 
         private void EnableAlibiInput()
@@ -220,7 +221,7 @@ namespace UI
             deadPrompt.SetActive(false);
 
             string[] subs = lastWordsText.text.Split(']');
-            if (!(subs[1].Trim().Length > 1))
+            if (subs[1].Trim().Length > 1)
             {
                 _notYet = true;
                 _rollLastWords = true;

@@ -35,13 +35,13 @@ namespace UI
 
         private void OnDisable()
         {
-            prompt.text = "You are";
-            mafiaRole.SetActive(false);
-            citizenRole.SetActive(false);
-            doctorRole.SetActive(false);
-            okButton.SetActive(false);
-            paragraph1.gameObject.SetActive(false);
-            paragraph2.gameObject.SetActive(false);
+            // prompt.text = "You are";
+            // mafiaRole.SetActive(false);
+            // citizenRole.SetActive(false);
+            // doctorRole.SetActive(false);
+            // okButton.SetActive(false);
+            // paragraph1.gameObject.SetActive(false);
+            // paragraph2.gameObject.SetActive(false);
         }
 
         public void DisplayRole(string role)
