@@ -228,12 +228,18 @@ namespace UI
             _publicLobbyButtonText.color = Colours.NightBlack;
         }
 
-        public void OnCreateLobbyClicked()
+        public async void OnCreateLobbyClicked()
         {
             var playersInt = 10;
             playersInt = int.Parse(populationInputField.text);
-            LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), playersInt,
+            var isLobbyCreated = await LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), playersInt,
                 _isPrivate, "");
+            if (isLobbyCreated)
+            {
+                ScreenChanger.Instance.ChangeToLobbyHostScreen();
+            }
+
+
         }
 
 

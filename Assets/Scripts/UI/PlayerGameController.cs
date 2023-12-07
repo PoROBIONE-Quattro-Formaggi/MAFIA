@@ -1,6 +1,7 @@
 using System;
 using DataStorage;
 using Managers;
+using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace UI
         public GameObject confirmInputButton;
         public TextMeshProUGUI promptText;
         public TMP_InputField input;
+        public TextMeshProUGUI inputPlaceholder;
         public KeyboardController keyboard;
         public GameObject lastWords;
         public TextMeshProUGUI lastWordsText;
@@ -51,8 +53,6 @@ namespace UI
             NetworkCommunicationManager.Instance.OnGameEnded += EndGame;
 
             lastWordsRectTransform = lastWords.GetComponent<RectTransform>();
-            
-            OnEnableNight();
         }
 
         // ON ENABLE FUNCTIONS
@@ -78,6 +78,8 @@ namespace UI
         private void OnEnableNight()
         {
             SetInformationText("NIGHT");
+            SetAlibiInput();
+            
             playerGameAnimator.Play("night");
             if (goVoteButton.activeSelf)
             {
@@ -110,19 +112,26 @@ namespace UI
 
         private void EnableAlibiInput()
         {
-            promptText.text = "Enter alibi:";
-            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
-            input.text = alibi;
+            promptText.text = "Click below to edit alibi, or";
+            var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
+            inputPlaceholder.text = alibi;
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
+            confirmInputButton.SetActive(true);
+        }
+
+        private void SetAlibiInput()
+        {
+            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
+            GameSessionManager.Instance.SetAlibi(alibi);
         }
 
         private void DisableInput()
         {
             prompt.SetActive(false);
             input.gameObject.SetActive(false);
-            input.text = "";
+            keyboard.HideKeyboard();
         }
         
         
@@ -141,6 +150,7 @@ namespace UI
             playerGameAnimator.ResetTrigger("Sunset");
             playerGameAnimator.SetTrigger("Sunrise");
             //OnConfirmInputButtonClicked();
+            DisableInput();
             confirmInputButton.SetActive(false);
             
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
@@ -151,9 +161,6 @@ namespace UI
             }
             else
             {
-                prompt.SetActive(false);
-                input.gameObject.SetActive(false);
-                
                 informationText.text = $"{lastKilledName} was killed last night";
             
                 goVoteButton.SetActive(true);
@@ -205,7 +212,7 @@ namespace UI
         {
             // HIDE INPUT
             //OnConfirmInputButtonClicked();
-            confirmInputButton.SetActive(false);
+            DisableInput();
             
             // ROLL LAST WORDS
             lastWordsText.text = GameSessionManager.Instance.GetLastWords();
@@ -235,7 +242,9 @@ namespace UI
             }
             else
             {
+                // ALIVE PLAYERS DO THIS
                 SetPlayerQuoteStringNight();
+                
                 playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
             }
@@ -249,6 +258,7 @@ namespace UI
         private void EnableLastWords()
         {
             promptText.text = "Any last words?";
+            inputPlaceholder.text = ". . .";
             input.text = ""; //TODO: generate last words?
             input.gameObject.SetActive(true);
             prompt.SetActive(true);
@@ -266,11 +276,21 @@ namespace UI
 
         public void OnConfirmInputButtonClicked()
         {
+            if (inputPlaceholder.text != ". . .")
+            {
+                Debug.Log("input edited");
+                input.text = inputPlaceholder.text;
+            }
             playerQuoteText.text += ".";
-            prompt.SetActive(false);
-            input.gameObject.SetActive(false);
-            keyboard.HideKeyboard();
             SendInputToServer();
+            DisableInput();
+        }
+        
+        public void OnInputValueChanged()
+        {
+            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
+            inputPlaceholder.text = ". . .";
+            confirmInputButton.SetActive(input.text.Length != 0);
         }
 
         private void SendInputToServer()
@@ -286,6 +306,8 @@ namespace UI
                     GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
                     break;
             }
+
+            input.SetTextWithoutNotify("");
         }
         
         // HELPER FUNCTIONS
@@ -338,13 +360,6 @@ namespace UI
                 _currentX -= 1 * animationSpeed;
             }
             informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
-        }
-
-        public void OnInputValueChanged()
-        {
-            playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
-            if (input.text.Length == 0) return;
-            confirmInputButton.SetActive(true);
         }
 
         private void OnDestroy()
