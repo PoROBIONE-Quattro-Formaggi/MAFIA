@@ -1,22 +1,35 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Managers;
 using TMPro;
 using UnityEngine;
 
-namespace UI {
-
-public class PlayerLobbyController : MonoBehaviour
+namespace UI
 {
-    public TextMeshProUGUI informationText;
-
-    private void OnEnable() 
+    public class PlayerLobbyController : MonoBehaviour
     {
-        SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
-    }
+        public TextMeshProUGUI informationText;
 
-    public void SetWelcomePrompt(string playerName)
-    {
-        informationText.text = $"You are {playerName}, please wait";
+        private void OnEnable()
+        {
+            LobbyManager.Instance.OnHostMigrated += HandleHostMigration;
+            SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
+        }
+
+        private void HandleHostMigration()
+        {
+            ScreenChanger.Instance.ChangeToLobbyHostScreen();
+        }
+
+        public void SetWelcomePrompt(string playerName)
+        {
+            informationText.text = $"You are {playerName}, please wait";
+        }
+
+        private void OnDisable()
+        {
+            LobbyManager.Instance.OnHostMigrated -= HandleHostMigration;
+        }
     }
-}
 }

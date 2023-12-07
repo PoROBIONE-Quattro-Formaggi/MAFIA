@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DataStorage;
 using Managers;
 using TMPro;
@@ -128,7 +129,11 @@ namespace UI
             mafiaStatus.gameObject.SetActive(false);
             mafiaStatus.text = "The mafia has not voted.";
             doctorStatus.gameObject.SetActive(false);
-            doctorStatus.text = "The doctor has not voted.";
+            if (GameSessionManager.Instance.GetAmountOfAliveDoctors() == 0)
+            {
+                doctorStatus.text = "All the medical staff is dead";
+            }
+            doctorStatus.text = "The medical staff has not voted.";
 
             townStatus.gameObject.SetActive(true);
         }
