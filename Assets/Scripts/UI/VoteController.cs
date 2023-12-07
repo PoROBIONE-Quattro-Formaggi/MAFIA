@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using DataStorage;
 using Managers;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace UI
@@ -79,7 +77,7 @@ namespace UI
         private void GenerateVotingOptionsNight()
         {
             ClearVotingOptions();
-            
+
             List<ulong> alivePlayersIDs;
             switch (PlayerData.Role)
             {
@@ -94,6 +92,7 @@ namespace UI
                     alivePlayersIDs = new List<ulong>();
                     break;
             }
+
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             foreach (var playerID in alivePlayersIDs)
             {
@@ -105,30 +104,38 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
+
             voteOptionsParent.SetActive(true);
         }
-        
+
         private void GenerateVotingOptionsDay()
         {
             ClearVotingOptions();
-            
+
             var alivePlayersIDs = GameSessionManager.Instance.GetAlivePlayersIDs(false);
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             var idToAlibis = GameSessionManager.Instance.GetAlibis();
-            
+
             Debug.Log("BEFORE FOREACH LOOP IN GENERATE OPTIONS DAY");
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
+                var alibi = DefaultAlibis.GetRandomAlibi();
+                if (idToAlibis.TryGetValue(playerID, out var playerSetAlibi))
+                {
+                    alibi = playerSetAlibi;
+                }
+
                 Debug.Log($"[{idToPlayerName[playerID]}] with alibi VVV");
-                Debug.Log($"Alibi to ^^^: {idToAlibis[playerID]}");
+                Debug.Log($"Alibi to ^^^: {alibi}");
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"<b>[{idToPlayerName[playerID]}]</b> {idToAlibis[playerID]}";
+                    $"<b>[{idToPlayerName[playerID]}]</b> {alibi}";
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
+
             Debug.Log("AFTER FOREACH LOOP IN GENERATE OPTIONS DAY");
             voteOptionsParent.SetActive(true);
         }
@@ -146,6 +153,7 @@ namespace UI
             {
                 DestroyImmediate(voteOptionsParent.transform.GetChild(i).gameObject);
             }
+
             voteButton.SetActive(false);
         }
 
@@ -163,6 +171,7 @@ namespace UI
                     SetPlayerQuoteStringDay(GameSessionManager.Instance.IDToPlayerName[currentClickedID]);
                     break;
             }
+
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
@@ -210,11 +219,12 @@ namespace UI
                         // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
                         break;
                 }
-            } else if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Day)
+            }
+            else if (GameSessionManager.Instance.GetCurrentTimeOfDay() == TimeIsAManMadeSocialConstruct.Day)
             {
                 GameSessionManager.Instance.DayVoteFor(_currentChosenID);
             }
-            
+
             voteOptionsParent.SetActive(false);
             goVoteButton.SetActive(false);
             var quote = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote) + ".";
