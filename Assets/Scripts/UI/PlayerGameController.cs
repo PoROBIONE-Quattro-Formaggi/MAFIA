@@ -208,12 +208,16 @@ namespace UI
             confirmInputButton.SetActive(false);
             
             // ROLL LAST WORDS
-            lastWordsText.text = GameSessionManager.Instance.GetLastWords();
-            _notYet = true;
-            _rollLastWords = true;
-            playerQuote.SetActive(false);
-            
-            InvokeRepeating(nameof(WaxingCrescentMoon), 0f,0.5f);
+                lastWordsText.text = GameSessionManager.Instance.GetLastWords();
+                _notYet = true;
+                _rollLastWords = true;
+                playerQuote.SetActive(false);
+                deadPrompt.SetActive(false);
+
+                if (lastWordsText.text.Length > 1)
+                {
+                    InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
+                }
         }
 
         private void WaxingCrescentMoon()
