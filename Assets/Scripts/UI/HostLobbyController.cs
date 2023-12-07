@@ -17,9 +17,9 @@ namespace UI
 
         private int _maxPlayers;
 
-        public void StartGame()
+        public async void StartGame()
         {
-            LobbyManager.Instance.StartGame();
+            await LobbyManager.Instance.StartGame();
         }
 
         public void CopyCode()
