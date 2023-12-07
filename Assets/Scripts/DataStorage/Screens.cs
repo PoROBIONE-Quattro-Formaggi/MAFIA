@@ -14,6 +14,7 @@ namespace DataStorage
         public const string PlayerRoleScreen = "Role";
         public const string PlayerVoteScreen = "Vote";
         public const string InstructionScreen = "Instruction";
+        public const string ErrorScreen = "Error";
         public const string EndGameScreen = "EndGame";
     }
 }
