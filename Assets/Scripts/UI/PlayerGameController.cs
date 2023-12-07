@@ -125,7 +125,6 @@ namespace UI
         {
             var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
             GameSessionManager.Instance.SetAlibi(alibi);
-            inputPlaceholder.text = alibi;
         }
 
         private void DisableInput()
@@ -276,11 +275,12 @@ namespace UI
 
         public void OnConfirmInputButtonClicked()
         {
-            playerQuoteText.text += ".";
             if (inputPlaceholder.text != ". . .")
             {
+                Debug.Log("input edited");
                 input.text = inputPlaceholder.text;
             }
+            playerQuoteText.text += ".";
             SendInputToServer();
             DisableInput();
         }
@@ -289,7 +289,7 @@ namespace UI
         {
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             inputPlaceholder.text = ". . .";
-            confirmInputButton.SetActive(input.text.Length == 0);
+            confirmInputButton.SetActive(input.text.Length != 0);
         }
 
         private void SendInputToServer()
@@ -306,7 +306,7 @@ namespace UI
                     break;
             }
 
-            input.text = "";
+            input.SetTextWithoutNotify("");
         }
         
         // HELPER FUNCTIONS
