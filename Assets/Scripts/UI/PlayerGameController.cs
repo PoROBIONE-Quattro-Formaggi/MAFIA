@@ -221,7 +221,8 @@ namespace UI
                 playerQuote.SetActive(false);
                 deadPrompt.SetActive(false);
 
-                if (lastWordsText.text.Length > 1)
+                string[] subs = lastWordsText.text.Split(']');
+                if (subs[1].Trim().Length > 1)
                 {
                     InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
                 }
