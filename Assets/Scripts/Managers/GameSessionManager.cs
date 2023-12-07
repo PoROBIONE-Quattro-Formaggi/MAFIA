@@ -216,6 +216,30 @@ namespace Managers
 
             List<string> GetRolesList(int playerNumber)
             {
+                switch (playerNumber)
+                {
+                    case <= 10:
+                        mafiaNumber = 1;
+                        doctorNumber = 1;
+                        break;
+                    case <= 25:
+                        mafiaNumber = 2;
+                        doctorNumber = 1;
+                        break;
+                    case <= 50:
+                        mafiaNumber = 3;
+                        doctorNumber = 2;
+                        break;
+                    case <= 100:
+                        mafiaNumber = 4;
+                        doctorNumber = 2;
+                        break;
+                    default:
+                        mafiaNumber = 1;
+                        doctorNumber = 1;
+                        break;
+                }
+
                 var tempRolesList = new List<string>(playerNumber);
                 foreach (var field in typeof(Roles).GetFields())
                 {
