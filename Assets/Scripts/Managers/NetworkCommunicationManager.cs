@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
+using UI;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -77,6 +78,7 @@ namespace Managers
         {
             NetworkManager.Shutdown();
             GameSessionManager.Instance.ReconnectToGame();
+            ScreenChanger.Instance.ChangeToErrorScreen();
         }
         
         private void OnHostStarted()

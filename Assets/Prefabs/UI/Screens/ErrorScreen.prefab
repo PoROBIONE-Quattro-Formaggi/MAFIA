@@ -591,6 +591,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2459562999292846136, guid: 13324225d4c34674ba8c7c9f86f1169e, type: 3}
+      propertyPath: returns
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2558880514890299480, guid: 13324225d4c34674ba8c7c9f86f1169e, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -974,7 +978,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1220234520854097313, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_text
-      value: SOMETHING WENT WRONG...
+      value: connection lost, game will be restarted after reconnection
       objectReference: {fileID: 0}
     - target: {fileID: 1679711956279204293, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_VerticalFit
@@ -1150,7 +1154,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8001744620153054844, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 467.05212
+      value: 1103.9
       objectReference: {fileID: 0}
     - target: {fileID: 8001744620153054844, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_SizeDelta.y
@@ -1158,7 +1162,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8001744620153054844, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 249.52606
+      value: 960
       objectReference: {fileID: 0}
     - target: {fileID: 8001744620153054844, guid: 054a2ab89094fc24dbf847c015a73044, type: 3}
       propertyPath: m_AnchoredPosition.y

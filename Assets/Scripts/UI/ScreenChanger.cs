@@ -101,6 +101,10 @@ namespace UI
 
         }
 
+        public void ChangeToErrorScreen(){
+            ChangeTo(Screens.ErrorScreen);
+        }
+
         public void ChangeToPreviousScreen() {
             if (_lastScreenName == ""){
                 ChangeTo(Screens.MainScreen);
