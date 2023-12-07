@@ -374,7 +374,7 @@ namespace Managers
             if (_joinedLobby.Players.Count(p =>
                     p.Data.ContainsKey(PlayerName) &&
                     p.Data[PlayerName].Value == currentName) <= 1) return;
-            
+
             var randomNumber = new Random().Next(100);
             var newName = $"{currentName}({randomNumber})";
             _playerName = newName;
@@ -465,15 +465,15 @@ namespace Managers
             Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
-        public async void StartGame()
+        public async Task<bool> StartGame()
         {
-            if (_joinedLobby == null) return;
-            if (!IsLobbyHost()) return;
+            if (_joinedLobby == null) return false;
+            if (!IsLobbyHost()) return false;
             var maxClientsNum = _hostLobby.Players.Count;
             if (maxClientsNum < 5)
             {
                 Toast.Show($"Cannot start the game. {maxClientsNum} out of 5 players required.");
-                return;
+                return false;
             }
 
             string relayCode;
@@ -485,13 +485,13 @@ namespace Managers
             {
                 Toast.Show("Cannot start the game. Try again.");
                 Debug.LogError(e);
-                return;
+                return false;
             }
 
             if (relayCode == ErrorCodes.JoinRelayErrorCode)
             {
                 Toast.Show("Cannot start the game. Try again.");
-                return;
+                return false;
             }
 
             SetPlayerPrefsForGameSession(relayCode, 1, _hostLobby.Players.Count - 1, Roles.Narrator);
@@ -517,10 +517,12 @@ namespace Managers
             catch (LobbyServiceException e)
             {
                 Debug.LogError(e);
-                return;
+                Toast.Show("Cannot start the game. Try again.");
+                return false;
             }
 
             SceneChanger.ChangeToGameScene();
+            return true;
         }
 
         public async Task<bool> EndGame()
