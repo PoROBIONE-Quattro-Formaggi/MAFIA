@@ -206,7 +206,7 @@ namespace UI
                         GameSessionManager.Instance.DoctorVoteFor(_currentChosenID);
                         break;
                     case Roles.Resident:
-                        //TODO 
+                        //TODO turn on later
                         // GameSessionManager.Instance.ResidentVoteFor(intVoteOption);
                         break;
                 }

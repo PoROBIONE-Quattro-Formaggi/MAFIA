@@ -113,8 +113,30 @@ namespace Managers
             {
                 if (await RelayManager.JoinRelay(joinCode))
                 {
-                    PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
-                    PlayerPrefs.Save();
+                    // PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
+                    // PlayerPrefs.Save();
+                    Debug.Log("[GameSessionManager] Joining to the Relay");
+                    return;
+                }
+
+                Toast.Show("Cannot join to the game");
+                SceneChanger.ChangeToMainScene();
+            }
+        }
+        
+        public async void ReconnectToGame()
+        {
+            var joinCode = PlayerPrefs.GetString(PpKeys.KeyStartGame);
+            var isHost = PlayerPrefs.GetInt(PpKeys.KeyIsHost);
+            if (joinCode == "0" || isHost == 1)
+            {
+                Toast.Show("Cannot join to the game");
+                SceneChanger.ChangeToMainScene();
+            }
+            else
+            {
+                if (await RelayManager.JoinRelay(joinCode))
+                {
                     Debug.Log("[GameSessionManager] Joining to the Relay");
                     return;
                 }
@@ -342,7 +364,6 @@ namespace Managers
         {
             Debug.Log($"THE END\n{winnerRole} wins");
             WinnerRole = winnerRole;
-            // TODO implement ENDGAME functionality
             OnHostEndGame?.Invoke();
             NetworkCommunicationManager.Instance.EndGameForClientsClientRpc(winnerRole);
         }

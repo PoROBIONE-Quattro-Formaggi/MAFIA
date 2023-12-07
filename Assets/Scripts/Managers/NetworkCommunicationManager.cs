@@ -52,6 +52,7 @@ namespace Managers
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            NetworkManager.Singleton.OnTransportFailure += OnTransportFailureClient;
             OnPlayerRoleAssigned += () =>
             {
                 IsPlayerRoleAssigned = true;
@@ -67,7 +68,14 @@ namespace Managers
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
+            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailureClient;
             IsPlayerRoleAssigned = false;
+        }
+        
+        private void OnTransportFailureClient()
+        {
+            NetworkManager.Shutdown();
+            GameSessionManager.Instance.ReconnectToGame();
         }
         
         private void OnHostStarted()
