@@ -52,12 +52,13 @@ namespace Managers
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-            NetworkManager.Singleton.OnTransportFailure += OnTransportFailureClient;
+            NetworkManager.Singleton.OnTransportFailure += OnTransportFailure;
             OnPlayerRoleAssigned += () =>
             {
-                IsPlayerRoleAssigned = true;
+                Debug.Log("OnPlayerRoleAssigned called (changing IsPlayerRoleAssigned)");
                 NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientReconnected;
+                IsPlayerRoleAssigned = true;
             };
         }
 
@@ -68,11 +69,11 @@ namespace Managers
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
-            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailureClient;
+            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure;
             IsPlayerRoleAssigned = false;
         }
         
-        private void OnTransportFailureClient()
+        private void OnTransportFailure()
         {
             NetworkManager.Shutdown();
             GameSessionManager.Instance.ReconnectToGame();
@@ -114,6 +115,8 @@ namespace Managers
         private void OnClientReconnected(ulong clientId)
         {
             if (IsHost) return;
+            Debug.Log("OnClientReconnected called");
+            Debug.Log($"Is player role assigned: {IsPlayerRoleAssigned}");
             var oldID = PlayerData.ClientID;
             PlayerData.ClientID = clientId;
             ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(oldID, clientId);
@@ -351,6 +354,12 @@ namespace Managers
             SendNightResidentsOptionsClientRpc(options);
             SendNarratorCommentClientRpc(GameSessionManager.Instance.NarratorComment);
             SetTimeForClientsClientRpc(GameSessionManager.Instance.CurrentTimeOfDay);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void EmergencyEndGameServerRpc()
+        {
+            GameSessionManager.Instance.EmergencyEndGame();
         }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

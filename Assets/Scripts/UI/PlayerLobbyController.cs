@@ -8,11 +8,15 @@ namespace UI {
 public class PlayerLobbyController : MonoBehaviour
 {
     public TextMeshProUGUI informationText;
-    public RectTransform screenRect;
-    public RectTransform informationRect;
 
-    private void OnEnable() {
-        informationText.text = $"You are {MainMenuUIManager.Instance.GetName()}, please wait";
-    } 
+    private void OnEnable() 
+    {
+        SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
+    }
+
+    public void SetWelcomePrompt(string playerName)
+    {
+        informationText.text = $"You are {playerName}, please wait";
+    }
 }
 }

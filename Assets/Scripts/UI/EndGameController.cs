@@ -15,11 +15,19 @@ namespace UI
         private void OnEnable()
         {
             string winnerRole = GameSessionManager.Instance.GetWinnerRole();
-            if (winnerRole == "Mafia"){
+            if (winnerRole == "Mafia")
+            {
                 informationText.text = $"The {winnerRole} wins.";
-            } else {
+            }
+            else if (winnerRole == "DRAW")
+            {
+                informationText.text = "It's a draw";
+            }
+            else
+            {
                 informationText.text = "The Citizens win.";
             }
+
             if (NetworkCommunicationManager.Instance.IsHost)
             {
                 goToLobbyButton.gameObject.SetActive(true);

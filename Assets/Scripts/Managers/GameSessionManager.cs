@@ -123,7 +123,7 @@ namespace Managers
                 SceneChanger.ChangeToMainScene();
             }
         }
-        
+
         public async void ReconnectToGame()
         {
             var joinCode = PlayerPrefs.GetString(PpKeys.KeyStartGame);
@@ -138,12 +138,18 @@ namespace Managers
                 if (await RelayManager.JoinRelay(joinCode))
                 {
                     Debug.Log("[GameSessionManager] Joining to the Relay");
+                    NetworkCommunicationManager.Instance.EmergencyEndGameServerRpc();
                     return;
                 }
 
                 Toast.Show("Cannot join to the game");
                 SceneChanger.ChangeToMainScene();
             }
+        }
+
+        public void EmergencyEndGame()
+        {
+            EndGame("DRAW");
         }
 
         public void OnNewClientConnected(ulong clientId)
@@ -163,6 +169,7 @@ namespace Managers
             {
                 Debug.Log($"{keyVal.Key} - {keyVal.Value}");
             }
+
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
             Debug.Log($"expected number of players: {expectedNumberOfPlayers}");

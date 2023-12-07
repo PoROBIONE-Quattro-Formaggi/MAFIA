@@ -19,6 +19,7 @@ namespace UI
         
         private void OnEnable()
         {
+            Debug.Log($"On enable client called. IsPlayerRoleAssigned: {NetworkCommunicationManager.Instance.IsPlayerRoleAssigned}");
             if (!NetworkCommunicationManager.Instance.IsPlayerRoleAssigned)
             {
                 ScreenChanger.Instance.ChangeToPlayerRoleScreen();
@@ -35,27 +36,5 @@ namespace UI
             roleController.DisplayRole(PlayerData.Role);
             NetworkCommunicationManager.Instance.OnPlayerRoleAssigned -= SetPlayerRoleToPrompt;
         }
-
-        // BUTTON ONCLICK FUNCTIONS
-        public void OnOkButtonClicked()
-        {
-            DisableRoleInformation();
-            EnableNight();
-        }
-
-        private void DisableRoleInformation()
-        {
-            okButton.SetActive(false);
-            rolePrompt.SetActive(false);
-        }
-        
-
-        private void EnableNight()
-        {
-            // TODO: set information for information prompt + actually animate prompt
-            infoBar.SetActive(true);
-            goVoteButton.SetActive(true);
-        }
-        
     }
 }

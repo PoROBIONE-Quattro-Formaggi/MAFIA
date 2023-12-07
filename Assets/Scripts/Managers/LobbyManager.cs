@@ -9,6 +9,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using UnityEngine;
+using Random = System.Random;
 
 namespace Managers
 {
@@ -40,6 +41,7 @@ namespace Managers
         private bool _sendingHeartbeat;
         private const float LobbyPollPeriod = 1.1f;
         private const float HeartbeatPeriod = 15f;
+        private const string PlayerName = "PlayerName";
 
         private void Awake()
         {
@@ -91,7 +93,7 @@ namespace Managers
                     {
                         Debug.LogError(e);
                     }
-                    
+
                     _polling = false;
                 }
             }
@@ -119,7 +121,7 @@ namespace Managers
                     {
                         Debug.LogError(e);
                     }
-                    
+
                     _sendingHeartbeat = false;
                 }
             }
@@ -149,6 +151,7 @@ namespace Managers
                 {
                     Debug.LogError(e);
                 }
+
                 return;
             }
 
@@ -182,7 +185,7 @@ namespace Managers
             _lastPlayersCount = _joinedLobby.Players.Count;
         }
 
-        public async void CreateLobbyAsync(
+        public async Task<bool> CreateLobbyAsync(
             string playerName,
             string lobbyName,
             int maxPlayersInt,
@@ -195,7 +198,7 @@ namespace Managers
                 Data = new Dictionary<string, PlayerDataObject>
                 {
                     {
-                        "PlayerName",
+                        PlayerName,
                         new PlayerDataObject(
                             PlayerDataObject.VisibilityOptions.Member,
                             playerName
@@ -237,13 +240,14 @@ namespace Managers
             {
                 Debug.LogError(e);
                 Toast.Show("Cannot create lobby. Try again.");
-                return;
+                return false;
             }
 
             _joinedLobby = _hostLobby; //Because creator automatically joins the lobby
             var message =
                 $"\nLobby '{_hostLobby.Name}' Created. Max players: {_hostLobby.MaxPlayers}. Code: {_hostLobby.LobbyCode}. Private: {_hostLobby.IsPrivate}";
             Debug.Log(message);
+            return true;
         }
 
         public static async Task<List<Lobby>> GetLobbiesList()
@@ -283,7 +287,7 @@ namespace Managers
         {
             return _joinedLobby == null
                 ? new List<string>()
-                : _joinedLobby.Players.Select(player => player.Data["PlayerName"].Value).ToList();
+                : _joinedLobby.Players.Select(player => player.Data[PlayerName].Value).ToList();
         }
 
         public string GetLobbyName()
@@ -309,7 +313,7 @@ namespace Managers
                 Data = new Dictionary<string, PlayerDataObject>
                 {
                     {
-                        "PlayerName", new PlayerDataObject(
+                        PlayerName, new PlayerDataObject(
                             PlayerDataObject.VisibilityOptions.Member,
                             playerName
                         )
@@ -340,6 +344,7 @@ namespace Managers
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByCodeAsync(code, joinLobbyByCodeOptions);
+                ChangePlayerNameIfTheSameIsPresent(joinLobbyByCodeOptions.Player.Data[PlayerName].Value);
                 Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
             }
             catch (LobbyServiceException e)
@@ -354,11 +359,46 @@ namespace Managers
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyID, joinLobbyByIdOptions);
+                ChangePlayerNameIfTheSameIsPresent(joinLobbyByIdOptions.Player.Data[PlayerName].Value);
                 Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
             }
             catch (LobbyServiceException e)
             {
                 Toast.Show("Cannot join to lobby. Try again.");
+                Debug.LogError(e);
+            }
+        }
+
+        private async void ChangePlayerNameIfTheSameIsPresent(string currentName)
+        {
+            if (_joinedLobby.Players.Count(p =>
+                    p.Data.ContainsKey(PlayerName) &&
+                    p.Data[PlayerName].Value == currentName) <= 1) return;
+            
+            var randomNumber = new Random().Next(100);
+            var newName = $"{currentName}({randomNumber})";
+            _playerName = newName;
+            FindObjectOfType<PlayerLobbyController>().SetWelcomePrompt(newName);
+            var updatePlayerOptions = new UpdatePlayerOptions
+            {
+                Data = new Dictionary<string, PlayerDataObject>
+                {
+                    {
+                        PlayerName, new PlayerDataObject(
+                            PlayerDataObject.VisibilityOptions.Member,
+                            newName
+                        )
+                    }
+                }
+            };
+            try
+            {
+                var playerID = AuthenticationService.Instance.PlayerId;
+                await LobbyService.Instance.UpdatePlayerAsync(_joinedLobby.Id, playerID, updatePlayerOptions);
+            }
+            catch (LobbyServiceException e)
+            {
+                Toast.Show("Error with updating the lobby.");
                 Debug.LogError(e);
             }
         }
@@ -401,6 +441,7 @@ namespace Managers
                 _hostLobby = null;
                 _joinedLobby = null;
             }
+
             Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
@@ -420,6 +461,7 @@ namespace Managers
                 _hostLobby = null;
                 _joinedLobby = null;
             }
+
             Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
