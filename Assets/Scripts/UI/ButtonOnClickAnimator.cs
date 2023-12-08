@@ -57,6 +57,7 @@ namespace UI
             _buttonText.text = _buttonText.text[..^1];
             if (changesScreen)
             {
+                Debug.Log("screen changer called");
                 ScreenChanger.Instance.ChangeTo(screenToChangeTo.name);
             } else if (returns)
             {

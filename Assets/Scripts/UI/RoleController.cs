@@ -30,11 +30,24 @@ namespace UI
 
         private void AnimateDots()
         {
-            MainMenuUIManager.Instance.AnimatePlaceholder(dots);
+            AnimatePlaceholder(dots);
+        }
+        
+        public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        {
+            placeholderText.text = placeholderText.text.Length switch
+            {
+                0 => ".",
+                1 => ". .",
+                3 => ". . .",
+                5 => "",
+                _ => "."
+            };
         }
 
         private void OnDisable()
         {
+            CancelInvoke(nameof(AnimateDots));
             // prompt.text = "You are";
             // mafiaRole.SetActive(false);
             // citizenRole.SetActive(false);

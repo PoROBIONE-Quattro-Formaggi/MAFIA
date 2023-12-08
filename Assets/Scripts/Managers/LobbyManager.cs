@@ -131,8 +131,8 @@ namespace Managers
         private async void HandleLobbyPollForUpdates()
         {
             if (_joinedLobby == null) return;
-            if (IsLobbyHost()) return;
             CheckIfNewHost();
+            if (IsLobbyHost()) return;
             if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
             try
             {
@@ -173,6 +173,8 @@ namespace Managers
 
         private void CheckIfNewHost()
         {
+            Debug.Log("Checking if new host");
+            Debug.Log($"_joinedLobby.Players.Count: {_joinedLobby.Players.Count}, _lastPlayersCount: {_lastPlayersCount}");
             if (_joinedLobby.Players.Count < _lastPlayersCount)
             {
                 if (IsLobbyHost() && _hostLobby == null)
