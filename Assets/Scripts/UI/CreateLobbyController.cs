@@ -1,3 +1,4 @@
+using System.Text;
 using DataStorage;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
@@ -40,6 +41,8 @@ namespace UI
         private float _maxCharWidth;
         private bool _blockTownAnimationInvoke;
         private bool _blockPopulationAnimationInvoke;
+        private int _dotIndex = 0;
+        private StringBuilder _placeholderString;
 
 
         private void Awake()
@@ -51,6 +54,8 @@ namespace UI
 
             _inputDisplayMinWidth = inputDisplay.sizeDelta.x - inputDisplayOffset;
             _maxCharWidth = maxWidthChar.preferredWidth;
+            
+            _placeholderString = new StringBuilder(townNameInputPlaceholder.text);
         }
 
         private void AdjustCreateDisplay(float preferredWidth)
@@ -246,7 +251,23 @@ namespace UI
         // PLACEHOLDER ANIMATION FUNCTIONS
         private void AnimateTownNamePlaceholder()
         {
-            MainMenuUIManager.Instance.AnimatePlaceholder(townNameInputPlaceholder);
+            if (_dotIndex == 0)
+            {
+                _placeholderString[_dotIndex] = ' ';
+                _dotIndex += 2;
+            } else if (_dotIndex > _placeholderString.Length)
+            {
+                _placeholderString[_dotIndex - 2] = '.';
+                _dotIndex = 0;
+            }
+            else
+            {
+                _placeholderString[_dotIndex - 2] = '.';
+                _placeholderString[_dotIndex] = ' ';
+                _dotIndex += 2;
+            }
+
+            townNameInputPlaceholder.text = _placeholderString.ToString();
         }
 
         private void AnimatePopulationPlaceholder()
