@@ -281,7 +281,6 @@ namespace UI
         {
             if (inputPlaceholder.text != ". . .")
             {
-                Debug.Log("input edited");
                 input.text = inputPlaceholder.text;
             }
             playerQuoteText.text += ".";
@@ -294,6 +293,11 @@ namespace UI
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             inputPlaceholder.text = ". . .";
             confirmInputButton.SetActive(input.text.Length != 0);
+
+            if (input.text.EndsWith('\n'))
+            {
+                OnConfirmInputButtonClicked();
+            }
         }
         
         public void OnInputDeselected()
@@ -311,10 +315,10 @@ namespace UI
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
-                    GameSessionManager.Instance.SetAlibi(input.text);
+                    GameSessionManager.Instance.SetAlibi(input.text.Trim('\n'));
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
+                    GameSessionManager.Instance.SetLastWords(playerQuoteText.text.Trim('\n'));
                     break;
             }
 

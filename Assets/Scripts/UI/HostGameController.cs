@@ -40,12 +40,12 @@ namespace UI
 
             if (currentMafiaVoteCount == currentAliveMafiaCount)
             {
-                mafiaStatus.text = "The mafia has voted.";
+                mafiaStatus.text = "<b>The mafia has voted.</b>";
                 _isMafiaDoneVoting = true;
                 ShowForwardButton();
             }
             else
-                mafiaStatus.text = $"Currently {currentAliveMafiaCount} out of {currentAliveMafiaCount} have voted.";
+                mafiaStatus.text = $"Currently <b>{currentAliveMafiaCount} out of {currentAliveMafiaCount} mafiosi</b> have voted.";
         }
 
         private void OnOneDoctorVoted()
@@ -55,12 +55,12 @@ namespace UI
 
             if (currentDoctorVoteCount == currentAliveDoctorCount)
             {
-                doctorStatus.text = "The hospital staff has voted.";
+                doctorStatus.text = "<b>The hospital staff has voted.</b>";
                 _isDoctorsDoneVoting = true;
                 ShowForwardButton();
             }
             else
-                doctorStatus.text = $"Currently {currentAliveDoctorCount} out of {currentAliveDoctorCount} have voted.";
+                doctorStatus.text = $"Currently <b>{currentAliveDoctorCount} out of {currentAliveDoctorCount} doctors</b> have voted.";
         }
 
         private void OnOneResidentDayVoted()
@@ -70,12 +70,12 @@ namespace UI
 
             if (currentResidentsDayVoteCount == currentAlivePlayers)
             {
-                townStatus.text = "The town has voted.";
+                townStatus.text = "<b>The town has voted.</b>";
                 forwardButton.SetActive(true);
             }
             else
             {
-                townStatus.text = $"Currently {currentResidentsDayVoteCount} out of {currentAlivePlayers} have voted.";
+                townStatus.text = $"Currently <b>{currentResidentsDayVoteCount} out of {currentAlivePlayers} citizens</b> have voted.";
             }
         }
 
@@ -101,7 +101,7 @@ namespace UI
                     Sunset();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text}.");
+                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text.Trim('\n')}.");
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
                     DisableInput();
@@ -112,13 +112,52 @@ namespace UI
 
         public void OnInputValueChanged()
         {
-            lastDeath.text = $"[Narrator] " + input.text;
+            lastDeath.text = $"<b>[Narrator]</b> " + input.text;
+
+            if (input.text.Length == 0)
+            {
+                InvokeRepeating(nameof(AnimatePlaceholder), 0f, 0.5f);
+            } 
+            else
+            {
+                CancelInvoke(nameof(AnimatePlaceholder));
+            }
+
+            if (input.text.EndsWith('\n'))
+            {
+                OnForwardClicked();
+            }
+        }
+        
+        private void AnimatePlaceholder()
+        {
+            AnimatePlaceholder(inputPlaceholder);
+        }
+        
+        private void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        {
+            placeholderText.text = placeholderText.text.Length switch
+            {
+                0 => ".",
+                1 => ". .",
+                3 => ". . .",
+                5 => "",
+                _ => "."
+            };
+        }
+
+        public void OnInputSelected()
+        {
+            if (input.text.Length != 0) return;
+            InvokeRepeating(nameof(AnimatePlaceholder), 0f, 0.5f);
         }
 
         public void OnInputDeselected()
         {
+            CancelInvoke(nameof(AnimatePlaceholder));
             if (input.text.Length == 0)
             {
+                inputPlaceholder.text = ". . .";
                 inputPlaceholder.gameObject.SetActive(true);
             }
         }
@@ -127,13 +166,9 @@ namespace UI
         private void Sunrise()
         {
             mafiaStatus.gameObject.SetActive(false);
-            mafiaStatus.text = "The mafia has not voted.";
+            mafiaStatus.text = "<b>The mafia has not voted.</b>";
             doctorStatus.gameObject.SetActive(false);
-            if (GameSessionManager.Instance.GetAmountOfAliveDoctors() == 0)
-            {
-                doctorStatus.text = "All the medical staff is dead";
-            }
-            doctorStatus.text = "The medical staff has not voted.";
+            doctorStatus.text = "<b>The medical staff has not voted.</b>";
 
             townStatus.gameObject.SetActive(true);
         }
@@ -142,7 +177,7 @@ namespace UI
         private void Sunset()
         {
             townStatus.gameObject.SetActive(false);
-            townStatus.text = "The town has not voted.";
+            townStatus.text = "<b>The town has not voted.</b>";
             
             executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
             executionStatus.gameObject.SetActive(true);
@@ -168,6 +203,10 @@ namespace UI
             executionStatus.gameObject.SetActive(false);
             executionStatus.text = $"_ was executed by the town.";
             
+            if (GameSessionManager.Instance.GetAmountOfAliveDoctors() == 0)
+            {
+                doctorStatus.text = "<b>All the medical staff is dead</b>";
+            }
             mafiaStatus.gameObject.SetActive(true);
             doctorStatus.gameObject.SetActive(true);
         }
