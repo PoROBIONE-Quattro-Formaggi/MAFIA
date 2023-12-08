@@ -101,9 +101,9 @@ namespace UI
                     Sunset();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
+                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text}.");
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
-                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text}.");
                     DisableInput();
                     MoonRise();
                     break;

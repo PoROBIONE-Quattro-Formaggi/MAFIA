@@ -21,34 +21,40 @@ namespace UI
             }
             else if (winnerRole == "DRAW")
             {
-                informationText.text = "It's a draw";
+                informationText.text = "Oh no! A fatal error occured \u00af\\_(ツ)_/\u00af";
             }
             else
             {
                 informationText.text = "The Citizens win.";
             }
-
-            if (NetworkCommunicationManager.Instance.IsHost)
-            {
-                goToLobbyButton.gameObject.SetActive(true);
-            }
         }
 
         public async void GoToLobbyClicked()
         {
-            if (!await LobbyManager.Instance.EndGame())
+            if (LobbyManager.Instance.IsLobbyHost())
             {
-                Toast.Show("Cannot end the game. Try again.");
-                return;
+                if (!await LobbyManager.Instance.EndGame())
+                {
+                    Toast.Show("Cannot end the game. Try again.");
+                    return;
+                }
+
+                NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             }
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
             GameSessionManager.Instance.ClearAllDataForEndGame();
-            NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
-            LobbyManager.Instance.LeaveLobby();
-            SceneChanger.ChangeToMainScene();
+            if (LobbyManager.Instance.GetLobbyName() != "")
+            {
+                LobbyManager.Instance.LeaveLobby();
+            }
+
+            if (!NetworkManager.Singleton.ShutdownInProgress)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
             // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
-            NetworkManager.Singleton.Shutdown();
+            SceneChanger.ChangeToMainScene();
         }
     }
 }

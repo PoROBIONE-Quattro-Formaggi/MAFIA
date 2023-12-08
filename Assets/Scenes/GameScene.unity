@@ -168,6 +168,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Game Session Managers
       objectReference: {fileID: 0}
+    - target: {fileID: 4524849476002824268, guid: 8e11c04883f39964793da4972849834e, type: 3}
+      propertyPath: networkManager
+      value: 
+      objectReference: {fileID: 5172173921015072382, guid: 4e6d3abe3b31cc842b45aa6218097cee, type: 3}
     - target: {fileID: 7920735048323769144, guid: 8e11c04883f39964793da4972849834e, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -623,6 +627,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4970033380084817631, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
+      propertyPath: m_text
+      value: Traveling
+      objectReference: {fileID: 0}
     - target: {fileID: 5869495782281491851, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -633,7 +641,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5869495782281491851, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 134.06
+      value: 159.61
       objectReference: {fileID: 0}
     - target: {fileID: 5869495782281491851, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
       propertyPath: m_SizeDelta.y
@@ -641,7 +649,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5869495782281491851, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 67.03
+      value: 79.805
       objectReference: {fileID: 0}
     - target: {fileID: 5869495782281491851, guid: 3bf14669b5790463cbd4dfa97ce801ca, type: 3}
       propertyPath: m_AnchoredPosition.y

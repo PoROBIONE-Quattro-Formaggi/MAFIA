@@ -45,6 +45,13 @@ namespace UI
             return animationMaxWidthRender.preferredWidth;
         }
 
+        public void SetButtonText(string newText)
+        {
+            text.text = newText;
+            _animationMaxWidth = GetAnimationMaxWidth();
+            _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+        }
+
         public void OnClickAnimation()
         {
             StartCoroutine(AnimateOnClick());

@@ -77,7 +77,7 @@ namespace UI
 
         private void OnEnableNight()
         {
-            SetInformationText("NIGHT");
+            SetInformationText(LoreMessages.GetRandomMessage());
             SetAlibiInput();
             
             playerGameAnimator.Play("night");
@@ -95,7 +95,7 @@ namespace UI
 
         private void OnEnableDay()
         {
-            SetInformationText("DAY");
+            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
             if (goVoteButton.activeSelf)
             {
@@ -107,7 +107,7 @@ namespace UI
 
         private void OnEnableEvening()
         {
-            SetInformationText("EVENING");
+            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
         }
 
@@ -164,7 +164,7 @@ namespace UI
             }
             else
             {
-                informationText.text = $"{lastKilledName} was killed last night";
+                informationText.text = MafiaDeaths.GetRandomMafiaDeathMessage(lastKilledName);
             
                 goVoteButton.SetActive(true);
                 SetPlayerQuoteStringDay();
@@ -189,7 +189,7 @@ namespace UI
             }
             else
             {
-                informationText.text = $"{lastKilledName} was executed by the town.";
+                informationText.text = Executions.GetRandomDeathMessage(lastKilledName);
             }
         }
 
@@ -218,7 +218,7 @@ namespace UI
             DisableInput();
             
             // ROLL LAST WORDS
-            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
+            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n{GameSessionManager.Instance.GetNarratorComment()}";
             playerQuote.SetActive(false);
             deadPrompt.SetActive(false);
 
