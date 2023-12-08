@@ -114,8 +114,10 @@ namespace UI
         private void EnableAlibiInput()
         {
             promptText.text = "Click below to edit alibi, or";
+            Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
             inputPlaceholder.text = alibi;
+            Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);

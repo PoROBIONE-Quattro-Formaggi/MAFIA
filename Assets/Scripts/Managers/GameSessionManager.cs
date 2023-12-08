@@ -472,6 +472,7 @@ namespace Managers
         public void SetAlibi(string alibi)
         {
             Debug.Log($"alibi sent to server: {alibi}");
+            IDToAlibi[PlayerData.ClientID] = alibi;
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
 
