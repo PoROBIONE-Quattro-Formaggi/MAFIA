@@ -77,7 +77,7 @@ namespace UI
 
         private void OnEnableNight()
         {
-            SetInformationText("NIGHT");
+            SetInformationText(LoreMessages.GetRandomMessage());
             SetAlibiInput();
             
             playerGameAnimator.Play("night");
@@ -95,7 +95,7 @@ namespace UI
 
         private void OnEnableDay()
         {
-            SetInformationText("DAY");
+            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
             if (goVoteButton.activeSelf)
             {
@@ -107,15 +107,17 @@ namespace UI
 
         private void OnEnableEvening()
         {
-            SetInformationText("EVENING");
+            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
         }
 
         private void EnableAlibiInput()
         {
             promptText.text = "Click below to edit alibi, or";
+            Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
             inputPlaceholder.text = alibi;
+            Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
@@ -162,7 +164,7 @@ namespace UI
             }
             else
             {
-                informationText.text = $"{lastKilledName} was killed last night";
+                informationText.text = MafiaDeaths.GetRandomMafiaDeathMessage(lastKilledName);
             
                 goVoteButton.SetActive(true);
                 SetPlayerQuoteStringDay();
@@ -187,7 +189,7 @@ namespace UI
             }
             else
             {
-                informationText.text = $"{lastKilledName} was executed by the town.";
+                informationText.text = Executions.GetRandomDeathMessage(lastKilledName);
             }
         }
 
@@ -216,7 +218,7 @@ namespace UI
             DisableInput();
             
             // ROLL LAST WORDS
-            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
+            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n{GameSessionManager.Instance.GetNarratorComment()}";
             playerQuote.SetActive(false);
             deadPrompt.SetActive(false);
 
@@ -279,7 +281,6 @@ namespace UI
         {
             if (inputPlaceholder.text != ". . .")
             {
-                Debug.Log("input edited");
                 input.text = inputPlaceholder.text;
             }
             playerQuoteText.text += ".";
@@ -292,6 +293,19 @@ namespace UI
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             inputPlaceholder.text = ". . .";
             confirmInputButton.SetActive(input.text.Length != 0);
+
+            if (input.text.EndsWith('\n'))
+            {
+                OnConfirmInputButtonClicked();
+            }
+        }
+        
+        public void OnInputDeselected()
+        {
+            if (input.text.Length == 0)
+            {
+                inputPlaceholder.gameObject.SetActive(true);
+            }
         }
 
         private void SendInputToServer()
@@ -301,10 +315,10 @@ namespace UI
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
-                    GameSessionManager.Instance.SetAlibi(input.text);
+                    GameSessionManager.Instance.SetAlibi(input.text.Trim('\n'));
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetLastWords(playerQuoteText.text);
+                    GameSessionManager.Instance.SetLastWords(playerQuoteText.text.Trim('\n'));
                     break;
             }
 

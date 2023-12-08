@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
@@ -14,10 +16,34 @@ namespace UI
 
         [Header("Keyboard")] public KeyboardController keyboard;
 
+        private int _dotIndex = 0;
+        private StringBuilder _placeholderString;
+
+        private void Start()
+        {
+            _placeholderString = new StringBuilder(enterNamePlaceholder.text);
+        }
+
 
         private void AnimateEnterNamePlaceholder()
         {
-            MainMenuUIManager.Instance.AnimatePlaceholder(enterNamePlaceholder);
+            if (_dotIndex == 0)
+            {
+                _placeholderString[_dotIndex] = ' ';
+                _dotIndex += 2;
+            } else if (_dotIndex > _placeholderString.Length)
+            {
+                _placeholderString[_dotIndex - 2] = '.';
+                _dotIndex = 0;
+            }
+            else
+            {
+                _placeholderString[_dotIndex - 2] = '.';
+                _placeholderString[_dotIndex] = ' ';
+                _dotIndex += 2;
+            }
+
+            enterNamePlaceholder.text = _placeholderString.ToString();
         }
 
 

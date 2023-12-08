@@ -84,7 +84,7 @@ namespace UI
         private void FixedUpdate()
         {
             UpdateCredits();
-            if (_currentY < _rectTransform.sizeDelta.y)
+            if (_currentY < _rectTransform.sizeDelta.y - 216)
             {
                 _currentY += 1 * scrollSpeed;
             }

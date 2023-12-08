@@ -29,6 +29,7 @@ namespace Managers
         }
 
         public bool IsCurrentlyInGame { get; set; }
+        public event Action OnHostMigrated;
 
         private static LobbyManager _instance;
         private Lobby _hostLobby;
@@ -130,8 +131,8 @@ namespace Managers
         private async void HandleLobbyPollForUpdates()
         {
             if (_joinedLobby == null) return;
-            if (IsLobbyHost()) return;
             CheckIfNewHost();
+            if (IsLobbyHost()) return;
             if (Time.time - _lastLobbyServiceCall < LobbyPollPeriod) return;
             try
             {
@@ -178,7 +179,7 @@ namespace Managers
                 {
                     _hostLobby = _joinedLobby;
                     Toast.Show("You are new lobby host");
-                    //TODO change to host UI here
+                    OnHostMigrated?.Invoke();
                 }
             }
 

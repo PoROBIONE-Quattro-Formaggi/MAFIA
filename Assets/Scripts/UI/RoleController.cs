@@ -1,3 +1,4 @@
+using Managers;
 using TMPro;
 using UnityEngine;
 
@@ -5,8 +6,7 @@ namespace UI
 {
     public class RoleController : MonoBehaviour
     {
-        [Header("PROMPTS")]
-        public TextMeshProUGUI prompt;
+        [Header("PROMPTS")] public TextMeshProUGUI prompt;
         public TextMeshProUGUI paragraph1;
         public TextMeshProUGUI paragraph2;
         public GameObject mafiaRole;
@@ -14,27 +14,62 @@ namespace UI
         public GameObject doctorRole;
         public TextMeshProUGUI dots;
 
-        [Header("BUTTONS")] 
-        public GameObject okButton;
+        [Header("BUTTONS")] public GameObject okButton;
 
-        [Header("SCREENS TO CHANGE TO")] 
-        public GameObject night;
+        [Header("SCREENS TO CHANGE TO")] public GameObject night;
 
-        private GameObject _roleScreen;
+        private int _timeCounter;
 
-        private void OnStart()
+
+        private void Start()
         {
-            _roleScreen = GetComponent<GameObject>();
             InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
+            InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
+            
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
+        }
+
+        private void ThrowToGame()
+        {
+            ScreenChanger.Instance.ChangeToPlayerGameScreen();
+        }
+        
+        
+
+        private void ChangeButtonNameIfApplicable()
+        {
+            if (_timeCounter == 10)
+            {
+                okButton.GetComponent<ButtonOnClickAnimator>().SetButtonText("Please click here");
+                CancelInvoke(nameof(ChangeButtonNameIfApplicable));
+                return;
+            }
+
+            _timeCounter += 1;
         }
 
         private void AnimateDots()
         {
-            MainMenuUIManager.Instance.AnimatePlaceholder(dots);
+            AnimatePlaceholder(dots);
+        }
+
+        public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        {
+            placeholderText.text = placeholderText.text.Length switch
+            {
+                0 => ".",
+                1 => ". .",
+                3 => ". . .",
+                5 => "",
+                _ => "."
+            };
         }
 
         private void OnDisable()
         {
+            CancelInvoke(nameof(AnimateDots));
+            CancelInvoke(nameof(ChangeButtonNameIfApplicable));
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
             // prompt.text = "You are";
             // mafiaRole.SetActive(false);
             // citizenRole.SetActive(false);
@@ -61,7 +96,7 @@ namespace UI
                     DisplayCitizen();
                     break;
             }
-        
+
             // Show prompts and ok button
             paragraph1.gameObject.SetActive(true);
             paragraph2.gameObject.SetActive(true);
@@ -75,7 +110,7 @@ namespace UI
             paragraph2.text = "Select victims wisely to conquer the city without revealing your identity.";
             mafiaRole.SetActive(true);
         }
-    
+
         private void DisplayDoctor()
         {
             prompt.text = "You are the";
@@ -83,7 +118,7 @@ namespace UI
             paragraph2.text = "During the night voting select one person to protect from being killed by the Mafia.";
             doctorRole.SetActive(true);
         }
-    
+
         private void DisplayCitizen()
         {
             prompt.text = "You are a";
@@ -96,6 +131,5 @@ namespace UI
         {
             Debug.Log("Ok button clicked");
         }
-
     }
 }
