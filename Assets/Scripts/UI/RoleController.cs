@@ -1,3 +1,4 @@
+using Managers;
 using TMPro;
 using UnityEngine;
 
@@ -24,7 +25,16 @@ namespace UI
         {
             InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
             InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
+            
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
         }
+
+        private void ThrowToGame()
+        {
+            ScreenChanger.Instance.ChangeToPlayerGameScreen();
+        }
+        
+        
 
         private void ChangeButtonNameIfApplicable()
         {
@@ -59,6 +69,7 @@ namespace UI
         {
             CancelInvoke(nameof(AnimateDots));
             CancelInvoke(nameof(ChangeButtonNameIfApplicable));
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
             // prompt.text = "You are";
             // mafiaRole.SetActive(false);
             // citizenRole.SetActive(false);
