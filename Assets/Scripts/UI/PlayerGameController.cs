@@ -295,6 +295,14 @@ namespace UI
             inputPlaceholder.text = ". . .";
             confirmInputButton.SetActive(input.text.Length != 0);
         }
+        
+        public void OnInputDeselected()
+        {
+            if (input.text.Length == 0)
+            {
+                inputPlaceholder.gameObject.SetActive(true);
+            }
+        }
 
         private void SendInputToServer()
         {
