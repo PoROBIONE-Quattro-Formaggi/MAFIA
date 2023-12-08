@@ -173,8 +173,6 @@ namespace Managers
 
         private void CheckIfNewHost()
         {
-            Debug.Log("Checking if new host");
-            Debug.Log($"_joinedLobby.Players.Count: {_joinedLobby.Players.Count}, _lastPlayersCount: {_lastPlayersCount}");
             if (_joinedLobby.Players.Count < _lastPlayersCount)
             {
                 if (IsLobbyHost() && _hostLobby == null)
