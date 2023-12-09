@@ -69,7 +69,7 @@ namespace UI
         {
             CancelInvoke(nameof(AnimateDots));
             CancelInvoke(nameof(ChangeButtonNameIfApplicable));
-            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
+            NetworkCommunicationManager.Instance.OnDayBegan -= ThrowToGame;
             // prompt.text = "You are";
             // mafiaRole.SetActive(false);
             // citizenRole.SetActive(false);

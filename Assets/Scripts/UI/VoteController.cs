@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DataStorage;
 using Managers;
@@ -23,11 +24,9 @@ namespace UI
 
         private ulong _currentChosenID;
 
-        //private string _time;
-
-        private void Start()
+        private void ThrowToGame()
         {
-            OnEnableNight();
+            ScreenChanger.Instance.ChangeToPlayerGameScreen();
         }
 
         private void OnEnable()
@@ -44,6 +43,8 @@ namespace UI
                     OnEnableEvening();
                     break;
             }
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
+            NetworkCommunicationManager.Instance.OnEveningBegan += ThrowToGame;
         }
 
         private void OnEnableNight()
@@ -126,8 +127,6 @@ namespace UI
                     alibi = playerSetAlibi;
                 }
 
-                Debug.Log($"[{idToPlayerName[playerID]}] with alibi VVV");
-                Debug.Log($"Alibi to ^^^: {alibi}");
                 voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
                     $"<b>[{idToPlayerName[playerID]}]</b> {alibi}";
                 voteOption.SetActive(true);
@@ -135,14 +134,8 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
-
             Debug.Log("AFTER FOREACH LOOP IN GENERATE OPTIONS DAY");
             voteOptionsParent.SetActive(true);
-        }
-
-        private void OnDisable()
-        {
-            ClearVotingOptions();
         }
 
         private void ClearVotingOptions()
@@ -231,6 +224,13 @@ namespace UI
             playerQuoteText.text = quote;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, quote);
             PlayerPrefs.Save();
+        }
+        
+        private void OnDisable()
+        {
+            ClearVotingOptions();
+            NetworkCommunicationManager.Instance.OnDayBegan -= ThrowToGame;
+            NetworkCommunicationManager.Instance.OnEveningBegan -= ThrowToGame;
         }
     }
 }

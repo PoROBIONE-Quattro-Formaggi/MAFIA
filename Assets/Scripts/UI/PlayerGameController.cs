@@ -36,9 +36,6 @@ namespace UI
         private string _time;
         private bool _notYet;
         private bool _rollLastWords;
-        
-        
-
 
         [Header("VARIABLES")] public float animationSpeed;
 
