@@ -19,6 +19,7 @@ namespace UI
         public GameObject endGameScreen;
         public TMP_InputField input;
         public TextMeshProUGUI inputPlaceholder;
+        public Animator hostGameAnimator;
         
 
         private bool _isMafiaDoneVoting;
@@ -31,6 +32,19 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
             GameSessionManager.Instance.OnHostEndGame += EndGame;
+
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    hostGameAnimator.Play("night");
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    hostGameAnimator.Play("day");
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    hostGameAnimator.Play("day");
+                    break;
+            }
         }
 
         private void OnOneMafiaVoted()
@@ -169,6 +183,8 @@ namespace UI
             mafiaStatus.text = "<b>The mafia has not voted.</b>";
             doctorStatus.gameObject.SetActive(false);
             doctorStatus.text = "<b>The medical staff has not voted.</b>";
+            
+            hostGameAnimator.Play("sunrise");
 
             townStatus.gameObject.SetActive(true);
         }
@@ -178,6 +194,8 @@ namespace UI
         {
             townStatus.gameObject.SetActive(false);
             townStatus.text = "<b>The town has not voted.</b>";
+            
+            hostGameAnimator.Play("sunset");
             
             executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
             executionStatus.gameObject.SetActive(true);

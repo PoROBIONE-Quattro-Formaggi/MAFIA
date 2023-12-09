@@ -213,6 +213,7 @@ namespace UI
             // HIDE INPUT
             //OnConfirmInputButtonClicked();
             DisableInput();
+            confirmInputButton.SetActive(false);
             
             // ROLL LAST WORDS
             lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n{GameSessionManager.Instance.GetNarratorComment()}";

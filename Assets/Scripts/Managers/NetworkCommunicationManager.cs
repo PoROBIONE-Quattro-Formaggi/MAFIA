@@ -127,8 +127,25 @@ namespace Managers
         private void  OnClientDisconnected(ulong clientId)
         {
             if (IsHost) return;
-            Toast.Show("You were disconnected. Trying to reconnect.");
             LobbyManager.Instance.IsCurrentlyInGame = false;
+            if (!PlayerData.IsAlive)
+            {
+                GameSessionManager.Instance.ClearAllDataForEndGame();
+                if (LobbyManager.Instance.GetLobbyName() != "")
+                {
+                    LobbyManager.Instance.LeaveLobby();
+                }
+
+                if (!NetworkManager.Singleton.ShutdownInProgress)
+                {
+                    NetworkManager.Singleton.Shutdown();
+                }
+                SceneChanger.ChangeToMainScene();
+            }
+            else
+            {
+                Toast.Show("You were disconnected. Trying to reconnect.");
+            }
         }
 
 
