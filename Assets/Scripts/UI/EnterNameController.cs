@@ -96,5 +96,10 @@ namespace UI
                 Toast.Show("Your name should be at least 2 characters long and no longer than 16");
             }
         }
+
+        private void OnDisable()
+        {
+            enterNameField.text = enterNameField.text.Trim('\n');
+        }
     }
 }

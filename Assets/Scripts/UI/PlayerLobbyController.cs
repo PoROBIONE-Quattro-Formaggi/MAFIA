@@ -14,6 +14,11 @@ namespace UI
         private void OnEnable()
         {
             LobbyManager.Instance.OnHostMigrated += HandleHostMigration;
+            InvokeRepeating(nameof(UpdateWelcomePrompt),0f,1f);
+        }
+
+        private void UpdateWelcomePrompt()
+        {
             SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
         }
 

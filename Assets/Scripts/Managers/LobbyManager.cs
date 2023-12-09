@@ -383,7 +383,7 @@ namespace Managers
             var randomNumber = new Random().Next(100);
             var newName = $"{currentName}({randomNumber})";
             _playerName = newName;
-            FindObjectOfType<PlayerLobbyController>().SetWelcomePrompt(newName);
+            FindObjectOfType<PlayerLobbyController>(true).SetWelcomePrompt(newName);
             var updatePlayerOptions = new UpdatePlayerOptions
             {
                 Data = new Dictionary<string, PlayerDataObject>
