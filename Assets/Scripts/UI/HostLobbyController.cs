@@ -22,7 +22,6 @@ namespace UI
         public async void StartGame()
         {
             await LobbyManager.Instance.StartGame();
-            playButton.SetActive(false);
         }
 
         public void CopyCode()

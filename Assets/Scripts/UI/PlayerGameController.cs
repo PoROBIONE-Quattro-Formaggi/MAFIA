@@ -3,6 +3,7 @@ using DataStorage;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -32,6 +33,7 @@ namespace UI
         public float scrollSpeed;
         public Animator playerGameAnimator;
         public RectTransform lastWordsRectTransform;
+        public GameObject returnButton;
         
         private string _time;
         private bool _notYet;
@@ -255,6 +257,34 @@ namespace UI
         {
             ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
+        
+        public async void GoToLobbyClicked()
+        {
+            if (LobbyManager.Instance.IsLobbyHost())
+            {
+                if (!await LobbyManager.Instance.EndGame())
+                {
+                    Toast.Show("Cannot end the game. Try again.");
+                    return;
+                }
+
+                NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
+            }
+
+            LobbyManager.Instance.IsCurrentlyInGame = false;
+            GameSessionManager.Instance.ClearAllDataForEndGame();
+            if (LobbyManager.Instance.GetLobbyName() != "")
+            {
+                LobbyManager.Instance.LeaveLobby();
+            }
+
+            if (!NetworkManager.Singleton.ShutdownInProgress)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
+            // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
+            SceneChanger.ChangeToMainScene();
+        }
 
         private void EnableLastWords()
         {
@@ -273,6 +303,7 @@ namespace UI
             goVoteButton.SetActive(false);
             DisableInput();
             deadPrompt.SetActive(true);
+            returnButton.SetActive(true);
         }
 
         public void OnConfirmInputButtonClicked()

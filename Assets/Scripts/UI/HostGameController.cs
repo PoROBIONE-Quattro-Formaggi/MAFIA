@@ -106,12 +106,12 @@ namespace UI
                 case TimeIsAManMadeSocialConstruct.Night:
                     GameSessionManager.Instance.EndNight();
                     forwardButton.SetActive(false);
-                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
+                    lastDeath.text = $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
                     Sunrise();
                     break;
                 case TimeIsAManMadeSocialConstruct.Day:
                     GameSessionManager.Instance.EndDay();
-                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    lastDeath.text = $"<b>[The Narrator]</b>{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     Sunset();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
@@ -126,7 +126,7 @@ namespace UI
 
         public void OnInputValueChanged()
         {
-            lastDeath.text = $"<b>[Narrator]</b> " + input.text;
+            lastDeath.text = $"<b>[The Narrator]</b> " + input.text;
 
             if (input.text.Length == 0)
             {

@@ -21,7 +21,7 @@ namespace UI
         public void Start()
         {
             InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
-            InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 20f);
+            InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
         }
 
         private void EmergencyGoToMainMenuIfApplicable()
@@ -38,7 +38,7 @@ namespace UI
                     break;
             }
 
-            _counter++;
+            _counter += 1;
         }
 
         public void AnimatePlaceholder(TextMeshProUGUI placeholderText)

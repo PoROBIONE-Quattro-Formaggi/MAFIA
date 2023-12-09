@@ -308,6 +308,10 @@ namespace Managers
 
         public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
+            if (playerName == "")
+            {
+                playerName = "Anonymous";
+            }
             _playerName = playerName;
             var player = new Player
             {

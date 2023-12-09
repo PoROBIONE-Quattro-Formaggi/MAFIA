@@ -52,7 +52,7 @@ namespace Third_Party.Toast_UI.Scripts
 
         public static void Show(string text)
         {
-            Show(text, new Color(0.1137f, 0.1137f,0.1059f));
+            Show(text,3f ,new Color(0.1137f,0.1137f,0.1059f));
             // Prepare();
             // toastUI.Init(text, 2F, ToastColor.Black, ToastPosition.BottomCenter);
         }
