@@ -105,7 +105,6 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
-
             voteOptionsParent.SetActive(true);
         }
 

@@ -35,6 +35,7 @@ namespace UI
         public Animator playerGameAnimator;
         public RectTransform lastWordsRectTransform;
         public GameObject returnButton;
+        public ScreenChanger screenChanger;
         
         private string _time;
         private bool _notYet;
@@ -276,7 +277,7 @@ namespace UI
 
         private void EndGame()
         {
-            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+            screenChanger.ChangeTo(endGameScreen.name);
         }
         
         public async void GoToLobbyClicked()

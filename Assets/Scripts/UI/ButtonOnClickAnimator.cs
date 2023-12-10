@@ -16,24 +16,20 @@ namespace UI
         public GameObject screenToChangeTo = null;
         public TextMeshProUGUI animationMaxWidthRender;
         public TextMeshProUGUI text;
+        public RectTransform textRectTransform;
         public RectTransform textParent;
         public GameObject thisButton;
 
         private float _animationMaxWidth;
         private const string MaxWidthKeyFrame = "...";
         private string _text;
-        private RectTransform _textRectTransform;
         private GameObject _thisButton;
 
-
-        private TextMeshProUGUI _buttonText;
         private void Start()
         {
-            _buttonText = GetComponentInChildren<TextMeshProUGUI>();
             _animationMaxWidth = GetAnimationMaxWidth();
-            _textRectTransform = text.gameObject.GetComponent<RectTransform>();
             _text = text.text;
-            _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+            textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, textRectTransform.sizeDelta.y);
         }
 
         private void OnDisable()
@@ -51,7 +47,7 @@ namespace UI
         {
             text.text = newText;
             _animationMaxWidth = GetAnimationMaxWidth();
-            _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+            textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, textRectTransform.sizeDelta.y);
         }
 
         public void OnClickAnimation()
@@ -61,10 +57,10 @@ namespace UI
 
         private IEnumerator AnimateOnClick()
         {
-            if (_buttonText.text.EndsWith("...")) yield break;
-            _buttonText.text += ".";
+            if (text.text.EndsWith("...")) yield break;
+            text.text += ".";
             yield return new WaitForSeconds(animationTime);
-            _buttonText.text = _buttonText.text[..^1];
+            text.text = text.text[..^1];
             
             if (changesScreen)
             {

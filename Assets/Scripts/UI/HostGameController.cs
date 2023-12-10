@@ -20,11 +20,18 @@ namespace UI
         public TMP_InputField input;
         public TextMeshProUGUI inputPlaceholder;
         public Animator hostGameAnimator;
+        public ScreenChanger screenChanger;
         
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
-        
+        private bool _isRolesAssigned;
+
+        private void Start()
+        {
+            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetRolesAssigned;
+        }
+
 
         private void OnEnable()
         {
@@ -37,12 +44,18 @@ namespace UI
             {
                 case TimeIsAManMadeSocialConstruct.Night:
                     hostGameAnimator.Play("night");
-                    OnOneMafiaVoted();
-                    OnOneDoctorVoted();
+                    if (_isRolesAssigned)
+                    {
+                        OnOneMafiaVoted();
+                        OnOneDoctorVoted();
+                    }
                     break;
                 case TimeIsAManMadeSocialConstruct.Day:
                     hostGameAnimator.Play("day");
-                    OnOneResidentDayVoted();
+                    if (_isRolesAssigned)
+                    {
+                        OnOneResidentDayVoted();
+                    }
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
                     hostGameAnimator.Play("day");
@@ -55,6 +68,7 @@ namespace UI
             var currentMafiaVoteCount = GameSessionManager.Instance.GetCurrentAmountOfMafiaThatVoted();
             var currentAliveMafiaCount = GameSessionManager.Instance.GetAmountOfAliveMafia();
 
+            Debug.Log($"currentMafiaVoteCount: {currentMafiaVoteCount}, currentAliveMafiaCount: {currentAliveMafiaCount}");
             if (currentMafiaVoteCount == currentAliveMafiaCount)
             {
                 mafiaStatus.text = "<b>The mafia has voted.</b>";
@@ -234,7 +248,13 @@ namespace UI
         
         private void EndGame()
         {
-            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+            screenChanger.ChangeTo(endGameScreen.name);
+        }
+
+        private void SetRolesAssigned()
+        {
+            _isRolesAssigned = true;
+            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned -= SetRolesAssigned;
         }
         
         private void OnDestroy()

@@ -50,7 +50,7 @@ namespace UI
                     Toast.Show("Your identity has been stolen. Create a new one.");
                     return;
                 case 5:
-                    Toast.Show("The Narrator is still looking for your identity...");
+                    Toast.Show("The Narrator is still searching for your identity...");
                     break;
             }
 
