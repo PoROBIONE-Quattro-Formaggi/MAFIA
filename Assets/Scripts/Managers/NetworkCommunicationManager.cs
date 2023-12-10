@@ -65,7 +65,7 @@ namespace Managers
 
         private void OnDisable()
         {
-            // UnsubscribeAllNetworkEvents();
+            UnsubscribeAllNetworkEvents();
         }
 
         private void UnsubscribeAllNetworkEvents()
@@ -138,15 +138,7 @@ namespace Managers
             LobbyManager.Instance.IsCurrentlyInGame = false;
             if (!PlayerData.IsAlive)
             {
-                LobbyManager.Instance.IsGameEnded = true;
-                Debug.Log("Clearing data");
-                GameSessionManager.Instance.ClearAllDataForEndGame();
-                if (LobbyManager.Instance.GetLobbyName() != "")
-                {
-                    LobbyManager.Instance.LeaveLobby();
-                }
-                Debug.Log("Lobby left, changing to main scene");
-                SceneChanger.ChangeToMainScene();
+                FinaliseLeavingRelay();
             }
             else
             {
@@ -167,14 +159,31 @@ namespace Managers
 
         public void LeaveRelay()
         {
-            PlayerData.IsAlive = false;
             Debug.Log("LeaveRelay() called");
+            PlayerData.IsAlive = false;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
             KillMeServerRpc();
             if (NetworkManager.Singleton.IsConnectedClient)
             {
                 Debug.Log("Shutting down Netcode");
                 NetworkManager.Singleton.Shutdown();
             }
+
+            FinaliseLeavingRelay();
+        }
+
+        private static async void FinaliseLeavingRelay()
+        {
+            LobbyManager.Instance.IsGameEnded = true;
+            Debug.Log("Clearing data");
+            GameSessionManager.Instance.ClearAllDataForEndGame();
+            if (LobbyManager.Instance.GetLobbyName() != "")
+            {
+                await LobbyManager.Instance.LeaveLobby();
+            }
+
+            Debug.Log("Lobby left, changing to main scene");
+            SceneChanger.ChangeToMainScene();
         }
 
         private void SendRolesToClients()
