@@ -89,12 +89,17 @@ namespace UI
             
             if (goVoteButton.activeSelf)
             {
+                var alibi = DefaultAlibis.GetRandomAlibi();
+                GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
+                
                 SetPlayerQuoteStringNight();
                 DisableInput();
             }
             else
             {
+                Debug.Log("before enable alibi");
                 EnableAlibiInput();
+                Debug.Log("after enable alibi");
             }
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
@@ -137,7 +142,7 @@ namespace UI
             promptText.text = "Click below to edit alibi, or";
             Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
-            inputPlaceholder.text = alibi;
+            inputPlaceholder.text = alibi[alibi.IndexOf(' ')..];
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
             SendInputToServer();

@@ -65,7 +65,7 @@ namespace Managers
 
         private void OnDisable()
         {
-            UnsubscribeAllNetworkEvents();
+            // UnsubscribeAllNetworkEvents();
         }
 
         private void UnsubscribeAllNetworkEvents()
@@ -133,16 +133,19 @@ namespace Managers
 
         private void OnClientDisconnected(ulong clientId)
         {
+            if (IsHost) return;
+            Debug.Log("On client disconnected called");
             LobbyManager.Instance.IsCurrentlyInGame = false;
             if (!PlayerData.IsAlive)
             {
                 LobbyManager.Instance.IsGameEnded = true;
+                Debug.Log("Clearing data");
                 GameSessionManager.Instance.ClearAllDataForEndGame();
                 if (LobbyManager.Instance.GetLobbyName() != "")
                 {
                     LobbyManager.Instance.LeaveLobby();
                 }
-
+                Debug.Log("Lobby left, changing to main scene");
                 SceneChanger.ChangeToMainScene();
             }
             else
@@ -165,9 +168,11 @@ namespace Managers
         public void LeaveRelay()
         {
             PlayerData.IsAlive = false;
+            Debug.Log("LeaveRelay() called");
             KillMeServerRpc();
             if (NetworkManager.Singleton.IsConnectedClient)
             {
+                Debug.Log("Shutting down Netcode");
                 NetworkManager.Singleton.Shutdown();
             }
         }
@@ -402,6 +407,7 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void KillMeServerRpc(ServerRpcParams rpcParams = default)
         {
+            Debug.Log("KillMeServerRpc called");
             GameSessionManager.Instance.IDToIsPlayerAlive[rpcParams.Receive.SenderClientId] = false;
             var keys = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
