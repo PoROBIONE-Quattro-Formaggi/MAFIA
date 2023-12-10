@@ -127,8 +127,7 @@ namespace UI
                     alibi = playerSetAlibi;
                 }
 
-                voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"<b>[{idToPlayerName[playerID]}]</b> {alibi}";
+                voteOption.GetComponentInChildren<TextMeshProUGUI>().text = alibi;
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();

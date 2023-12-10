@@ -59,7 +59,6 @@ namespace UI
         private void OnEnable()
         {
             _time = GameSessionManager.Instance.GetCurrentTimeOfDay();
-            if (!PlayerData.IsAlive) return;
             switch (_time)
             {
                 case TimeIsAManMadeSocialConstruct.Night:
@@ -77,10 +76,16 @@ namespace UI
 
         private void OnEnableNight()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
-            SetAlibiInput();
-            
             playerGameAnimator.Play("night");
+
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+            
+            SetInformationText(LoreMessages.GetRandomMessage());
+            
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringNight();
@@ -95,8 +100,16 @@ namespace UI
 
         private void OnEnableDay()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
+            
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+            
+            SetInformationText(LoreMessages.GetRandomMessage());
+            
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringDay();
@@ -107,8 +120,15 @@ namespace UI
 
         private void OnEnableEvening()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
+            
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+            
+            SetInformationText(LoreMessages.GetRandomMessage());
         }
 
         private void EnableAlibiInput()
@@ -119,15 +139,10 @@ namespace UI
             inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
+            SendInputToServer();
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
             confirmInputButton.SetActive(true);
-        }
-
-        private void SetAlibiInput()
-        {
-            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
-            GameSessionManager.Instance.SetAlibi(alibi);
         }
 
         private void DisableInput()
@@ -154,7 +169,12 @@ namespace UI
             playerGameAnimator.SetTrigger("Sunrise");
             //OnConfirmInputButtonClicked();
             DisableInput();
-            confirmInputButton.SetActive(false);
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+            }
+            
             
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
     
@@ -259,9 +279,8 @@ namespace UI
             ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
         
-        public async Task GoToLobbyClicked()
+        public async void GoToLobbyClicked()
         {
-            await GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.IsLobbyHost())
             {
                 if (!await LobbyManager.Instance.EndGame())
@@ -276,13 +295,14 @@ namespace UI
             LobbyManager.Instance.IsCurrentlyInGame = false;
             if (LobbyManager.Instance.GetLobbyName() != "")
             {
-                LobbyManager.Instance.LeaveLobby();
+                await LobbyManager.Instance.LeaveLobby();
             }
 
             if (!NetworkManager.Singleton.ShutdownInProgress)
             {
                 NetworkManager.Singleton.Shutdown();
             }
+            GameSessionManager.Instance.ClearAllDataForEndGame();
             // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
             SceneChanger.ChangeToMainScene();
         }
@@ -314,7 +334,6 @@ namespace UI
                 input.text = inputPlaceholder.text;
             }
             playerQuoteText.text += ".";
-            SendInputToServer();
             DisableInput();
         }
         
@@ -323,6 +342,7 @@ namespace UI
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             inputPlaceholder.text = ". . .";
             confirmInputButton.SetActive(input.text.Length != 0);
+            input.SetTextWithoutNotify(input.text.Trim('\n'));
 
             if (input.text.EndsWith('\n'))
             {
@@ -338,14 +358,14 @@ namespace UI
             }
         }
 
-        private void SendInputToServer()
+        public void SendInputToServer()
         {
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
-                    GameSessionManager.Instance.SetAlibi(input.text.Trim('\n'));
+                    GameSessionManager.Instance.SetAlibi(playerQuoteText.text.Trim('\n'));
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
                     GameSessionManager.Instance.SetLastWords(playerQuoteText.text.Trim('\n'));

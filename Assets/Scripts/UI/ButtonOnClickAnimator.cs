@@ -11,6 +11,8 @@ namespace UI
         public bool changesScreen;
         public bool returns;
         public bool disappears;
+        public bool sendsInputToServer;
+        public PlayerGameController playerGameController;
         public GameObject screenToChangeTo = null;
         public TextMeshProUGUI animationMaxWidthRender;
         public TextMeshProUGUI text;
@@ -63,13 +65,20 @@ namespace UI
             _buttonText.text += ".";
             yield return new WaitForSeconds(animationTime);
             _buttonText.text = _buttonText.text[..^1];
+            
             if (changesScreen)
             {
-                Debug.Log("screen changer called");
                 ScreenChanger.Instance.ChangeTo(screenToChangeTo.name);
             } else if (returns)
             {
                 ScreenChanger.Instance.ChangeToPreviousScreen();
+            } else if (disappears && sendsInputToServer)
+            {
+                if (thisButton.activeSelf)
+                {
+                    playerGameController.SendInputToServer();
+                }
+                thisButton.SetActive(false);
             } else if (disappears)
             {
                 thisButton.SetActive(false);

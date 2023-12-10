@@ -649,9 +649,9 @@ namespace Managers
             return WinnerRole;
         }
 
-        public async Task ClearAllDataForEndGame()
+        public void ClearAllDataForEndGame()
         {
-            await NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEventsAsync();
+            NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEventsAsync();
             IDToRole.Clear();
             IDToPlayerName.Clear();
             IDToIsPlayerAlive.Clear();

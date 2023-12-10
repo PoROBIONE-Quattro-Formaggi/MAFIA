@@ -64,18 +64,15 @@ namespace Managers
             };
         }
 
-        public async Task UnsubscribeAllNetworkEventsAsync()
+        public void UnsubscribeAllNetworkEventsAsync()
         {
             IsPlayerRoleAssigned = false;
-            var unsubscribe1 = Task.Run(() => NetworkManager.Singleton.OnServerStarted -= OnHostStarted);
-            var unsubscribe2 = Task.Run(() => NetworkManager.Singleton.OnServerStopped -= OnHostStopped);
-            var unsubscribe3 = Task.Run(() => NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected);
-            var unsubscribe4 =
-                Task.Run(() => NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected);
-            var unsubscribe5 =
-                Task.Run(() => NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected);
-            var unsubscribe6 = Task.Run(() => NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure);
-            await Task.WhenAll(unsubscribe1, unsubscribe2, unsubscribe3, unsubscribe4, unsubscribe5, unsubscribe6);
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure;
+            NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
+            NetworkManager.Singleton.OnServerStopped -= OnHostStopped;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
         }
 
         private void OnTransportFailure()
@@ -143,13 +140,13 @@ namespace Managers
             ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(oldID, clientId);
         }
 
-        private async void OnClientDisconnected(ulong clientId)
+        private void OnClientDisconnected(ulong clientId)
         {
             if (IsHost) return;
             LobbyManager.Instance.IsCurrentlyInGame = false;
             if (!PlayerData.IsAlive)
             {
-                await GameSessionManager.Instance.ClearAllDataForEndGame();
+                GameSessionManager.Instance.ClearAllDataForEndGame();
                 if (LobbyManager.Instance.GetLobbyName() != "")
                 {
                     LobbyManager.Instance.LeaveLobby();
@@ -617,9 +614,9 @@ namespace Managers
             if (IsHost) return;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             GameSessionManager.Instance.ClearAllDataForEndGame();
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            NetworkManager.Singleton.Shutdown();
             LobbyManager.Instance.LeaveLobby();
+            NetworkManager.Singleton.Shutdown();
+            LobbyManager.Instance.IsCurrentlyInGame = false;
             SceneChanger.ChangeToMainScene();
             // SceneChanger.ChangeToMainSceneToLobbyPlayerScreen(); TODO back to lobby functionality maybe later
         }

@@ -29,7 +29,6 @@ namespace Managers
         }
 
         public bool IsCurrentlyInGame { get; set; }
-        public event Action OnHostMigrated;
 
         private static LobbyManager _instance;
         private Lobby _hostLobby;
@@ -178,8 +177,8 @@ namespace Managers
                 if (IsLobbyHost() && _hostLobby == null)
                 {
                     _hostLobby = _joinedLobby;
+                    ScreenChanger.Instance.ChangeToLobbyHostScreen();
                     Toast.Show("You are new lobby host");
-                    OnHostMigrated?.Invoke();
                 }
             }
 
@@ -418,19 +417,19 @@ namespace Managers
             return _joinedLobby.Players;
         }
 
-        public void LeaveLobby()
+        public async Task LeaveLobby()
         {
             if (GetPlayersListInLobby().Count <= 1)
             {
-                HandleDeleteLobby();
+                await HandleDeleteLobby();
             }
             else
             {
-                HandleLeaveLobby();
+                await HandleLeaveLobby();
             }
         }
 
-        private async void HandleLeaveLobby()
+        private async Task HandleLeaveLobby()
         {
             Debug.Log("Leaving lobby");
             try
@@ -450,7 +449,7 @@ namespace Managers
             Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
-        private async void HandleDeleteLobby()
+        private async Task HandleDeleteLobby()
         {
             if (!IsLobbyHost()) return;
             Debug.Log("Deleting lobby");

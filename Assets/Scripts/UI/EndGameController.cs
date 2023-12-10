@@ -30,7 +30,7 @@ namespace UI
             }
         }
 
-        public async Task GoToLobbyClicked()
+        public async void GoToLobbyClicked()
         {
             if (LobbyManager.Instance.IsLobbyHost())
             {
@@ -44,16 +44,16 @@ namespace UI
             }
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
-            await GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.GetLobbyName() != "")
             {
-                LobbyManager.Instance.LeaveLobby();
+                await LobbyManager.Instance.LeaveLobby();
             }
 
             if (!NetworkManager.Singleton.ShutdownInProgress)
             {
                 NetworkManager.Singleton.Shutdown();
             }
+            GameSessionManager.Instance.ClearAllDataForEndGame();
             // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
             SceneChanger.ChangeToMainScene();
         }

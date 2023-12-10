@@ -1,5 +1,6 @@
 using System;
 using Managers;
+using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
 
@@ -14,25 +15,46 @@ namespace UI
         public GameObject citizenRole;
         public GameObject doctorRole;
         public TextMeshProUGUI dots;
+        public ButtonOnClickAnimator buttonAnimator;
 
         [Header("BUTTONS")] public GameObject okButton;
 
         [Header("SCREENS TO CHANGE TO")] public GameObject night;
 
         private int _timeCounter;
+        private int _counter;
 
 
         private void Start()
         {
             InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
+            InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
         }
 
         private void OnEnable()
         {
             NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
-            okButton.GetComponent<ButtonOnClickAnimator>().SetButtonText("Ok");
+            buttonAnimator.SetButtonText("Ok");
             _timeCounter = 0;
             InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
+        }
+        
+        private async void EmergencyGoToMainMenuIfApplicable()
+        {
+            switch (_counter)
+            {
+                case >= 10:
+                    CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                    await LobbyManager.Instance.LeaveLobby();
+                    SceneChanger.ChangeToMainScene();
+                    Toast.Show("Your identity has been stolen. Create a new one.");
+                    return;
+                case 5:
+                    Toast.Show("The Narrator is still looking for your identity...");
+                    break;
+            }
+
+            _counter += 1;
         }
 
         private void ThrowToGame()
@@ -51,6 +73,7 @@ namespace UI
                 return;
             }
 
+            Debug.Log($"time passed: {_timeCounter}");
             _timeCounter += 1;
         }
 
@@ -87,6 +110,7 @@ namespace UI
 
         public void DisplayRole(string role)
         {
+            CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
             CancelInvoke(nameof(AnimateDots));
             dots.gameObject.SetActive(false);
             // Set text values for prompts

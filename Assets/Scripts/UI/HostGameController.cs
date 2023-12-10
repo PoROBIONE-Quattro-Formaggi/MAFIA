@@ -37,9 +37,12 @@ namespace UI
             {
                 case TimeIsAManMadeSocialConstruct.Night:
                     hostGameAnimator.Play("night");
+                    OnOneMafiaVoted();
+                    OnOneDoctorVoted();
                     break;
                 case TimeIsAManMadeSocialConstruct.Day:
                     hostGameAnimator.Play("day");
+                    OnOneResidentDayVoted();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
                     hostGameAnimator.Play("day");
@@ -195,8 +198,6 @@ namespace UI
             townStatus.gameObject.SetActive(false);
             townStatus.text = "<b>The town has not voted.</b>";
             
-            hostGameAnimator.Play("sunset");
-            
             executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
             executionStatus.gameObject.SetActive(true);
             EnableInput();
@@ -220,6 +221,8 @@ namespace UI
         {
             executionStatus.gameObject.SetActive(false);
             executionStatus.text = $"_ was executed by the town.";
+            
+            hostGameAnimator.Play("sunset");
             
             if (GameSessionManager.Instance.GetAmountOfAliveDoctors() == 0)
             {

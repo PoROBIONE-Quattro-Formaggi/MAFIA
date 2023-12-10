@@ -24,14 +24,15 @@ namespace UI
             InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
         }
 
-        private void EmergencyGoToMainMenuIfApplicable()
+        private async void EmergencyGoToMainMenuIfApplicable()
         {
             switch (_counter)
             {
                 case >= 20:
+                    CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                    await LobbyManager.Instance.LeaveLobby();
                     SceneChanger.ChangeToMainScene();
                     Toast.Show("This road leads to nowhere. Going back.");
-                    CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
                     return;
                 case 10:
                     Toast.Show("Took a wrong turn, re-calculating route.");

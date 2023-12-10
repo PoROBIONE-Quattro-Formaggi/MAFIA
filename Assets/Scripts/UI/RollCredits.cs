@@ -10,6 +10,7 @@ namespace UI
         public GameObject screen;
         public GameObject textPrefab;
         public GameObject credits;
+        public GameObject namesParent;
         public TextMeshProUGUI subtitle;
     
         //parameters
@@ -33,9 +34,6 @@ namespace UI
             {
                 Destroy(nameObj);
             }
-
-            nameTexts.Clear();
-            nameObjects.Clear();
         }
 
         private void OnEnable()
@@ -55,29 +53,26 @@ namespace UI
             // Display town name
             subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
 
-            // Spawn text objects for all possible players 
-            for (var i = 0; i < _maxPlayers; i++)
-            {
-                var nameObj = Instantiate(textPrefab, credits.transform);
-                nameObjects.Add(nameObj);
-                foreach (var text in nameObj.GetComponentsInChildren<TextMeshProUGUI>())
-                {
-                    if (text.gameObject.name != "Text") continue;
-                    nameTexts.Add(text);
-                }
-            }
-
             _isLobbyReady = true;
             CancelInvoke(nameof(WaitForLobby));
         }
 
         private void UpdateCredits()
         {
+            // CLEAR NAME OBJECTS
+            var namesDisplayedNo = namesParent.transform.childCount;
+            for (var i = namesDisplayedNo - 1; i >= 0; i--)
+            {
+                DestroyImmediate(namesParent.transform.GetChild(i).gameObject);
+            }
+            
+            // SPAWN NAME OBJECTS FOR ALL NAMES
             if (!_isLobbyReady) return;
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
-            for (var i = 0; i < _maxPlayers; i++)
+            foreach (var playerName in playerNames)
             {
-                nameTexts[i].text = i < playerNames.Count ? playerNames[i] : "";
+                var nameObj = Instantiate(textPrefab, namesParent.transform);
+                nameObj.GetComponentInChildren<TextMeshProUGUI>().text = playerName;
             }
         }
 
