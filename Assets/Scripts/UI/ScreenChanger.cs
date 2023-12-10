@@ -8,6 +8,11 @@ namespace UI
         public static ScreenChanger Instance { get; private set; }
         public GameObject screensParent;
         private string _lastScreenName;
+
+        public string GetLastScreenName()
+        {
+            return _lastScreenName;
+        }
     
         private void Awake()
         {

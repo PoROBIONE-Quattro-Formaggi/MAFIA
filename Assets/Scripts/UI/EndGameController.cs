@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
@@ -29,7 +30,7 @@ namespace UI
             }
         }
 
-        public async void GoToLobbyClicked()
+        public async Task GoToLobbyClicked()
         {
             if (LobbyManager.Instance.IsLobbyHost())
             {
@@ -43,7 +44,7 @@ namespace UI
             }
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
+            await GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.GetLobbyName() != "")
             {
                 LobbyManager.Instance.LeaveLobby();

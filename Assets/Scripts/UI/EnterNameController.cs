@@ -81,6 +81,7 @@ namespace UI
             // Enter shortcut key implementation
             if (Validators.CheckIfEndsWithNewline(enterNameField.text))
             {
+                enterNameField.text = enterNameField.text.Trim('\n');
                 OnConfirmNameButtonClicked();
             }
         }

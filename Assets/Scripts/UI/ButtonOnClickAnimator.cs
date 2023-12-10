@@ -18,7 +18,7 @@ namespace UI
         public GameObject thisButton;
 
         private float _animationMaxWidth;
-        private const string MaxWidthKeyFrame = "....";
+        private const string MaxWidthKeyFrame = "...";
         private string _text;
         private RectTransform _textRectTransform;
         private GameObject _thisButton;
@@ -59,6 +59,7 @@ namespace UI
 
         private IEnumerator AnimateOnClick()
         {
+            if (_buttonText.text.EndsWith("...")) yield break;
             _buttonText.text += ".";
             yield return new WaitForSeconds(animationTime);
             _buttonText.text = _buttonText.text[..^1];

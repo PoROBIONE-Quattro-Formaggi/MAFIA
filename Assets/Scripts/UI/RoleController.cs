@@ -1,3 +1,4 @@
+using System;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -24,9 +25,14 @@ namespace UI
         private void Start()
         {
             InvokeRepeating(nameof(AnimateDots), 0f, 0.5f);
-            InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
-            
+        }
+
+        private void OnEnable()
+        {
             NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
+            okButton.GetComponent<ButtonOnClickAnimator>().SetButtonText("Ok");
+            _timeCounter = 0;
+            InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
         }
 
         private void ThrowToGame()
@@ -125,11 +131,6 @@ namespace UI
             paragraph1.text = "Eliminate suspected Mafia members during the day voting.";
             paragraph2.text = "Be vigilant and make smart decisions to avoid being killed by the mafia.";
             citizenRole.SetActive(true);
-        }
-
-        public void D_OnOkButtonClicked()
-        {
-            Debug.Log("Ok button clicked");
         }
     }
 }

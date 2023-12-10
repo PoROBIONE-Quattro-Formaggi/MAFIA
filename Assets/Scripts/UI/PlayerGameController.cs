@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using DataStorage;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
@@ -218,7 +219,7 @@ namespace UI
             confirmInputButton.SetActive(false);
             
             // ROLL LAST WORDS
-            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n{GameSessionManager.Instance.GetNarratorComment()}";
+            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
             playerQuote.SetActive(false);
             deadPrompt.SetActive(false);
 
@@ -258,8 +259,9 @@ namespace UI
             ScreenChanger.Instance.ChangeTo(endGameScreen.name);
         }
         
-        public async void GoToLobbyClicked()
+        public async Task GoToLobbyClicked()
         {
+            await GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.IsLobbyHost())
             {
                 if (!await LobbyManager.Instance.EndGame())
@@ -272,7 +274,6 @@ namespace UI
             }
 
             LobbyManager.Instance.IsCurrentlyInGame = false;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.GetLobbyName() != "")
             {
                 LobbyManager.Instance.LeaveLobby();
