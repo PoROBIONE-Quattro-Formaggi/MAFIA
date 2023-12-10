@@ -30,6 +30,9 @@ namespace UI
             {
                 case >= 20:
                     CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                    NetworkCommunicationManager.Instance.LeaveRelay();
+                    LobbyManager.Instance.IsGameEnded = true;
+                    LobbyManager.Instance.IsCurrentlyInGame = false;
                     await LobbyManager.Instance.LeaveLobby();
                     SceneChanger.ChangeToMainScene();
                     Toast.Show("This road leads to nowhere. Going back.");

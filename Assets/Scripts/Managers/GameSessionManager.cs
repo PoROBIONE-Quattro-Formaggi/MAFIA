@@ -651,7 +651,6 @@ namespace Managers
 
         public void ClearAllDataForEndGame()
         {
-            NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEventsAsync();
             IDToRole.Clear();
             IDToPlayerName.Clear();
             IDToIsPlayerAlive.Clear();

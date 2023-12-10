@@ -292,20 +292,7 @@ namespace UI
 
                 NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             }
-
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            if (LobbyManager.Instance.GetLobbyName() != "")
-            {
-                await LobbyManager.Instance.LeaveLobby();
-            }
-
-            if (!NetworkManager.Singleton.ShutdownInProgress)
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-            GameSessionManager.Instance.ClearAllDataForEndGame();
-            // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
-            SceneChanger.ChangeToMainScene();
+            NetworkCommunicationManager.Instance.LeaveRelay();
         }
 
         private void EnableLastWords()
