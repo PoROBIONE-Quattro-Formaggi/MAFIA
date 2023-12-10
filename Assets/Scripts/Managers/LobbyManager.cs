@@ -29,6 +29,7 @@ namespace Managers
         }
 
         public bool IsCurrentlyInGame { get; set; }
+        public bool IsGameEnded { get; set; }
 
         private static LobbyManager _instance;
         private Lobby _hostLobby;
@@ -156,6 +157,7 @@ namespace Managers
             }
 
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
+            if (IsGameEnded) return;
             if (relayCode == "0") return;
             if (IsCurrentlyInGame) return;
             IsCurrentlyInGame = true;
@@ -412,21 +414,14 @@ namespace Managers
             return _joinedLobby != null;
         }
 
-        public List<Player> GetPlayersListInLobby()
+        private List<Player> GetPlayersListInLobby()
         {
             return _joinedLobby.Players;
         }
 
-        public async Task LeaveLobby()
+        public Task LeaveLobby()
         {
-            if (GetPlayersListInLobby().Count <= 1)
-            {
-                await HandleDeleteLobby();
-            }
-            else
-            {
-                await HandleLeaveLobby();
-            }
+            return GetPlayersListInLobby().Count <= 1 ? HandleDeleteLobby() : HandleLeaveLobby();
         }
 
         private async Task HandleLeaveLobby()

@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
@@ -22,6 +23,12 @@ namespace UI
         private void Start()
         {
             _placeholderString = new StringBuilder(enterNamePlaceholder.text);
+        }
+
+        private void OnEnable()
+        {
+            LobbyManager.Instance.IsGameEnded = false;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
         }
 
 

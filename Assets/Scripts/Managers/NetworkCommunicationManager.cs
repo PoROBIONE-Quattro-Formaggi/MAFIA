@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Threading.Tasks;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using UI;
@@ -49,7 +48,7 @@ namespace Managers
             {
                 Destroy(gameObject);
             }
-            
+
             NetworkManager.Singleton.OnServerStarted += OnHostStarted;
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -64,7 +63,12 @@ namespace Managers
             };
         }
 
-        public void UnsubscribeAllNetworkEventsAsync()
+        private void OnDisable()
+        {
+            UnsubscribeAllNetworkEvents();
+        }
+
+        private void UnsubscribeAllNetworkEvents()
         {
             IsPlayerRoleAssigned = false;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
@@ -98,20 +102,7 @@ namespace Managers
         {
             Debug.Log("Server stopped");
             EmergencyEndGameServerRpc();
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
-            if (LobbyManager.Instance.GetLobbyName() != "")
-            {
-                LobbyManager.Instance.LeaveLobby();
-            }
-
-            if (!NetworkManager.Singleton.ShutdownInProgress)
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-            // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
-            SceneChanger.ChangeToMainScene();
+            LeaveRelay();
         }
 
         private void OnClientConnected(ulong clientId)
@@ -142,19 +133,14 @@ namespace Managers
 
         private void OnClientDisconnected(ulong clientId)
         {
-            if (IsHost) return;
             LobbyManager.Instance.IsCurrentlyInGame = false;
             if (!PlayerData.IsAlive)
             {
+                LobbyManager.Instance.IsGameEnded = true;
                 GameSessionManager.Instance.ClearAllDataForEndGame();
                 if (LobbyManager.Instance.GetLobbyName() != "")
                 {
                     LobbyManager.Instance.LeaveLobby();
-                }
-
-                if (!NetworkManager.Singleton.ShutdownInProgress)
-                {
-                    NetworkManager.Singleton.Shutdown();
                 }
 
                 SceneChanger.ChangeToMainScene();
@@ -174,6 +160,16 @@ namespace Managers
         public static bool StartClient()
         {
             return NetworkManager.Singleton.StartClient();
+        }
+
+        public void LeaveRelay()
+        {
+            PlayerData.IsAlive = false;
+            KillMeServerRpc();
+            if (NetworkManager.Singleton.IsConnectedClient)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
         }
 
         private void SendRolesToClients()
@@ -328,6 +324,7 @@ namespace Managers
             SendNewIDToIsPlayerAliveClientRpc(keysForIsPlayerAlive, valuesForIsPlayerAlive);
 
             // ALIBIS
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.IDToAlibi.TryGetValue(oldId, out var alibi))
             {
                 GameSessionManager.Instance.IDToAlibi.Remove(oldId);
@@ -343,6 +340,7 @@ namespace Managers
             switch (role)
             {
                 case Roles.Mafia:
+                    // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
                     if (GameSessionManager.Instance.MafiaIDToVotedForID.TryGetValue(oldId, out var mafiaVotedForID))
                     {
                         GameSessionManager.Instance.MafiaIDToVotedForID.Remove(oldId);
@@ -364,6 +362,7 @@ namespace Managers
 
                     break;
                 case Roles.Doctor:
+                    // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
                     if (GameSessionManager.Instance.DoctorIDToVotedForID.TryGetValue(oldId,
                             out var doctorVotedForID))
                     {
@@ -374,12 +373,14 @@ namespace Managers
                     break;
             }
 
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.IDToVotedForID.TryGetValue(oldId, out var votedForID))
             {
                 GameSessionManager.Instance.IDToVotedForID.Remove(oldId);
                 GameSessionManager.Instance.IDToVotedForID[newId] = votedForID;
             }
 
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.ResidentIDToVotedForOption.TryGetValue(oldId,
                     out var votedForOption))
             {
@@ -396,6 +397,15 @@ namespace Managers
             SendNightResidentsOptionsClientRpc(options);
             SendNarratorCommentClientRpc(GameSessionManager.Instance.NarratorComment);
             SetTimeForClientsClientRpc(GameSessionManager.Instance.CurrentTimeOfDay);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void KillMeServerRpc(ServerRpcParams rpcParams = default)
+        {
+            GameSessionManager.Instance.IDToIsPlayerAlive[rpcParams.Receive.SenderClientId] = false;
+            var keys = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
+            var values = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
+            SendNewIDToIsPlayerAliveClientRpc(keys, values);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -612,13 +622,7 @@ namespace Managers
         {
             Debug.Log("GoBackToLobbyClientRpc called");
             if (IsHost) return;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
-            LobbyManager.Instance.LeaveLobby();
-            NetworkManager.Singleton.Shutdown();
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            SceneChanger.ChangeToMainScene();
-            // SceneChanger.ChangeToMainSceneToLobbyPlayerScreen(); TODO back to lobby functionality maybe later
+            LeaveRelay();
         }
     }
 }
