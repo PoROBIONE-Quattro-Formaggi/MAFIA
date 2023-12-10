@@ -57,6 +57,12 @@ namespace UI
             
             _placeholderString = new StringBuilder(townNameInputPlaceholder.text);
         }
+        
+        private void OnEnable()
+        {
+            LobbyManager.Instance.IsGameEnded = false;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
+        }
 
         private void AdjustCreateDisplay(float preferredWidth)
         {
