@@ -142,7 +142,9 @@ namespace UI
             promptText.text = "Click below to edit alibi, or";
             Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
-            inputPlaceholder.text = alibi[alibi.IndexOf(' ')..];
+            //Trim alibi
+            alibi = alibi[alibi.IndexOf(']')..].Trim();
+            inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
             SendInputToServer();
@@ -174,12 +176,16 @@ namespace UI
             playerGameAnimator.ResetTrigger("Sunset");
             playerGameAnimator.SetTrigger("Sunrise");
             //OnConfirmInputButtonClicked();
-            DisableInput();
             if (confirmInputButton.activeSelf)
             {
                 OnConfirmInputButtonClicked();
                 SendInputToServer();
             }
+            
+            DisableInput();
+            var alibi = DefaultAlibis.GetRandomAlibi();
+            GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
+            
             
             
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
@@ -201,6 +207,12 @@ namespace UI
         private void Sunset()
         {
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
+            
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+            }
             
             if (!PlayerData.IsAlive)
             {
@@ -241,8 +253,13 @@ namespace UI
         {
             // HIDE INPUT
             //OnConfirmInputButtonClicked();
-            DisableInput();
-            confirmInputButton.SetActive(false);
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+                confirmInputButton.SetActive(false);
+            }
+            
             
             // ROLL LAST WORDS
             lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";

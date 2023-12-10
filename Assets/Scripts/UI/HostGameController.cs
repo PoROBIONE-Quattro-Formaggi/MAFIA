@@ -136,6 +136,7 @@ namespace UI
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
                     DisableInput();
+                    lastDeath.text = $"<b>[The Narrator]</b>{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     MoonRise();
                     break;
             }
@@ -261,7 +262,7 @@ namespace UI
         {
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
-            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted -= OnOneResidentDayVoted;
             GameSessionManager.Instance.OnHostEndGame -= EndGame;
         }
     }
