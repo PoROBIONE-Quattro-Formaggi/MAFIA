@@ -72,6 +72,7 @@ namespace UI
             {
                 if (thisButton.activeSelf)
                 {
+                    Debug.Log("Button called send input to server");
                     playerGameController.SendInputToServer();
                 }
                 thisButton.SetActive(false);

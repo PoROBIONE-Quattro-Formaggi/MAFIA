@@ -7092,6 +7092,10 @@ PrefabInstance:
       propertyPath: screenToChangeTo
       value: 
       objectReference: {fileID: 4177439585604425486}
+    - target: {fileID: 8067603561196668192, guid: 243476862f9145940a9f8888f9f1c856, type: 3}
+      propertyPath: sendsInputToServer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8725672000687195167, guid: 243476862f9145940a9f8888f9f1c856, type: 3}
       propertyPath: m_SizeDelta.x
       value: 233.07
@@ -9016,6 +9020,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3960678134058235864}
     m_Modifications:
+    - target: {fileID: 218563077844513637, guid: 86514ce4c613deb4ba8ad50e530528c7, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 218563077844513637, guid: 86514ce4c613deb4ba8ad50e530528c7, type: 3}
+      propertyPath: m_fontSizeMin
+      value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 218563077844513637, guid: 86514ce4c613deb4ba8ad50e530528c7, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1122126414176406315, guid: 86514ce4c613deb4ba8ad50e530528c7, type: 3}
       propertyPath: m_AnchorMax.y
       value: 1

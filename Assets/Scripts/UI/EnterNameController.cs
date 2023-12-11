@@ -101,7 +101,7 @@ namespace UI
             }
             else
             {
-                Toast.Show("Your name should be at least 2 characters long and no longer than 16");
+                Toast.Show("Your name should between 2 and 16 characters & without special characters");
             }
         }
 

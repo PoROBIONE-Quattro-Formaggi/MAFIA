@@ -94,12 +94,11 @@ namespace UI
                 
                 SetPlayerQuoteStringNight();
                 DisableInput();
+                confirmInputButton.SetActive(false);
             }
             else
             {
-                Debug.Log("before enable alibi");
                 EnableAlibiInput();
-                Debug.Log("after enable alibi");
             }
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
@@ -120,6 +119,7 @@ namespace UI
             {
                 SetPlayerQuoteStringDay();
                 DisableInput();
+                confirmInputButton.SetActive(false);
             }
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
@@ -143,7 +143,8 @@ namespace UI
             Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
             //Trim alibi
-            alibi = alibi[alibi.IndexOf(']')..].Trim();
+            var trimIndex = alibi.IndexOf(']') + 1;
+            alibi = alibi[trimIndex..].Trim();
             inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
@@ -183,10 +184,7 @@ namespace UI
             }
             
             DisableInput();
-            var alibi = DefaultAlibis.GetRandomAlibi();
-            GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
-            
-            
+            confirmInputButton.SetActive(false);
             
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
     
@@ -260,6 +258,10 @@ namespace UI
                 confirmInputButton.SetActive(false);
             }
             
+            // GENERATE ALIBI
+            var alibi = DefaultAlibis.GetRandomAlibi();
+            GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
+            
             
             // ROLL LAST WORDS
             lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
@@ -325,6 +327,7 @@ namespace UI
             input.gameObject.SetActive(true);
             prompt.SetActive(true);
             confirmInputButton.SetActive(true);
+            inputPlaceholder.gameObject.SetActive(true);
         }
 
         private void OnPlayerDead()
@@ -333,6 +336,7 @@ namespace UI
             information.SetActive(false);
             goVoteButton.SetActive(false);
             DisableInput();
+            confirmInputButton.SetActive(false);
             deadPrompt.SetActive(true);
             returnButton.SetActive(true);
         }
@@ -341,6 +345,7 @@ namespace UI
         {
             if (inputPlaceholder.text != ". . .")
             {
+                // TODO: tu maybe without notify
                 input.text = inputPlaceholder.text;
             }
             playerQuoteText.text += ".";
@@ -354,10 +359,9 @@ namespace UI
             confirmInputButton.SetActive(input.text.Length != 0);
             input.SetTextWithoutNotify(input.text.Trim('\n'));
 
-            if (input.text.EndsWith('\n'))
-            {
-                OnConfirmInputButtonClicked();
-            }
+            if (!input.text.EndsWith('\n')) return;
+            OnConfirmInputButtonClicked();
+            SendInputToServer();
         }
         
         public void OnInputDeselected()
@@ -372,6 +376,7 @@ namespace UI
         {
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
+            Debug.Log($"input send to server: {playerQuoteText.text.Trim('\n')}");
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:

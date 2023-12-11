@@ -128,15 +128,18 @@ namespace UI
                     break;
                 case TimeIsAManMadeSocialConstruct.Day:
                     GameSessionManager.Instance.EndDay();
-                    lastDeath.text = $"<b>[The Narrator]</b>{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    lastDeath.text = $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     Sunset();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text.Trim('\n')}.");
+                    if (input.text != "")
+                    {
+                        GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text.Trim('\n')}.");
+                    }
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
                     DisableInput();
-                    lastDeath.text = $"<b>[The Narrator]</b>{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    lastDeath.text = $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     MoonRise();
                     break;
             }
@@ -221,7 +224,7 @@ namespace UI
         private void EnableInput()
         {
             commentPrompt.gameObject.SetActive(true);
-            input.text = "";
+            input.SetTextWithoutNotify("");
             input.gameObject.SetActive(true);
         }
 

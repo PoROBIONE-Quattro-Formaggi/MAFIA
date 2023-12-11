@@ -8,7 +8,7 @@ namespace UI
     {
         public static bool CheckIfNameCorrect(string fieldName)
         {
-            var regex = new Regex("^[\\s]*$|^.{0,1}$|^.{17,}$");
+            var regex = new Regex("^[\\s]*$|^.{0,1}$|[!@#$%^&*()_+[\\]{};:'<>,\\.?\\\\]+|^.{17,}$");
             fieldName = fieldName.Trim();
             if (regex.Matches(fieldName).Count > 0)
             {

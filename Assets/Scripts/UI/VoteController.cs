@@ -49,8 +49,10 @@ namespace UI
 
         private void OnEnableNight()
         {
-            GenerateVotingOptionsNight();
             voteAnimator.Play("night");
+            
+            GenerateVotingOptionsNight();
+            
             votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -120,7 +122,7 @@ namespace UI
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
-                var alibi = DefaultAlibis.GetRandomAlibi();
+                var alibi = $"<b>[{idToPlayerName[playerID]}]</b> " + DefaultAlibis.GetRandomAlibi();
                 if (idToAlibis.TryGetValue(playerID, out var playerSetAlibi))
                 {
                     alibi = playerSetAlibi;

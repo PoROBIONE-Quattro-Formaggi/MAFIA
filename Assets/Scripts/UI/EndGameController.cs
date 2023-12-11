@@ -22,7 +22,7 @@ namespace UI
             }
             else if (winnerRole == "DRAW")
             {
-                informationText.text = "Oh no! A fatal error occured \u00af\\_(ツ)_/\u00af";
+                informationText.text = "Oh no! Can't continue under these circumstances.";
             }
             else
             {

@@ -37,6 +37,8 @@ namespace Managers
         public event Action OnEveningBegan;
         public event Action OnNightBegan;
         public event Action OnGameEnded;
+        private int _counter;
+        private int _playerCounter;
 
         private void Awake()
         {
@@ -53,6 +55,7 @@ namespace Managers
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectedForHost;
             NetworkManager.Singleton.OnTransportFailure += OnTransportFailure;
             OnPlayerRoleAssigned += () =>
             {
@@ -72,6 +75,7 @@ namespace Managers
         {
             IsPlayerRoleAssigned = false;
             NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectedForHost;
             NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure;
             NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
             NetworkManager.Singleton.OnServerStopped -= OnHostStopped;
@@ -107,7 +111,13 @@ namespace Managers
 
         private void OnClientConnected(ulong clientId)
         {
-            if (IsHost) return;
+            if (IsHost)
+            {
+                _playerCounter++;
+                Debug.Log($"PlayerCounter: {_playerCounter}");
+                return;
+            }
+
             IsPlayerRoleAssigned = false;
             var oldID = PlayerData.ClientID;
             Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
@@ -123,7 +133,13 @@ namespace Managers
 
         private void OnClientReconnected(ulong clientId)
         {
-            if (IsHost) return;
+            if (IsHost)
+            {
+                _playerCounter++;
+                Debug.Log($"PlayerCounter: {_playerCounter}");
+                return;
+            }
+
             Debug.Log("OnClientReconnected called");
             Debug.Log($"Is player role assigned: {IsPlayerRoleAssigned}");
             var oldID = PlayerData.ClientID;
@@ -146,6 +162,40 @@ namespace Managers
             }
         }
 
+        private void OnClientDisconnectedForHost(ulong clientId)
+        {
+            if (!IsHost) return;
+            _playerCounter--;
+            Debug.Log($"PlayerCounter: {_playerCounter}");
+            Debug.Log("ClientDisconnected event called");
+            InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
+        }
+
+        private void EmergencyGoToMainMenuIfApplicable()
+        {
+            Debug.Log($"Counter: {_counter}");
+            Debug.Log($"Expected num of players: {PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber) + 1}" +
+                      $"\nCurrent players: {_playerCounter}");
+            if (PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber) + 1 <= _playerCounter)
+            {
+                CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                _counter = 0;
+                return;
+            }
+
+            switch (_counter)
+            {
+                case >= 20:
+                    CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                    GameSessionManager.Instance.EmergencyEndGame();
+                    return;
+                case 10:
+                    Toast.Show("Lost one citizen. Looking for them...");
+                    break;
+            }
+
+            _counter += 1;
+        }
 
         public static bool StartHost()
         {
