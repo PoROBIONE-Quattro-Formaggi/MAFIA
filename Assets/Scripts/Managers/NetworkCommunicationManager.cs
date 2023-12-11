@@ -59,7 +59,6 @@ namespace Managers
             NetworkManager.Singleton.OnTransportFailure += OnTransportFailure;
             OnPlayerRoleAssigned += () =>
             {
-                Debug.Log("OnPlayerRoleAssigned called (changing IsPlayerRoleAssigned)");
                 NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientReconnected;
                 IsPlayerRoleAssigned = true;
@@ -114,7 +113,6 @@ namespace Managers
             if (IsHost)
             {
                 _playerCounter++;
-                Debug.Log($"PlayerCounter: {_playerCounter}");
                 return;
             }
 
@@ -136,12 +134,9 @@ namespace Managers
             if (IsHost)
             {
                 _playerCounter++;
-                Debug.Log($"PlayerCounter: {_playerCounter}");
                 return;
             }
 
-            Debug.Log("OnClientReconnected called");
-            Debug.Log($"Is player role assigned: {IsPlayerRoleAssigned}");
             var oldID = PlayerData.ClientID;
             PlayerData.ClientID = clientId;
             ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(oldID, clientId);
@@ -165,17 +160,19 @@ namespace Managers
         private void OnClientDisconnectedForHost(ulong clientId)
         {
             if (!IsHost) return;
-            _playerCounter--;
-            Debug.Log($"PlayerCounter: {_playerCounter}");
-            Debug.Log("ClientDisconnected event called");
+            if (GameSessionManager.Instance.IDToIsPlayerAlive.TryGetValue(clientId, out var isAlive))
+            {
+                if (isAlive)
+                {
+                    _playerCounter--;
+                }
+            }
+
             InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
         }
 
         private void EmergencyGoToMainMenuIfApplicable()
         {
-            Debug.Log($"Counter: {_counter}");
-            Debug.Log($"Expected num of players: {PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber) + 1}" +
-                      $"\nCurrent players: {_playerCounter}");
             if (PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber) + 1 <= _playerCounter)
             {
                 CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
@@ -209,13 +206,11 @@ namespace Managers
 
         public void LeaveRelay()
         {
-            Debug.Log("LeaveRelay() called");
             PlayerData.IsAlive = false;
             LobbyManager.Instance.IsCurrentlyInGame = false;
             KillMeServerRpc();
             if (NetworkManager.Singleton.IsConnectedClient)
             {
-                Debug.Log("Shutting down Netcode");
                 NetworkManager.Singleton.Shutdown();
             }
 
@@ -225,14 +220,12 @@ namespace Managers
         private static async void FinaliseLeavingRelay()
         {
             LobbyManager.Instance.IsGameEnded = true;
-            Debug.Log("Clearing data");
             GameSessionManager.Instance.ClearAllDataForEndGame();
             if (LobbyManager.Instance.GetLobbyName() != "")
             {
                 await LobbyManager.Instance.LeaveLobby();
             }
 
-            Debug.Log("Lobby left, changing to main scene");
             SceneChanger.ChangeToMainScene();
         }
 
@@ -264,19 +257,11 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
-            Debug.Log(
-                $"[NetworkCommunicationManager] (in ServerRPC) Sender clientID: {rpcParams.Receive.SenderClientId}");
             GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             var keys = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToPlayerName.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
-            Debug.Log("[NetworkCommunicationManager] (in ServerRPC) Sending all names to clientRPC:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
-            }
-
             SendNewIDToPlayerNameClientRpc(keys, values);
         }
 
@@ -302,7 +287,6 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void MafiaVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
-            Debug.Log($"Received mafia voted for ID: {votedForID}");
             GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
             var keys = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
             var values = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
@@ -337,9 +321,7 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void SetLastWordsServerRpc(string lastWords)
         {
-            Debug.Log("Received last words RPC");
             GameSessionManager.Instance.LastWords = lastWords;
-            Debug.Log("Sending last words to all clients RPC");
             SendLastWordsClientRpc(lastWords);
         }
 
@@ -468,7 +450,10 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void KillMeServerRpc(ServerRpcParams rpcParams = default)
         {
-            Debug.Log("KillMeServerRpc called");
+            var prevPlayerNumber = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
+            var nextPlayerNumber = prevPlayerNumber - 1;
+            PlayerPrefs.SetInt(PpKeys.KeyPlayersNumber, nextPlayerNumber);
+            PlayerPrefs.Save();
             GameSessionManager.Instance.IDToIsPlayerAlive[rpcParams.Receive.SenderClientId] = false;
             var keys = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
@@ -511,12 +496,6 @@ namespace Managers
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
-
-            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player names like:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
-            }
         }
 
         [ClientRpc]
@@ -527,14 +506,7 @@ namespace Managers
             GameSessionManager.Instance.IDToIsPlayerAlive.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
-                Debug.Log($"key is: {keys[i]}, value is: {values[i]}");
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
-            }
-
-            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player 'isAlives' like:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToIsPlayerAlive)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
             }
 
             if (GameSessionManager.Instance.IDToIsPlayerAlive.TryGetValue(PlayerData.ClientID, out var isAlive))
@@ -576,7 +548,6 @@ namespace Managers
         private void SendLastWordsClientRpc(string lastWords)
         {
             if (IsHost) return;
-            Debug.Log($"Received RPC with last words {lastWords}");
             GameSessionManager.Instance.LastWords = lastWords;
         }
 
@@ -687,7 +658,6 @@ namespace Managers
         [ClientRpc]
         public void GoBackToLobbyClientRpc()
         {
-            Debug.Log("GoBackToLobbyClientRpc called");
             if (IsHost) return;
             LeaveRelay();
         }

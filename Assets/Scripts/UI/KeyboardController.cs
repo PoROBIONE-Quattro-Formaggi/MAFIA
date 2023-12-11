@@ -71,7 +71,6 @@ namespace UI
             {
                 Debug.Log("some key missing");
             }
-            
         }
 
         public void ShowKeyboard()

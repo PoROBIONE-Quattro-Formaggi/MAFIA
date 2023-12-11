@@ -1,7 +1,6 @@
 using DataStorage;
 using Managers;
 using UnityEngine;
-using TMPro;
 
 namespace UI
 {
@@ -9,10 +8,9 @@ namespace UI
     {
         public RoleController roleController;
         public ScreenChanger screenChanger;
-        
+
         private void OnEnable()
         {
-            Debug.Log($"On enable client called. IsPlayerRoleAssigned: {NetworkCommunicationManager.Instance.IsPlayerRoleAssigned}");
             if (!NetworkCommunicationManager.Instance.IsPlayerRoleAssigned)
             {
                 screenChanger.ChangeToPlayerRoleScreen();

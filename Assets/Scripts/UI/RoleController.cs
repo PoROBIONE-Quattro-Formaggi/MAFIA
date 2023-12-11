@@ -1,4 +1,3 @@
-using System;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
@@ -38,7 +37,7 @@ namespace UI
             _timeCounter = 0;
             InvokeRepeating(nameof(ChangeButtonNameIfApplicable), 0f, 1f);
         }
-        
+
         private async void EmergencyGoToMainMenuIfApplicable()
         {
             switch (_counter)
@@ -61,8 +60,7 @@ namespace UI
         {
             ScreenChanger.Instance.ChangeToPlayerGameScreen();
         }
-        
-        
+
 
         private void ChangeButtonNameIfApplicable()
         {
@@ -82,7 +80,7 @@ namespace UI
             AnimatePlaceholder(dots);
         }
 
-        public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        private void AnimatePlaceholder(TextMeshProUGUI placeholderText)
         {
             placeholderText.text = placeholderText.text.Length switch
             {

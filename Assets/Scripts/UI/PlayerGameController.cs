@@ -1,14 +1,12 @@
-using System;
-using System.Threading.Tasks;
 using DataStorage;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
-using Unity.Netcode;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
+
+// ReSharper disable Unity.InefficientPropertyAccess
+
+// ReSharper disable Unity.PreferAddressByIdToGraphicsParams
 
 namespace UI
 {
@@ -36,7 +34,7 @@ namespace UI
         public RectTransform lastWordsRectTransform;
         public GameObject returnButton;
         public ScreenChanger screenChanger;
-        
+
         private string _time;
         private bool _notYet;
         private bool _rollLastWords;
@@ -72,7 +70,6 @@ namespace UI
                     OnEnableEvening();
                     break;
             }
-            
         }
 
         private void OnEnableNight()
@@ -84,14 +81,14 @@ namespace UI
                 OnPlayerDead();
                 return;
             }
-            
+
             SetInformationText(LoreMessages.GetRandomMessage());
-            
+
             if (goVoteButton.activeSelf)
             {
                 var alibi = DefaultAlibis.GetRandomAlibi();
                 GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
-                
+
                 SetPlayerQuoteStringNight();
                 DisableInput();
                 confirmInputButton.SetActive(false);
@@ -100,40 +97,42 @@ namespace UI
             {
                 EnableAlibiInput();
             }
+
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableDay()
         {
             playerGameAnimator.Play("day");
-            
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
                 return;
             }
-            
+
             SetInformationText(LoreMessages.GetRandomMessage());
-            
+
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringDay();
                 DisableInput();
                 confirmInputButton.SetActive(false);
             }
+
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableEvening()
         {
             playerGameAnimator.Play("day");
-            
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
                 return;
             }
-            
+
             SetInformationText(LoreMessages.GetRandomMessage());
         }
 
@@ -146,7 +145,7 @@ namespace UI
             var trimIndex = alibi.IndexOf(']') + 1;
             alibi = alibi[trimIndex..].Trim();
             alibi = alibi.Trim('.');
-            
+
             inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
@@ -162,8 +161,8 @@ namespace UI
             input.gameObject.SetActive(false);
             keyboard.HideKeyboard();
         }
-        
-        
+
+
         private void FixedUpdate()
         {
             RollInformation();
@@ -173,7 +172,7 @@ namespace UI
             }
         }
 
-        
+
         private void Sunrise()
         {
             playerGameAnimator.ResetTrigger("Sunset");
@@ -184,12 +183,12 @@ namespace UI
                 OnConfirmInputButtonClicked();
                 SendInputToServer();
             }
-            
+
             DisableInput();
             confirmInputButton.SetActive(false);
-            
+
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
-    
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -197,7 +196,7 @@ namespace UI
             else
             {
                 informationText.text = MafiaDeaths.GetRandomMafiaDeathMessage(lastKilledName);
-            
+
                 goVoteButton.SetActive(true);
                 SetPlayerQuoteStringDay();
                 playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
@@ -207,13 +206,13 @@ namespace UI
         private void Sunset()
         {
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
-            
+
             if (confirmInputButton.activeSelf)
             {
                 OnConfirmInputButtonClicked();
                 SendInputToServer();
             }
-            
+
             if (!PlayerData.IsAlive)
             {
                 if (PlayerData.Name == lastKilledName)
@@ -259,14 +258,15 @@ namespace UI
                 SendInputToServer();
                 confirmInputButton.SetActive(false);
             }
-            
+
             // GENERATE ALIBI
             var alibi = DefaultAlibis.GetRandomAlibi();
             GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
-            
-            
+
+
             // ROLL LAST WORDS
-            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
+            lastWordsText.text =
+                $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
             playerQuote.SetActive(false);
             deadPrompt.SetActive(false);
 
@@ -276,6 +276,7 @@ namespace UI
                 _notYet = true;
                 _rollLastWords = true;
             }
+
             InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
         }
 
@@ -283,10 +284,10 @@ namespace UI
         {
             if (_notYet) return;
             CancelInvoke(nameof(WaxingCrescentMoon));
-            
+
             playerGameAnimator.ResetTrigger("Sunrise");
             playerGameAnimator.SetTrigger("Sunset");
-            
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -295,7 +296,7 @@ namespace UI
             {
                 // ALIVE PLAYERS DO THIS
                 SetPlayerQuoteStringNight();
-                
+
                 playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
             }
@@ -305,7 +306,7 @@ namespace UI
         {
             screenChanger.ChangeTo(endGameScreen.name);
         }
-        
+
         public async void GoToLobbyClicked()
         {
             if (LobbyManager.Instance.IsLobbyHost())
@@ -318,6 +319,7 @@ namespace UI
 
                 NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             }
+
             NetworkCommunicationManager.Instance.LeaveRelay();
         }
 
@@ -350,10 +352,11 @@ namespace UI
                 // TODO: tu maybe without notify
                 input.text = inputPlaceholder.text;
             }
+
             playerQuoteText.text += ".";
             DisableInput();
         }
-        
+
         public void OnInputValueChanged()
         {
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
@@ -365,7 +368,7 @@ namespace UI
             OnConfirmInputButtonClicked();
             SendInputToServer();
         }
-        
+
         public void OnInputDeselected()
         {
             if (input.text.Length == 0)
@@ -391,13 +394,13 @@ namespace UI
 
             input.SetTextWithoutNotify("");
         }
-        
+
         // HELPER FUNCTIONS
         private void SetPlayerQuoteStringDay()
         {
             var playerQuoteString = $"<b>[{PlayerData.Name}]</b> I vote for _ to be executed";
             playerQuoteText.text = playerQuoteString;
-            
+
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
@@ -405,7 +408,7 @@ namespace UI
         private void SetPlayerQuoteStringNight()
         {
             var playerQuoteString = $"<b>[{PlayerData.Name}]</b> ";
-        
+
             playerQuoteString += PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -430,7 +433,7 @@ namespace UI
         {
             informationText.text = text;
         }
-        
+
         private void RollInformation()
         {
             if (_currentX < -parentScreenRectTransform.sizeDelta.x - informationText.preferredWidth)
@@ -441,6 +444,7 @@ namespace UI
             {
                 _currentX -= 1 * animationSpeed;
             }
+
             informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
         }
 

@@ -11,6 +11,7 @@ namespace UI
         private static extern void CopyToClipboard(string str);
 
         [DllImport("__Internal")]
+        // ReSharper disable once UnusedMember.Local
         private static extern void HandlePermission(string str);
 
         public TextMeshProUGUI information;

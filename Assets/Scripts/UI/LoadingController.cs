@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using UnityEngine;
@@ -45,7 +42,7 @@ namespace UI
             _counter += 1;
         }
 
-        public void AnimatePlaceholder(TextMeshProUGUI placeholderText)
+        private void AnimatePlaceholder(TextMeshProUGUI placeholderText)
         {
             placeholderText.text = placeholderText.text.Length switch
             {

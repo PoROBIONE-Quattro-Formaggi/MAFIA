@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using DataStorage;
 using Managers;
 using UnityEngine;
@@ -21,11 +18,10 @@ namespace UI
         {
             NetworkCommunicationManager.Instance.OnDayBegan -= ThrowToGame;
         }
-        
+
         private void ThrowToGame()
         {
             ScreenChanger.Instance.ChangeToPlayerGameScreen();
         }
     }
 }
-

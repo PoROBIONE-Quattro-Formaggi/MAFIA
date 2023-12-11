@@ -313,6 +313,7 @@ namespace Managers
             {
                 playerName = "Anonymous";
             }
+
             _playerName = playerName;
             var player = new Player
             {

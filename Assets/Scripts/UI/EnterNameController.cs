@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
@@ -9,15 +8,14 @@ namespace UI
 {
     public class EnterNameController : MonoBehaviour
     {
-        [Header("Input")]
-        public TextMeshProUGUI enterNamePlaceholder;
+        [Header("Input")] public TextMeshProUGUI enterNamePlaceholder;
         public TMP_InputField enterNameField;
 
         [Header("Confirm button")] public GameObject confirmNameButton;
 
         [Header("Keyboard")] public KeyboardController keyboard;
 
-        private int _dotIndex = 0;
+        private int _dotIndex;
         private StringBuilder _placeholderString;
 
         private void Start()
@@ -38,7 +36,8 @@ namespace UI
             {
                 _placeholderString[_dotIndex] = ' ';
                 _dotIndex += 2;
-            } else if (_dotIndex > _placeholderString.Length)
+            }
+            else if (_dotIndex > _placeholderString.Length)
             {
                 _placeholderString[_dotIndex - 2] = '.';
                 _dotIndex = 0;
@@ -86,16 +85,15 @@ namespace UI
             confirmNameButton.SetActive(enterNameField.text != "");
 
             // Enter shortcut key implementation
-            if (Validators.CheckIfEndsWithNewline(enterNameField.text))
-            {
-                enterNameField.text = enterNameField.text.Trim('\n');
-                OnConfirmNameButtonClicked();
-            }
+            if (!Validators.CheckIfEndsWithNewline(enterNameField.text)) return;
+            enterNameField.text = enterNameField.text.Trim('\n');
+            OnConfirmNameButtonClicked();
         }
 
         public void OnConfirmNameButtonClicked()
         {
-            if (Validators.CheckIfNameCorrect(enterNameField.text)){
+            if (Validators.CheckIfNameCorrect(enterNameField.text))
+            {
                 MainMenuUIManager.Instance.SetName(enterNameField.text.Trim());
                 ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
             }

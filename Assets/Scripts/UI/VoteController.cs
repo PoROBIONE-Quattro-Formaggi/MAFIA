@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using DataStorage;
 using Managers;
@@ -43,6 +42,7 @@ namespace UI
                     OnEnableEvening();
                     break;
             }
+
             NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
             NetworkCommunicationManager.Instance.OnEveningBegan += ThrowToGame;
         }
@@ -50,9 +50,9 @@ namespace UI
         private void OnEnableNight()
         {
             voteAnimator.Play("night");
-            
+
             GenerateVotingOptionsNight();
-            
+
             votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -107,6 +107,7 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
+
             voteOptionsParent.SetActive(true);
         }
 
@@ -118,7 +119,6 @@ namespace UI
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             var idToAlibis = GameSessionManager.Instance.GetAlibis();
 
-            Debug.Log("BEFORE FOREACH LOOP IN GENERATE OPTIONS DAY");
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
@@ -134,7 +134,7 @@ namespace UI
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
-            Debug.Log("AFTER FOREACH LOOP IN GENERATE OPTIONS DAY");
+
             voteOptionsParent.SetActive(true);
         }
 
@@ -225,7 +225,7 @@ namespace UI
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, quote);
             PlayerPrefs.Save();
         }
-        
+
         private void OnDisable()
         {
             ClearVotingOptions();

@@ -9,7 +9,7 @@ namespace UI
 
         private void OnEnable()
         {
-            InvokeRepeating(nameof(UpdateWelcomePrompt),0f,1f);
+            InvokeRepeating(nameof(UpdateWelcomePrompt), 0f, 1f);
         }
 
         private void UpdateWelcomePrompt()

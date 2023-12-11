@@ -12,7 +12,7 @@ namespace UI
         public GameObject credits;
         public GameObject namesParent;
         public TextMeshProUGUI subtitle;
-    
+
         //parameters
         public float scrollSpeed;
         public List<TextMeshProUGUI> nameTexts;
@@ -65,7 +65,7 @@ namespace UI
             {
                 DestroyImmediate(namesParent.transform.GetChild(i).gameObject);
             }
-            
+
             // SPAWN NAME OBJECTS FOR ALL NAMES
             if (!_isLobbyReady) return;
             var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();

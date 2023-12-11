@@ -9,13 +9,13 @@ namespace UI
     {
         [DllImport("__Internal")]
         private static extern string ClearClipboard();
-        
+
         [DllImport("__Internal")]
         private static extern void ShowClipboard();
-        
+
         [DllImport("__Internal")]
         private static extern void HideClipboard();
-        
+
         [Header("Input")] public TMP_InputField codeInputField;
         public TextMeshProUGUI codeInputPlaceholder;
         public TextMeshProUGUI codeDisplay;
@@ -55,6 +55,7 @@ namespace UI
                 CancelInvoke(nameof(TogglePlaceholder));
                 _blockAnimateCodeInputInvoke = false;
             }
+
             ShowClipboard();
         }
 
@@ -66,11 +67,9 @@ namespace UI
 
         public void OnPaste(string pasteString)
         {
-            Debug.Log($"Paste: {pasteString}");
             ClearClipboard();
             if (pasteString.Length != 6) return;
             SelectCodeInput();
-            Debug.Log($"attempted");
             codeInputField.text = pasteString;
         }
 
@@ -78,7 +77,6 @@ namespace UI
         {
             OnCodeInputSelected();
             codeInputField.text = codeInputField.text.ToUpper();
-            Debug.Log(codeInputField.text);
             TryToJoin();
             DisplayCode();
         }

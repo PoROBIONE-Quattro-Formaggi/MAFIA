@@ -1,8 +1,6 @@
-using System.Threading.Tasks;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,19 +13,13 @@ namespace UI
 
         private void OnEnable()
         {
-            string winnerRole = GameSessionManager.Instance.GetWinnerRole();
-            if (winnerRole == "Mafia")
+            var winnerRole = GameSessionManager.Instance.GetWinnerRole();
+            informationText.text = winnerRole switch
             {
-                informationText.text = $"The {winnerRole} wins.";
-            }
-            else if (winnerRole == "DRAW")
-            {
-                informationText.text = "You left the city.";
-            }
-            else
-            {
-                informationText.text = "The Citizens win.";
-            }
+                "Mafia" => $"The {winnerRole} wins.",
+                "DRAW" => "You left the city.",
+                _ => "The Citizens win."
+            };
         }
 
         public async void GoToLobbyClicked()
@@ -42,6 +34,7 @@ namespace UI
 
                 NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             }
+
             NetworkCommunicationManager.Instance.LeaveRelay();
         }
     }

@@ -1,7 +1,6 @@
 using System.Text;
 using DataStorage;
 using Managers;
-using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,8 +9,7 @@ namespace UI
 {
     public class CreateLobbyController : MonoBehaviour
     {
-        [Header("Buttons")]
-        public Button hostButton;
+        [Header("Buttons")] public Button hostButton;
         public Button privateLobbyButton;
         public Button publicLobbyButton;
         private Image _privateLobbyButtonBg;
@@ -19,8 +17,7 @@ namespace UI
         private TextMeshProUGUI _privateLobbyButtonText;
         private TextMeshProUGUI _publicLobbyButtonText;
 
-        [Header("Input")]
-        public TMP_InputField townNameInputField;
+        [Header("Input")] public TMP_InputField townNameInputField;
         public TextMeshProUGUI townNameInputPlaceholder;
         public TMP_InputField populationInputField;
         public TextMeshProUGUI populationInputPlaceholder;
@@ -29,11 +26,9 @@ namespace UI
         public float inputDisplayOffset;
         public TextMeshProUGUI maxWidthChar;
 
-        [Header("Keyboard")]
-        public KeyboardController keyboard;
+        [Header("Keyboard")] public KeyboardController keyboard;
 
-        [Header("Information")]
-        public TextMeshProUGUI information;
+        [Header("Information")] public TextMeshProUGUI information;
 
         // VARIABLES
         private bool _isPrivate = true;
@@ -41,7 +36,7 @@ namespace UI
         private float _maxCharWidth;
         private bool _blockTownAnimationInvoke;
         private bool _blockPopulationAnimationInvoke;
-        private int _dotIndex = 0;
+        private int _dotIndex;
         private StringBuilder _placeholderString;
 
 
@@ -54,10 +49,10 @@ namespace UI
 
             _inputDisplayMinWidth = inputDisplay.sizeDelta.x - inputDisplayOffset;
             _maxCharWidth = maxWidthChar.preferredWidth;
-            
+
             _placeholderString = new StringBuilder(townNameInputPlaceholder.text);
         }
-        
+
         private void OnEnable()
         {
             LobbyManager.Instance.IsGameEnded = false;
@@ -67,8 +62,6 @@ namespace UI
         private void AdjustCreateDisplay(float preferredWidth)
         {
             inputDisplay.sizeDelta = new Vector2(preferredWidth + inputDisplayOffset, inputDisplay.sizeDelta.y);
-
-            // TODO: reset text position (left = 4, but this is fucked up w chuy), spacja nie dodaje do preffered width XDD
         }
 
         public void OnPromptClicked()
@@ -121,6 +114,7 @@ namespace UI
                     ? preferredTextWidth
                     : _inputDisplayMinWidth);
             }
+
             OnInputValueChanged();
         }
 
@@ -134,7 +128,6 @@ namespace UI
                     InvokeRepeating(nameof(AnimatePopulationPlaceholder), 0.5f, 0.5f);
                     _blockPopulationAnimationInvoke = true;
                 }
-
             }
             else
             {
@@ -143,6 +136,7 @@ namespace UI
                 CancelInvoke(nameof(AnimatePopulationPlaceholder));
                 _blockPopulationAnimationInvoke = false;
             }
+
             OnInputValueChanged();
         }
 
@@ -164,7 +158,7 @@ namespace UI
                 if (Validators.CheckIfTownPopulationCorrect(populationInputField.text))
                 {
                     if (!Validators.CheckIfPopulationInRange(int.Parse(populationInputField.text)))
-                        information.text= "Choose from values 5 - 99";
+                        information.text = "Choose from values 5 - 99";
                     else
                     {
                         information.text = "Create lobby, and";
@@ -241,16 +235,14 @@ namespace UI
 
         public async void OnCreateLobbyClicked()
         {
-            var playersInt = 10;
-            playersInt = int.Parse(populationInputField.text);
-            var isLobbyCreated = await LobbyManager.Instance.CreateLobbyAsync("Narrator", townNameInputField.text.Trim(), playersInt,
+            var playersInt = int.Parse(populationInputField.text);
+            var isLobbyCreated = await LobbyManager.Instance.CreateLobbyAsync("Narrator",
+                townNameInputField.text.Trim(), playersInt,
                 _isPrivate, "");
             if (isLobbyCreated)
             {
                 ScreenChanger.Instance.ChangeToLobbyHostScreen();
             }
-
-
         }
 
 
@@ -261,7 +253,8 @@ namespace UI
             {
                 _placeholderString[_dotIndex] = ' ';
                 _dotIndex += 2;
-            } else if (_dotIndex > _placeholderString.Length)
+            }
+            else if (_dotIndex > _placeholderString.Length)
             {
                 _placeholderString[_dotIndex - 2] = '.';
                 _dotIndex = 0;
@@ -282,6 +275,7 @@ namespace UI
             {
                 populationInputPlaceholder.text = ". . .";
             }
+
             MainMenuUIManager.Instance.AnimatePlaceholder(populationInputPlaceholder);
         }
     }

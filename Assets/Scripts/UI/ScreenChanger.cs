@@ -13,7 +13,7 @@ namespace UI
         {
             return _lastScreenName;
         }
-    
+
         private void Awake()
         {
             Instance = this;
@@ -35,7 +35,7 @@ namespace UI
             foreach (Transform screenTransform in screensParent.transform)
             {
                 if (screenTransform.gameObject.name != screenName) continue;
-                
+
                 screenTransform.gameObject.SetActive(true);
             }
         }
@@ -103,17 +103,20 @@ namespace UI
         public void ChangeToInstructionScreen()
         {
             ChangeTo(Screens.InstructionScreen);
-
         }
 
-        public void ChangeToErrorScreen(){
+        public void ChangeToErrorScreen()
+        {
             ChangeTo(Screens.ErrorScreen);
         }
 
-        public void ChangeToPreviousScreen() {
-            if (_lastScreenName == ""){
+        public void ChangeToPreviousScreen()
+        {
+            if (_lastScreenName == "")
+            {
                 ChangeTo(Screens.MainScreen);
             }
+
             ChangeTo(_lastScreenName);
         }
     }
