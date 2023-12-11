@@ -145,6 +145,8 @@ namespace UI
             //Trim alibi
             var trimIndex = alibi.IndexOf(']') + 1;
             alibi = alibi[trimIndex..].Trim();
+            alibi = alibi.Trim('.');
+            
             inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
