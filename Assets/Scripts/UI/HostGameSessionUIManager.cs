@@ -1,5 +1,3 @@
-using System;
-using Managers;
 using UnityEngine;
 
 namespace UI

@@ -23,11 +23,9 @@ namespace UI
 
         private ulong _currentChosenID;
 
-        //private string _time;
-
-        private void Start()
+        private void ThrowToGame()
         {
-            OnEnableNight();
+            ScreenChanger.Instance.ChangeToPlayerGameScreen();
         }
 
         private void OnEnable()
@@ -44,12 +42,17 @@ namespace UI
                     OnEnableEvening();
                     break;
             }
+
+            NetworkCommunicationManager.Instance.OnDayBegan += ThrowToGame;
+            NetworkCommunicationManager.Instance.OnEveningBegan += ThrowToGame;
         }
 
         private void OnEnableNight()
         {
-            GenerateVotingOptionsNight();
             voteAnimator.Play("night");
+
+            GenerateVotingOptionsNight();
+
             votePromptText.text = PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -116,33 +119,23 @@ namespace UI
             var idToPlayerName = GameSessionManager.Instance.IDToPlayerName;
             var idToAlibis = GameSessionManager.Instance.GetAlibis();
 
-            Debug.Log("BEFORE FOREACH LOOP IN GENERATE OPTIONS DAY");
             foreach (var playerID in alivePlayersIDs)
             {
                 var voteOption = Instantiate(voteOptionDayPrefab, voteOptionsParent.transform);
-                var alibi = DefaultAlibis.GetRandomAlibi();
+                var alibi = $"<b>[{idToPlayerName[playerID]}]</b> " + DefaultAlibis.GetRandomAlibi();
                 if (idToAlibis.TryGetValue(playerID, out var playerSetAlibi))
                 {
                     alibi = playerSetAlibi;
                 }
 
-                Debug.Log($"[{idToPlayerName[playerID]}] with alibi VVV");
-                Debug.Log($"Alibi to ^^^: {alibi}");
-                voteOption.GetComponentInChildren<TextMeshProUGUI>().text =
-                    $"<b>[{idToPlayerName[playerID]}]</b> {alibi}";
+                voteOption.GetComponentInChildren<TextMeshProUGUI>().text = alibi;
                 voteOption.SetActive(true);
                 var toggle = voteOption.GetComponent<Toggle>();
                 toggle.group = voteOptionsParent.GetComponent<ToggleGroup>();
                 toggle.onValueChanged.AddListener(delegate { OnVoteOptionClicked(playerID, toggle); });
             }
 
-            Debug.Log("AFTER FOREACH LOOP IN GENERATE OPTIONS DAY");
             voteOptionsParent.SetActive(true);
-        }
-
-        private void OnDisable()
-        {
-            ClearVotingOptions();
         }
 
         private void ClearVotingOptions()
@@ -231,6 +224,13 @@ namespace UI
             playerQuoteText.text = quote;
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, quote);
             PlayerPrefs.Save();
+        }
+
+        private void OnDisable()
+        {
+            ClearVotingOptions();
+            NetworkCommunicationManager.Instance.OnDayBegan -= ThrowToGame;
+            NetworkCommunicationManager.Instance.OnEveningBegan -= ThrowToGame;
         }
     }
 }

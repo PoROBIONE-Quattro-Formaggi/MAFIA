@@ -29,7 +29,7 @@ namespace Managers
         }
 
         public bool IsCurrentlyInGame { get; set; }
-        public event Action OnHostMigrated;
+        public bool IsGameEnded { get; set; }
 
         private static LobbyManager _instance;
         private Lobby _hostLobby;
@@ -157,6 +157,7 @@ namespace Managers
             }
 
             var relayCode = _joinedLobby.Data[PpKeys.KeyStartGame].Value;
+            if (IsGameEnded) return;
             if (relayCode == "0") return;
             if (IsCurrentlyInGame) return;
             IsCurrentlyInGame = true;
@@ -178,8 +179,8 @@ namespace Managers
                 if (IsLobbyHost() && _hostLobby == null)
                 {
                     _hostLobby = _joinedLobby;
+                    ScreenChanger.Instance.ChangeToLobbyHostScreen();
                     Toast.Show("You are new lobby host");
-                    OnHostMigrated?.Invoke();
                 }
             }
 
@@ -308,6 +309,11 @@ namespace Managers
 
         public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
+            if (playerName == "")
+            {
+                playerName = "Anonymous";
+            }
+
             _playerName = playerName;
             var player = new Player
             {
@@ -379,7 +385,7 @@ namespace Managers
             var randomNumber = new Random().Next(100);
             var newName = $"{currentName}({randomNumber})";
             _playerName = newName;
-            FindObjectOfType<PlayerLobbyController>().SetWelcomePrompt(newName);
+            FindObjectOfType<PlayerLobbyController>(true).SetWelcomePrompt(newName);
             var updatePlayerOptions = new UpdatePlayerOptions
             {
                 Data = new Dictionary<string, PlayerDataObject>
@@ -409,24 +415,17 @@ namespace Managers
             return _joinedLobby != null;
         }
 
-        public List<Player> GetPlayersListInLobby()
+        private List<Player> GetPlayersListInLobby()
         {
             return _joinedLobby.Players;
         }
 
-        public void LeaveLobby()
+        public Task LeaveLobby()
         {
-            if (GetPlayersListInLobby().Count <= 1)
-            {
-                HandleDeleteLobby();
-            }
-            else
-            {
-                HandleLeaveLobby();
-            }
+            return GetPlayersListInLobby().Count <= 1 ? HandleDeleteLobby() : HandleLeaveLobby();
         }
 
-        private async void HandleLeaveLobby()
+        private async Task HandleLeaveLobby()
         {
             Debug.Log("Leaving lobby");
             try
@@ -446,7 +445,7 @@ namespace Managers
             Debug.Log($"Lobby state: {_joinedLobby}");
         }
 
-        private async void HandleDeleteLobby()
+        private async Task HandleDeleteLobby()
         {
             if (!IsLobbyHost()) return;
             Debug.Log("Deleting lobby");

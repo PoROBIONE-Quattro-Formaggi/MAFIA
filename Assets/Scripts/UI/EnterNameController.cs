@@ -1,5 +1,5 @@
-using System;
 using System.Text;
+using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
 using UnityEngine;
@@ -8,20 +8,25 @@ namespace UI
 {
     public class EnterNameController : MonoBehaviour
     {
-        [Header("Input")]
-        public TextMeshProUGUI enterNamePlaceholder;
+        [Header("Input")] public TextMeshProUGUI enterNamePlaceholder;
         public TMP_InputField enterNameField;
 
         [Header("Confirm button")] public GameObject confirmNameButton;
 
         [Header("Keyboard")] public KeyboardController keyboard;
 
-        private int _dotIndex = 0;
+        private int _dotIndex;
         private StringBuilder _placeholderString;
 
         private void Start()
         {
             _placeholderString = new StringBuilder(enterNamePlaceholder.text);
+        }
+
+        private void OnEnable()
+        {
+            LobbyManager.Instance.IsGameEnded = false;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
         }
 
 
@@ -31,7 +36,8 @@ namespace UI
             {
                 _placeholderString[_dotIndex] = ' ';
                 _dotIndex += 2;
-            } else if (_dotIndex > _placeholderString.Length)
+            }
+            else if (_dotIndex > _placeholderString.Length)
             {
                 _placeholderString[_dotIndex - 2] = '.';
                 _dotIndex = 0;
@@ -79,22 +85,27 @@ namespace UI
             confirmNameButton.SetActive(enterNameField.text != "");
 
             // Enter shortcut key implementation
-            if (Validators.CheckIfEndsWithNewline(enterNameField.text))
-            {
-                OnConfirmNameButtonClicked();
-            }
+            if (!Validators.CheckIfEndsWithNewline(enterNameField.text)) return;
+            enterNameField.text = enterNameField.text.Trim('\n');
+            OnConfirmNameButtonClicked();
         }
 
         public void OnConfirmNameButtonClicked()
         {
-            if (Validators.CheckIfNameCorrect(enterNameField.text)){
+            if (Validators.CheckIfNameCorrect(enterNameField.text))
+            {
                 MainMenuUIManager.Instance.SetName(enterNameField.text.Trim());
                 ScreenChanger.Instance.ChangeToBrowseLobbiesScreen();
             }
             else
             {
-                Toast.Show("Your name should be at least 2 characters long and no longer than 16");
+                Toast.Show("Your name should between 2 and 16 characters & without special characters");
             }
+        }
+
+        private void OnDisable()
+        {
+            enterNameField.text = enterNameField.text.Trim('\n');
         }
     }
 }

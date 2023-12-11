@@ -11,27 +11,24 @@ namespace UI
         public bool changesScreen;
         public bool returns;
         public bool disappears;
-        public GameObject screenToChangeTo = null;
+        public bool sendsInputToServer;
+        public PlayerGameController playerGameController;
+        public GameObject screenToChangeTo;
         public TextMeshProUGUI animationMaxWidthRender;
         public TextMeshProUGUI text;
-        public RectTransform textParent;
+        public RectTransform textRectTransform;
         public GameObject thisButton;
 
         private float _animationMaxWidth;
-        private const string MaxWidthKeyFrame = "....";
+        private const string MaxWidthKeyFrame = "...";
         private string _text;
-        private RectTransform _textRectTransform;
         private GameObject _thisButton;
 
-
-        private TextMeshProUGUI _buttonText;
         private void Start()
         {
-            _buttonText = GetComponentInChildren<TextMeshProUGUI>();
             _animationMaxWidth = GetAnimationMaxWidth();
-            _textRectTransform = text.gameObject.GetComponent<RectTransform>();
             _text = text.text;
-            _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+            textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, textRectTransform.sizeDelta.y);
         }
 
         private void OnDisable()
@@ -49,7 +46,7 @@ namespace UI
         {
             text.text = newText;
             _animationMaxWidth = GetAnimationMaxWidth();
-            _textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, _textRectTransform.sizeDelta.y);
+            textRectTransform.sizeDelta = new Vector2(_animationMaxWidth, textRectTransform.sizeDelta.y);
         }
 
         public void OnClickAnimation()
@@ -59,17 +56,29 @@ namespace UI
 
         private IEnumerator AnimateOnClick()
         {
-            _buttonText.text += ".";
+            if (text.text.EndsWith("...")) yield break;
+            text.text += ".";
             yield return new WaitForSeconds(animationTime);
-            _buttonText.text = _buttonText.text[..^1];
+            text.text = text.text[..^1];
+
             if (changesScreen)
             {
-                Debug.Log("screen changer called");
                 ScreenChanger.Instance.ChangeTo(screenToChangeTo.name);
-            } else if (returns)
+            }
+            else if (returns)
             {
                 ScreenChanger.Instance.ChangeToPreviousScreen();
-            } else if (disappears)
+            }
+            else if (disappears && sendsInputToServer)
+            {
+                if (thisButton.activeSelf)
+                {
+                    playerGameController.SendInputToServer();
+                }
+
+                thisButton.SetActive(false);
+            }
+            else if (disappears)
             {
                 thisButton.SetActive(false);
             }

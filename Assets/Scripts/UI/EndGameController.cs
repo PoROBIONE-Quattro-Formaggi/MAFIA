@@ -1,7 +1,6 @@
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,19 +13,13 @@ namespace UI
 
         private void OnEnable()
         {
-            string winnerRole = GameSessionManager.Instance.GetWinnerRole();
-            if (winnerRole == "Mafia")
+            var winnerRole = GameSessionManager.Instance.GetWinnerRole();
+            informationText.text = winnerRole switch
             {
-                informationText.text = $"The {winnerRole} wins.";
-            }
-            else if (winnerRole == "DRAW")
-            {
-                informationText.text = "Oh no! A fatal error occured \u00af\\_(ツ)_/\u00af";
-            }
-            else
-            {
-                informationText.text = "The Citizens win.";
-            }
+                "Mafia" => $"The {winnerRole} wins.",
+                "DRAW" => "You left the city.",
+                _ => "The Citizens win."
+            };
         }
 
         public async void GoToLobbyClicked()
@@ -42,19 +35,7 @@ namespace UI
                 NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
             }
 
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
-            if (LobbyManager.Instance.GetLobbyName() != "")
-            {
-                LobbyManager.Instance.LeaveLobby();
-            }
-
-            if (!NetworkManager.Singleton.ShutdownInProgress)
-            {
-                NetworkManager.Singleton.Shutdown();
-            }
-            // SceneChanger.ChangeToMainSceneToLobbyHostScreen(); TODO back to lobby functionality maybe later
-            SceneChanger.ChangeToMainScene();
+            NetworkCommunicationManager.Instance.LeaveRelay();
         }
     }
 }

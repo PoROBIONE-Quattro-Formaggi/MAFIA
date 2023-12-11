@@ -1,5 +1,4 @@
 using DataStorage;
-using UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,20 +19,6 @@ namespace Managers
         public static void ChangeToGameScene()
         {
             ChangeSceneTo(Scenes.GameScene);
-        }
-
-        public static void ChangeToMainSceneToLobbyPlayerScreen()
-        {
-            ChangeToMainScene();
-            ScreenChanger.Instance.ChangeToLobbyPlayerScreen();
-        }
-
-        public static void ChangeToMainSceneToLobbyHostScreen()
-        {
-            Debug.Log("Changing to main scene");
-            ChangeToMainScene();
-            Debug.Log("Changing to lobby host screen");
-            ScreenChanger.Instance.ChangeToLobbyHostScreen();
         }
     }
 }

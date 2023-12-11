@@ -11,11 +11,14 @@ namespace UI
         private static extern void CopyToClipboard(string str);
 
         [DllImport("__Internal")]
+        // ReSharper disable once UnusedMember.Local
         private static extern void HandlePermission(string str);
 
         public TextMeshProUGUI information;
+        public GameObject playButton;
 
         private int _maxPlayers;
+        
 
         public async void StartGame()
         {
@@ -31,6 +34,7 @@ namespace UI
         private void OnEnable()
         {
             InvokeRepeating(nameof(WaitForLobby), 0f, 0.1f);
+            playButton.SetActive(true);
         }
 
         private void WaitForLobby()
@@ -39,7 +43,7 @@ namespace UI
             if (_maxPlayers == 0) return;
 
             // Display lobby code
-            information.text = "LOBBY CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
+            information.text = "TOWN CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
 
             CancelInvoke(nameof(WaitForLobby));
         }

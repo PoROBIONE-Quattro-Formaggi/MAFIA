@@ -37,6 +37,8 @@ namespace Managers
         public event Action OnEveningBegan;
         public event Action OnNightBegan;
         public event Action OnGameEnded;
+        private int _counter;
+        private int _playerCounter;
 
         private void Awake()
         {
@@ -53,34 +55,40 @@ namespace Managers
             NetworkManager.Singleton.OnServerStopped += OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnectedForHost;
             NetworkManager.Singleton.OnTransportFailure += OnTransportFailure;
             OnPlayerRoleAssigned += () =>
             {
-                Debug.Log("OnPlayerRoleAssigned called (changing IsPlayerRoleAssigned)");
                 NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientReconnected;
                 IsPlayerRoleAssigned = true;
             };
         }
 
-        public void UnsubscribeAllNetworkEvents()
+        private void OnDisable()
         {
+            UnsubscribeAllNetworkEvents();
+        }
+
+        private void UnsubscribeAllNetworkEvents()
+        {
+            IsPlayerRoleAssigned = false;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnectedForHost;
+            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure;
             NetworkManager.Singleton.OnServerStarted -= OnHostStarted;
             NetworkManager.Singleton.OnServerStopped -= OnHostStopped;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
             NetworkManager.Singleton.OnClientConnectedCallback -= OnClientReconnected;
-            NetworkManager.Singleton.OnTransportFailure -= OnTransportFailure;
-            IsPlayerRoleAssigned = false;
         }
-        
+
         private void OnTransportFailure()
         {
             NetworkManager.Shutdown();
             GameSessionManager.Instance.ReconnectToGame();
             ScreenChanger.Instance.ChangeToErrorScreen();
         }
-        
+
         private void OnHostStarted()
         {
             if (!IsHost) return;
@@ -93,14 +101,21 @@ namespace Managers
             GameSessionManager.Instance.OnPlayersAssignedToRoles += SendRolesToClients;
         }
 
-        private static void OnHostStopped(bool obj)
+        private void OnHostStopped(bool obj)
         {
             Debug.Log("Server stopped");
+            EmergencyEndGameServerRpc();
+            LeaveRelay();
         }
 
         private void OnClientConnected(ulong clientId)
         {
-            if (IsHost) return;
+            if (IsHost)
+            {
+                _playerCounter++;
+                return;
+            }
+
             IsPlayerRoleAssigned = false;
             var oldID = PlayerData.ClientID;
             Debug.Log($"[NetworkCommunicationManager] OnClientConnected, ClientID: {clientId}");
@@ -116,21 +131,68 @@ namespace Managers
 
         private void OnClientReconnected(ulong clientId)
         {
-            if (IsHost) return;
-            Debug.Log("OnClientReconnected called");
-            Debug.Log($"Is player role assigned: {IsPlayerRoleAssigned}");
+            if (IsHost)
+            {
+                _playerCounter++;
+                return;
+            }
+
             var oldID = PlayerData.ClientID;
             PlayerData.ClientID = clientId;
             ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(oldID, clientId);
         }
 
-        private void  OnClientDisconnected(ulong clientId)
+        private void OnClientDisconnected(ulong clientId)
         {
             if (IsHost) return;
-            Toast.Show("You were disconnected. Trying to reconnect.");
+            Debug.Log("On client disconnected called");
             LobbyManager.Instance.IsCurrentlyInGame = false;
+            if (!PlayerData.IsAlive)
+            {
+                FinaliseLeavingRelay();
+            }
+            else
+            {
+                Toast.Show("You were disconnected. Trying to reconnect.");
+            }
         }
 
+        private void OnClientDisconnectedForHost(ulong clientId)
+        {
+            if (!IsHost) return;
+            if (GameSessionManager.Instance.IDToIsPlayerAlive.TryGetValue(clientId, out var isAlive))
+            {
+                if (isAlive)
+                {
+                    _playerCounter--;
+                }
+            }
+
+            InvokeRepeating(nameof(EmergencyGoToMainMenuIfApplicable), 0f, 1f);
+        }
+
+        private void EmergencyGoToMainMenuIfApplicable()
+        {
+            if (PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber) + 1 <= _playerCounter)
+            {
+                CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                _counter = 0;
+                return;
+            }
+
+            switch (_counter)
+            {
+                case >= 20:
+                    CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
+                    GameSessionManager.Instance.EmergencyEndGame();
+                    return;
+                case 10:
+                    Toast.Show("Lost one citizen. Looking for them...");
+                    break;
+            }
+
+            _counter += 1;
+        }
 
         public static bool StartHost()
         {
@@ -142,6 +204,31 @@ namespace Managers
             return NetworkManager.Singleton.StartClient();
         }
 
+        public void LeaveRelay()
+        {
+            PlayerData.IsAlive = false;
+            LobbyManager.Instance.IsCurrentlyInGame = false;
+            KillMeServerRpc();
+            if (NetworkManager.Singleton.IsConnectedClient)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
+
+            FinaliseLeavingRelay();
+        }
+
+        private static async void FinaliseLeavingRelay()
+        {
+            LobbyManager.Instance.IsGameEnded = true;
+            GameSessionManager.Instance.ClearAllDataForEndGame();
+            if (LobbyManager.Instance.GetLobbyName() != "")
+            {
+                await LobbyManager.Instance.LeaveLobby();
+            }
+
+            SceneChanger.ChangeToMainScene();
+        }
+
         private void SendRolesToClients()
         {
             GameSessionManager.Instance.OnPlayersAssignedToRoles -= SendRolesToClients;
@@ -149,6 +236,7 @@ namespace Managers
             var values = GameSessionManager.Instance.IDToRole.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
+            OnPlayerRoleAssigned?.Invoke();
             SendNewIDToRoleClientRpc(keys, values);
         }
 
@@ -169,17 +257,11 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         private void AddClientNameToListServerRpc(string playerName, ServerRpcParams rpcParams = default)
         {
-            Debug.Log($"[NetworkCommunicationManager] (in ServerRPC) Sender clientID: {rpcParams.Receive.SenderClientId}");
             GameSessionManager.Instance.IDToPlayerName[rpcParams.Receive.SenderClientId] = playerName;
             var keys = GameSessionManager.Instance.IDToPlayerName.Keys.ToArray();
             var values = GameSessionManager.Instance.IDToPlayerName.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
-            Debug.Log("[NetworkCommunicationManager] (in ServerRPC) Sending all names to clientRPC:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
-            }
             SendNewIDToPlayerNameClientRpc(keys, values);
         }
 
@@ -205,7 +287,6 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void MafiaVoteForServerRpc(ulong votedForID, ServerRpcParams rpcParams = default)
         {
-            Debug.Log($"Received mafia voted for ID: {votedForID}");
             GameSessionManager.Instance.MafiaIDToVotedForID[rpcParams.Receive.SenderClientId] = votedForID;
             var keys = GameSessionManager.Instance.MafiaIDToVotedForID.Keys.ToArray();
             var values = GameSessionManager.Instance.MafiaIDToVotedForID.Values.ToArray();
@@ -240,9 +321,7 @@ namespace Managers
         [ServerRpc(RequireOwnership = false)]
         public void SetLastWordsServerRpc(string lastWords)
         {
-            Debug.Log("Received last words RPC");
             GameSessionManager.Instance.LastWords = lastWords;
-            Debug.Log("Sending last words to all clients RPC");
             SendLastWordsClientRpc(lastWords);
         }
 
@@ -258,7 +337,7 @@ namespace Managers
 
             GameSessionManager.Instance.OnNewClientConnected(newId);
         }
-        
+
         [ServerRpc(RequireOwnership = false)]
         [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Local")]
         private void ReassignPlayerDataAfterReconnectionAfterRolesAssignedServerRpc(ulong oldId, ulong newId)
@@ -271,8 +350,9 @@ namespace Managers
             var valuesForRoles = GameSessionManager.Instance.IDToRole.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
+            OnPlayerRoleAssigned?.Invoke();
             SendNewIDToRoleClientRpc(keysForRoles, valuesForRoles);
-            
+
             // NAMES
             var playerName = GameSessionManager.Instance.IDToPlayerName[oldId];
             GameSessionManager.Instance.IDToPlayerName.Remove(oldId);
@@ -282,7 +362,7 @@ namespace Managers
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
             SendNewIDToPlayerNameClientRpc(keysForNames, valuesForNames);
-            
+
             // IS ALIVES
             var isAlive = GameSessionManager.Instance.IDToIsPlayerAlive[oldId];
             GameSessionManager.Instance.IDToIsPlayerAlive.Remove(oldId);
@@ -290,8 +370,9 @@ namespace Managers
             var keysForIsPlayerAlive = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
             var valuesForIsPlayerAlive = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
             SendNewIDToIsPlayerAliveClientRpc(keysForIsPlayerAlive, valuesForIsPlayerAlive);
-            
+
             // ALIBIS
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.IDToAlibi.TryGetValue(oldId, out var alibi))
             {
                 GameSessionManager.Instance.IDToAlibi.Remove(oldId);
@@ -307,6 +388,7 @@ namespace Managers
             switch (role)
             {
                 case Roles.Mafia:
+                    // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
                     if (GameSessionManager.Instance.MafiaIDToVotedForID.TryGetValue(oldId, out var mafiaVotedForID))
                     {
                         GameSessionManager.Instance.MafiaIDToVotedForID.Remove(oldId);
@@ -322,31 +404,38 @@ namespace Managers
                                 TargetClientIds = mafiaIDs
                             }
                         };
-                        SendNewMafiaIDToVotedForIDClientRpc(keysForMafiaVotedFor, valuesForMafiaVotedFor, clientRpcParamsWithMafiaIDsOnly);
+                        SendNewMafiaIDToVotedForIDClientRpc(keysForMafiaVotedFor, valuesForMafiaVotedFor,
+                            clientRpcParamsWithMafiaIDsOnly);
                     }
+
                     break;
                 case Roles.Doctor:
+                    // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
                     if (GameSessionManager.Instance.DoctorIDToVotedForID.TryGetValue(oldId,
                             out var doctorVotedForID))
                     {
                         GameSessionManager.Instance.DoctorIDToVotedForID.Remove(oldId);
                         GameSessionManager.Instance.DoctorIDToVotedForID[newId] = doctorVotedForID;
                     }
+
                     break;
             }
 
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.IDToVotedForID.TryGetValue(oldId, out var votedForID))
             {
                 GameSessionManager.Instance.IDToVotedForID.Remove(oldId);
                 GameSessionManager.Instance.IDToVotedForID[newId] = votedForID;
             }
 
+            // ReSharper disable once CanSimplifyDictionaryRemovingWithSingleCall
             if (GameSessionManager.Instance.ResidentIDToVotedForOption.TryGetValue(oldId,
                     out var votedForOption))
             {
                 GameSessionManager.Instance.ResidentIDToVotedForOption.Remove(oldId);
                 GameSessionManager.Instance.ResidentIDToVotedForOption[newId] = votedForOption;
             }
+
             SendLastWordsClientRpc(GameSessionManager.Instance.LastWords);
             SendLastKilledNameClientRpc(GameSessionManager.Instance.LastKilledName);
             SendNightResidentsPollChosenAnswerClientRpc(GameSessionManager.Instance.NightResidentsPollChosenAnswer);
@@ -356,6 +445,19 @@ namespace Managers
             SendNightResidentsOptionsClientRpc(options);
             SendNarratorCommentClientRpc(GameSessionManager.Instance.NarratorComment);
             SetTimeForClientsClientRpc(GameSessionManager.Instance.CurrentTimeOfDay);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void KillMeServerRpc(ServerRpcParams rpcParams = default)
+        {
+            var prevPlayerNumber = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
+            var nextPlayerNumber = prevPlayerNumber - 1;
+            PlayerPrefs.SetInt(PpKeys.KeyPlayersNumber, nextPlayerNumber);
+            PlayerPrefs.Save();
+            GameSessionManager.Instance.IDToIsPlayerAlive[rpcParams.Receive.SenderClientId] = false;
+            var keys = GameSessionManager.Instance.IDToIsPlayerAlive.Keys.ToArray();
+            var values = GameSessionManager.Instance.IDToIsPlayerAlive.Values.ToArray();
+            SendNewIDToIsPlayerAliveClientRpc(keys, values);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -394,11 +496,6 @@ namespace Managers
             {
                 GameSessionManager.Instance.IDToPlayerName[keys[i]] = values[i].ToString();
             }
-            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player names like:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToPlayerName)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
-            }
         }
 
         [ClientRpc]
@@ -409,13 +506,7 @@ namespace Managers
             GameSessionManager.Instance.IDToIsPlayerAlive.Clear();
             for (var i = 0; i < keys.Length; i++)
             {
-                Debug.Log($"key is: {keys[i]}, value is: {values[i]}");
                 GameSessionManager.Instance.IDToIsPlayerAlive[keys[i]] = values[i];
-            }
-            Debug.Log("[NetworkCommunicationManager] (ClientRPC) all player 'isAlives' like:");
-            foreach (var keyVal in GameSessionManager.Instance.IDToIsPlayerAlive)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
             }
 
             if (GameSessionManager.Instance.IDToIsPlayerAlive.TryGetValue(PlayerData.ClientID, out var isAlive))
@@ -457,7 +548,6 @@ namespace Managers
         private void SendLastWordsClientRpc(string lastWords)
         {
             if (IsHost) return;
-            Debug.Log($"Received RPC with last words {lastWords}");
             GameSessionManager.Instance.LastWords = lastWords;
         }
 
@@ -568,15 +658,8 @@ namespace Managers
         [ClientRpc]
         public void GoBackToLobbyClientRpc()
         {
-            Debug.Log("GoBackToLobbyClientRpc called");
             if (IsHost) return;
-            GameSessionManager.Instance.ClearAllDataForEndGame();
-            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
-            LobbyManager.Instance.IsCurrentlyInGame = false;
-            NetworkManager.Singleton.Shutdown();
-            LobbyManager.Instance.LeaveLobby();
-            SceneChanger.ChangeToMainScene();
-            // SceneChanger.ChangeToMainSceneToLobbyPlayerScreen(); TODO back to lobby functionality maybe later
+            LeaveRelay();
         }
     }
 }

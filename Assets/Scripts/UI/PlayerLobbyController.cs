@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Managers;
 using TMPro;
 using UnityEngine;
 
@@ -13,23 +9,17 @@ namespace UI
 
         private void OnEnable()
         {
-            LobbyManager.Instance.OnHostMigrated += HandleHostMigration;
-            SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
+            InvokeRepeating(nameof(UpdateWelcomePrompt), 0f, 1f);
         }
 
-        private void HandleHostMigration()
+        private void UpdateWelcomePrompt()
         {
-            ScreenChanger.Instance.ChangeToLobbyHostScreen();
+            SetWelcomePrompt(MainMenuUIManager.Instance.GetName());
         }
 
         public void SetWelcomePrompt(string playerName)
         {
             informationText.text = $"You are {playerName}, please wait";
-        }
-
-        private void OnDisable()
-        {
-            LobbyManager.Instance.OnHostMigrated -= HandleHostMigration;
         }
     }
 }

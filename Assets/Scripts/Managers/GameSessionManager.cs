@@ -48,7 +48,6 @@ namespace Managers
         public string NightResidentsPollChosenAnswer { get; set; } = "";
         public string CurrentTimeOfDay { get; set; } = TimeIsAManMadeSocialConstruct.Night;
         public string WinnerRole { get; set; } = "";
-        public List<ulong> ClientsIDs { get; } = new();
         public event Action OnPlayersAssignedToRoles;
         public event Action OnHostEndGame;
 
@@ -57,6 +56,7 @@ namespace Managers
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         private static GameSessionManager _instance;
+        private List<ulong> ClientsIDs { get; } = new();
         private ulong CurrentDayVotedID { get; set; }
 
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,25 +156,13 @@ namespace Managers
         {
             if (NetworkCommunicationManager.GetOwnClientID() == clientId) return;
             IDToIsPlayerAlive[clientId] = true;
-            Debug.Log("CURRENT ALIVE IDS:");
-            foreach (var key in IDToIsPlayerAlive.Keys)
-            {
-                Debug.Log(key);
-            }
-
             var keys = IDToIsPlayerAlive.Keys.ToArray();
             var values = IDToIsPlayerAlive.Values.ToArray();
-            Debug.Log($"[GameSessionManager] (OnNewClientConnected) all player 'isAlives':");
-            foreach (var keyVal in IDToIsPlayerAlive)
-            {
-                Debug.Log($"{keyVal.Key} - {keyVal.Value}");
-            }
-
             NetworkCommunicationManager.Instance.SendNewIDToIsPlayerAliveClientRpc(keys, values);
             var expectedNumberOfPlayers = PlayerPrefs.GetInt(PpKeys.KeyPlayersNumber);
-            Debug.Log($"expected number of players: {expectedNumberOfPlayers}");
+            Debug.Log($"[GameSessionManager] Expected number of players: {expectedNumberOfPlayers}");
             var currentNumberOfPlayers = IDToIsPlayerAlive.Count;
-            Debug.Log($"current number of players: {currentNumberOfPlayers}");
+            Debug.Log($"[GameSessionManager] Current number of players: {currentNumberOfPlayers}");
             if (expectedNumberOfPlayers != currentNumberOfPlayers) return;
             AssignPlayersToRoles();
         }
@@ -288,16 +276,9 @@ namespace Managers
 
         private ulong GetWhoMafiaVotedID()
         {
-            Debug.Log($"count of mafia vote dictionary: {MafiaIDToVotedForID.Count}");
             var occurrences = MafiaIDToVotedForID.Values
                 .GroupBy(v => v)
                 .ToDictionary(g => g.Key, g => g.Count());
-
-            foreach (var occurrence in occurrences)
-            {
-                Debug.Log($"Occurrence key: {occurrence.Key}, value: {occurrence.Value}");
-            }
-
             var mafiaChoice = occurrences.OrderByDescending(x => x.Value).First().Key;
             return mafiaChoice;
         }
@@ -450,7 +431,6 @@ namespace Managers
 
         public void MafiaVoteFor(ulong votedForID)
         {
-            Debug.Log($"Sending server RPC with mafia vote for: {votedForID}");
             NetworkCommunicationManager.Instance.MafiaVoteForServerRpc(votedForID);
         }
 
@@ -471,7 +451,6 @@ namespace Managers
 
         public void SetAlibi(string alibi)
         {
-            Debug.Log($"alibi sent to server: {alibi}");
             IDToAlibi[PlayerData.ClientID] = alibi;
             NetworkCommunicationManager.Instance.SetAlibiServerRpc(alibi);
         }
@@ -483,12 +462,6 @@ namespace Managers
 
         public int GetAmountOfAliveMafia()
         {
-            Debug.Log("ALL ALIVE PLAYERS IDS BELOW:");
-            foreach (var id in GetAlivePlayersIDs())
-            {
-                Debug.Log(id);
-            }
-
             return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Mafia);
         }
 
@@ -499,12 +472,6 @@ namespace Managers
 
         public int GetAmountOfAliveDoctors()
         {
-            Debug.Log("ALL ALIVE PLAYERS IDS BELOW:");
-            foreach (var id in GetAlivePlayersIDs())
-            {
-                Debug.Log(id);
-            }
-
             return GetAlivePlayersIDs().Count(id => IDToRole[id] == Roles.Doctor);
         }
 
@@ -629,7 +596,6 @@ namespace Managers
 
         public void SetLastWords(string lastWords)
         {
-            Debug.Log($"Sending server rpc with {lastWords}");
             NetworkCommunicationManager.Instance.SetLastWordsServerRpc(lastWords);
         }
 
@@ -672,7 +638,6 @@ namespace Managers
             PlayerData.Name = "";
             PlayerData.Role = "";
             PlayerData.IsAlive = false;
-            NetworkCommunicationManager.Instance.UnsubscribeAllNetworkEvents();
         }
     }
 }

@@ -297,7 +297,7 @@ MonoBehaviour:
   m_MinWidth: -1
   m_MinHeight: -1
   m_PreferredWidth: -1
-  m_PreferredHeight: 152
+  m_PreferredHeight: 172
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
@@ -317,9 +317,12 @@ MonoBehaviour:
   changesScreen: 0
   returns: 0
   disappears: 0
+  sendsInputToServer: 0
+  playerGameController: {fileID: 0}
   screenToChangeTo: {fileID: 0}
   animationMaxWidthRender: {fileID: 1327584310748492969}
   text: {fileID: 816289503933639445}
+  textRectTransform: {fileID: 8725672000687195167}
   textParent: {fileID: 2223004345834176577}
   thisButton: {fileID: 7950266698185235776}
 --- !u!114 &5420743241374957974
@@ -562,3 +565,8 @@ MonoBehaviour:
   m_FlexibleWidth: 1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
+--- !u!224 &8725672000687195167 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2737751340734762668, guid: 014e4480300380745ad6b1c03f89eb35, type: 3}
+  m_PrefabInstance: {fileID: 6695060591873100467}
+  m_PrefabAsset: {fileID: 0}

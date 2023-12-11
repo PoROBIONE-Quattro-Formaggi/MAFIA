@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using DataStorage;
 using Managers;
 using TMPro;
@@ -19,11 +17,19 @@ namespace UI
         public GameObject endGameScreen;
         public TMP_InputField input;
         public TextMeshProUGUI inputPlaceholder;
-        
+        public Animator hostGameAnimator;
+        public ScreenChanger screenChanger;
+
 
         private bool _isMafiaDoneVoting;
         private bool _isDoctorsDoneVoting;
-        
+        private bool _isRolesAssigned;
+
+        private void Start()
+        {
+            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned += SetRolesAssigned;
+        }
+
 
         private void OnEnable()
         {
@@ -31,6 +37,30 @@ namespace UI
             NetworkCommunicationManager.Instance.OnOneDoctorVoted += OnOneDoctorVoted;
             NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
             GameSessionManager.Instance.OnHostEndGame += EndGame;
+
+            switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
+            {
+                case TimeIsAManMadeSocialConstruct.Night:
+                    hostGameAnimator.Play("night");
+                    if (_isRolesAssigned)
+                    {
+                        OnOneMafiaVoted();
+                        OnOneDoctorVoted();
+                    }
+
+                    break;
+                case TimeIsAManMadeSocialConstruct.Day:
+                    hostGameAnimator.Play("day");
+                    if (_isRolesAssigned)
+                    {
+                        OnOneResidentDayVoted();
+                    }
+
+                    break;
+                case TimeIsAManMadeSocialConstruct.Evening:
+                    hostGameAnimator.Play("day");
+                    break;
+            }
         }
 
         private void OnOneMafiaVoted()
@@ -38,6 +68,8 @@ namespace UI
             var currentMafiaVoteCount = GameSessionManager.Instance.GetCurrentAmountOfMafiaThatVoted();
             var currentAliveMafiaCount = GameSessionManager.Instance.GetAmountOfAliveMafia();
 
+            Debug.Log(
+                $"currentMafiaVoteCount: {currentMafiaVoteCount}, currentAliveMafiaCount: {currentAliveMafiaCount}");
             if (currentMafiaVoteCount == currentAliveMafiaCount)
             {
                 mafiaStatus.text = "<b>The mafia has voted.</b>";
@@ -45,7 +77,8 @@ namespace UI
                 ShowForwardButton();
             }
             else
-                mafiaStatus.text = $"Currently <b>{currentAliveMafiaCount} out of {currentAliveMafiaCount} mafiosi</b> have voted.";
+                mafiaStatus.text =
+                    $"Currently <b>{currentAliveMafiaCount} out of {currentAliveMafiaCount} mafiosi</b> have voted.";
         }
 
         private void OnOneDoctorVoted()
@@ -60,7 +93,8 @@ namespace UI
                 ShowForwardButton();
             }
             else
-                doctorStatus.text = $"Currently <b>{currentAliveDoctorCount} out of {currentAliveDoctorCount} doctors</b> have voted.";
+                doctorStatus.text =
+                    $"Currently <b>{currentAliveDoctorCount} out of {currentAliveDoctorCount} doctors</b> have voted.";
         }
 
         private void OnOneResidentDayVoted()
@@ -75,7 +109,8 @@ namespace UI
             }
             else
             {
-                townStatus.text = $"Currently <b>{currentResidentsDayVoteCount} out of {currentAlivePlayers} citizens</b> have voted.";
+                townStatus.text =
+                    $"Currently <b>{currentResidentsDayVoteCount} out of {currentAlivePlayers} citizens</b> have voted.";
             }
         }
 
@@ -92,19 +127,27 @@ namespace UI
                 case TimeIsAManMadeSocialConstruct.Night:
                     GameSessionManager.Instance.EndNight();
                     forwardButton.SetActive(false);
-                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
+                    lastDeath.text =
+                        $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was killed by the mafia.";
                     Sunrise();
                     break;
                 case TimeIsAManMadeSocialConstruct.Day:
                     GameSessionManager.Instance.EndDay();
-                    lastDeath.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
+                    lastDeath.text =
+                        $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     Sunset();
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
-                    GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text.Trim('\n')}.");
+                    if (input.text != "")
+                    {
+                        GameSessionManager.Instance.SetNarratorComment($"{lastDeath.text.Trim('\n')}.");
+                    }
+
                     GameSessionManager.Instance.EndEvening();
                     forwardButton.SetActive(false);
                     DisableInput();
+                    lastDeath.text =
+                        $"<b>[The Narrator]</b> {GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
                     MoonRise();
                     break;
             }
@@ -112,12 +155,12 @@ namespace UI
 
         public void OnInputValueChanged()
         {
-            lastDeath.text = $"<b>[Narrator]</b> " + input.text;
+            lastDeath.text = $"<b>[The Narrator]</b> " + input.text;
 
             if (input.text.Length == 0)
             {
                 InvokeRepeating(nameof(AnimatePlaceholder), 0f, 0.5f);
-            } 
+            }
             else
             {
                 CancelInvoke(nameof(AnimatePlaceholder));
@@ -128,12 +171,12 @@ namespace UI
                 OnForwardClicked();
             }
         }
-        
+
         private void AnimatePlaceholder()
         {
             AnimatePlaceholder(inputPlaceholder);
         }
-        
+
         private void AnimatePlaceholder(TextMeshProUGUI placeholderText)
         {
             placeholderText.text = placeholderText.text.Length switch
@@ -170,6 +213,8 @@ namespace UI
             doctorStatus.gameObject.SetActive(false);
             doctorStatus.text = "<b>The medical staff has not voted.</b>";
 
+            hostGameAnimator.Play("sunrise");
+
             townStatus.gameObject.SetActive(true);
         }
 
@@ -178,7 +223,7 @@ namespace UI
         {
             townStatus.gameObject.SetActive(false);
             townStatus.text = "<b>The town has not voted.</b>";
-            
+
             executionStatus.text = $"{GameSessionManager.Instance.GetLastKilledName()} was executed by the town.";
             executionStatus.gameObject.SetActive(true);
             EnableInput();
@@ -187,7 +232,7 @@ namespace UI
         private void EnableInput()
         {
             commentPrompt.gameObject.SetActive(true);
-            input.text = "";
+            input.SetTextWithoutNotify("");
             input.gameObject.SetActive(true);
         }
 
@@ -202,25 +247,34 @@ namespace UI
         {
             executionStatus.gameObject.SetActive(false);
             executionStatus.text = $"_ was executed by the town.";
-            
+
+            hostGameAnimator.Play("sunset");
+
             if (GameSessionManager.Instance.GetAmountOfAliveDoctors() == 0)
             {
                 doctorStatus.text = "<b>All the medical staff is dead</b>";
             }
+
             mafiaStatus.gameObject.SetActive(true);
             doctorStatus.gameObject.SetActive(true);
         }
-        
+
         private void EndGame()
         {
-            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+            screenChanger.ChangeTo(endGameScreen.name);
         }
-        
+
+        private void SetRolesAssigned()
+        {
+            _isRolesAssigned = true;
+            NetworkCommunicationManager.Instance.OnPlayerRoleAssigned -= SetRolesAssigned;
+        }
+
         private void OnDestroy()
         {
             NetworkCommunicationManager.Instance.OnOneMafiaVoted -= OnOneMafiaVoted;
             NetworkCommunicationManager.Instance.OnOneDoctorVoted -= OnOneDoctorVoted;
-            NetworkCommunicationManager.Instance.OnOneResidentDayVoted += OnOneResidentDayVoted;
+            NetworkCommunicationManager.Instance.OnOneResidentDayVoted -= OnOneResidentDayVoted;
             GameSessionManager.Instance.OnHostEndGame -= EndGame;
         }
     }

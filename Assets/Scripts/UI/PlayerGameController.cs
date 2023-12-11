@@ -1,12 +1,12 @@
-using System;
 using DataStorage;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.UIElements;
+
+// ReSharper disable Unity.InefficientPropertyAccess
+
+// ReSharper disable Unity.PreferAddressByIdToGraphicsParams
 
 namespace UI
 {
@@ -32,13 +32,12 @@ namespace UI
         public float scrollSpeed;
         public Animator playerGameAnimator;
         public RectTransform lastWordsRectTransform;
-        
+        public GameObject returnButton;
+        public ScreenChanger screenChanger;
+
         private string _time;
         private bool _notYet;
         private bool _rollLastWords;
-        
-        
-
 
         [Header("VARIABLES")] public float animationSpeed;
 
@@ -59,7 +58,6 @@ namespace UI
         private void OnEnable()
         {
             _time = GameSessionManager.Instance.GetCurrentTimeOfDay();
-            if (!PlayerData.IsAlive) return;
             switch (_time)
             {
                 case TimeIsAManMadeSocialConstruct.Night:
@@ -72,43 +70,70 @@ namespace UI
                     OnEnableEvening();
                     break;
             }
-            
         }
 
         private void OnEnableNight()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
-            SetAlibiInput();
-            
             playerGameAnimator.Play("night");
+
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+
+            SetInformationText(LoreMessages.GetRandomMessage());
+
             if (goVoteButton.activeSelf)
             {
+                var alibi = DefaultAlibis.GetRandomAlibi();
+                GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
+
                 SetPlayerQuoteStringNight();
                 DisableInput();
+                confirmInputButton.SetActive(false);
             }
             else
             {
                 EnableAlibiInput();
             }
+
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableDay()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
+
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+
+            SetInformationText(LoreMessages.GetRandomMessage());
+
             if (goVoteButton.activeSelf)
             {
                 SetPlayerQuoteStringDay();
                 DisableInput();
+                confirmInputButton.SetActive(false);
             }
+
             playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
         }
 
         private void OnEnableEvening()
         {
-            SetInformationText(LoreMessages.GetRandomMessage());
             playerGameAnimator.Play("day");
+
+            if (!PlayerData.IsAlive)
+            {
+                OnPlayerDead();
+                return;
+            }
+
+            SetInformationText(LoreMessages.GetRandomMessage());
         }
 
         private void EnableAlibiInput()
@@ -116,18 +141,18 @@ namespace UI
             promptText.text = "Click below to edit alibi, or";
             Debug.Log("BEFORE VAR ALIBI =");
             var alibi = GameSessionManager.Instance.GetAlibis()[PlayerData.ClientID];
+            //Trim alibi
+            var trimIndex = alibi.IndexOf(']') + 1;
+            alibi = alibi[trimIndex..].Trim();
+            alibi = alibi.Trim('.');
+
             inputPlaceholder.text = alibi;
             Debug.Log("BEFORE SET PLAYER QUOTE STRING");
             SetPlayerQuoteString(alibi);
+            SendInputToServer();
             prompt.SetActive(true);
             input.gameObject.SetActive(true);
             confirmInputButton.SetActive(true);
-        }
-
-        private void SetAlibiInput()
-        {
-            var alibi = DefaultAlibis.GetRandomAlibi().Trim('.');
-            GameSessionManager.Instance.SetAlibi(alibi);
         }
 
         private void DisableInput()
@@ -136,8 +161,8 @@ namespace UI
             input.gameObject.SetActive(false);
             keyboard.HideKeyboard();
         }
-        
-        
+
+
         private void FixedUpdate()
         {
             RollInformation();
@@ -147,17 +172,23 @@ namespace UI
             }
         }
 
-        
+
         private void Sunrise()
         {
             playerGameAnimator.ResetTrigger("Sunset");
             playerGameAnimator.SetTrigger("Sunrise");
             //OnConfirmInputButtonClicked();
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+            }
+
             DisableInput();
             confirmInputButton.SetActive(false);
-            
+
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
-    
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -165,7 +196,7 @@ namespace UI
             else
             {
                 informationText.text = MafiaDeaths.GetRandomMafiaDeathMessage(lastKilledName);
-            
+
                 goVoteButton.SetActive(true);
                 SetPlayerQuoteStringDay();
                 playerQuoteText.text = PlayerPrefs.GetString(PpKeys.KeyPlayerQuote);
@@ -175,7 +206,13 @@ namespace UI
         private void Sunset()
         {
             var lastKilledName = GameSessionManager.Instance.GetLastKilledName();
-            
+
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+            }
+
             if (!PlayerData.IsAlive)
             {
                 if (PlayerData.Name == lastKilledName)
@@ -215,10 +252,21 @@ namespace UI
         {
             // HIDE INPUT
             //OnConfirmInputButtonClicked();
-            DisableInput();
-            
+            if (confirmInputButton.activeSelf)
+            {
+                OnConfirmInputButtonClicked();
+                SendInputToServer();
+                confirmInputButton.SetActive(false);
+            }
+
+            // GENERATE ALIBI
+            var alibi = DefaultAlibis.GetRandomAlibi();
+            GameSessionManager.Instance.SetAlibi($"<b>[{PlayerData.Name}]</b> {alibi}");
+
+
             // ROLL LAST WORDS
-            lastWordsText.text = $"{GameSessionManager.Instance.GetLastWords()}\n{GameSessionManager.Instance.GetNarratorComment()}";
+            lastWordsText.text =
+                $"{GameSessionManager.Instance.GetLastWords()}\n\n{GameSessionManager.Instance.GetNarratorComment()}";
             playerQuote.SetActive(false);
             deadPrompt.SetActive(false);
 
@@ -228,6 +276,7 @@ namespace UI
                 _notYet = true;
                 _rollLastWords = true;
             }
+
             InvokeRepeating(nameof(WaxingCrescentMoon), 0f, 0.5f);
         }
 
@@ -235,10 +284,10 @@ namespace UI
         {
             if (_notYet) return;
             CancelInvoke(nameof(WaxingCrescentMoon));
-            
+
             playerGameAnimator.ResetTrigger("Sunrise");
             playerGameAnimator.SetTrigger("Sunset");
-            
+
             if (!PlayerData.IsAlive)
             {
                 OnPlayerDead();
@@ -247,7 +296,7 @@ namespace UI
             {
                 // ALIVE PLAYERS DO THIS
                 SetPlayerQuoteStringNight();
-                
+
                 playerQuote.SetActive(true);
                 goVoteButton.SetActive(true);
             }
@@ -255,7 +304,23 @@ namespace UI
 
         private void EndGame()
         {
-            ScreenChanger.Instance.ChangeTo(endGameScreen.name);
+            screenChanger.ChangeTo(endGameScreen.name);
+        }
+
+        public async void GoToLobbyClicked()
+        {
+            if (LobbyManager.Instance.IsLobbyHost())
+            {
+                if (!await LobbyManager.Instance.EndGame())
+                {
+                    Toast.Show("Cannot end the game. Try again.");
+                    return;
+                }
+
+                NetworkCommunicationManager.Instance.GoBackToLobbyClientRpc();
+            }
+
+            NetworkCommunicationManager.Instance.LeaveRelay();
         }
 
         private void EnableLastWords()
@@ -266,6 +331,7 @@ namespace UI
             input.gameObject.SetActive(true);
             prompt.SetActive(true);
             confirmInputButton.SetActive(true);
+            inputPlaceholder.gameObject.SetActive(true);
         }
 
         private void OnPlayerDead()
@@ -274,32 +340,35 @@ namespace UI
             information.SetActive(false);
             goVoteButton.SetActive(false);
             DisableInput();
+            confirmInputButton.SetActive(false);
             deadPrompt.SetActive(true);
+            returnButton.SetActive(true);
         }
 
         public void OnConfirmInputButtonClicked()
         {
             if (inputPlaceholder.text != ". . .")
             {
+                // TODO: tu maybe without notify
                 input.text = inputPlaceholder.text;
             }
+
             playerQuoteText.text += ".";
-            SendInputToServer();
             DisableInput();
         }
-        
+
         public void OnInputValueChanged()
         {
             playerQuoteText.text = $"<b>[{PlayerData.Name}]</b> " + input.text;
             inputPlaceholder.text = ". . .";
             confirmInputButton.SetActive(input.text.Length != 0);
+            input.SetTextWithoutNotify(input.text.Trim('\n'));
 
-            if (input.text.EndsWith('\n'))
-            {
-                OnConfirmInputButtonClicked();
-            }
+            if (!input.text.EndsWith('\n')) return;
+            OnConfirmInputButtonClicked();
+            SendInputToServer();
         }
-        
+
         public void OnInputDeselected()
         {
             if (input.text.Length == 0)
@@ -308,14 +377,15 @@ namespace UI
             }
         }
 
-        private void SendInputToServer()
+        public void SendInputToServer()
         {
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteText.text);
             PlayerPrefs.Save();
+            Debug.Log($"input send to server: {playerQuoteText.text.Trim('\n')}");
             switch (GameSessionManager.Instance.GetCurrentTimeOfDay())
             {
                 case TimeIsAManMadeSocialConstruct.Night:
-                    GameSessionManager.Instance.SetAlibi(input.text.Trim('\n'));
+                    GameSessionManager.Instance.SetAlibi(playerQuoteText.text.Trim('\n'));
                     break;
                 case TimeIsAManMadeSocialConstruct.Evening:
                     GameSessionManager.Instance.SetLastWords(playerQuoteText.text.Trim('\n'));
@@ -324,13 +394,13 @@ namespace UI
 
             input.SetTextWithoutNotify("");
         }
-        
+
         // HELPER FUNCTIONS
         private void SetPlayerQuoteStringDay()
         {
             var playerQuoteString = $"<b>[{PlayerData.Name}]</b> I vote for _ to be executed";
             playerQuoteText.text = playerQuoteString;
-            
+
             PlayerPrefs.SetString(PpKeys.KeyPlayerQuote, playerQuoteString);
             PlayerPrefs.Save();
         }
@@ -338,7 +408,7 @@ namespace UI
         private void SetPlayerQuoteStringNight()
         {
             var playerQuoteString = $"<b>[{PlayerData.Name}]</b> ";
-        
+
             playerQuoteString += PlayerData.Role switch
             {
                 // Assign question to information prompt
@@ -363,7 +433,7 @@ namespace UI
         {
             informationText.text = text;
         }
-        
+
         private void RollInformation()
         {
             if (_currentX < -parentScreenRectTransform.sizeDelta.x - informationText.preferredWidth)
@@ -374,6 +444,7 @@ namespace UI
             {
                 _currentX -= 1 * animationSpeed;
             }
+
             informationTextRectTransform.anchoredPosition = new Vector2(_currentX, 0);
         }
 
