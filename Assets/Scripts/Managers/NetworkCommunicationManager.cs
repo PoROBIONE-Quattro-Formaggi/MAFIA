@@ -243,6 +243,7 @@ namespace Managers
             var values = GameSessionManager.Instance.IDToRole.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
+            OnPlayerRoleAssigned?.Invoke();
             SendNewIDToRoleClientRpc(keys, values);
         }
 
@@ -367,6 +368,7 @@ namespace Managers
             var valuesForRoles = GameSessionManager.Instance.IDToRole.Values
                 .Select(value => new FixedString32Bytes(value))
                 .ToArray();
+            OnPlayerRoleAssigned?.Invoke();
             SendNewIDToRoleClientRpc(keysForRoles, valuesForRoles);
 
             // NAMES

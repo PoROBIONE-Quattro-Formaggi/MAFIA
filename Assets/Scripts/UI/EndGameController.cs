@@ -22,7 +22,7 @@ namespace UI
             }
             else if (winnerRole == "DRAW")
             {
-                informationText.text = "Oh no! Can't continue under these circumstances.";
+                informationText.text = "You left the city.";
             }
             else
             {
