@@ -292,7 +292,7 @@ namespace Backend.Hub.Controllers
             return _joinedLobby?.MaxPlayers ?? 0;
         }
 
-        public void JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
+        public async Task<bool> JoinLobby(string lobbyID = null, string code = null, string playerName = "Anonymous")
         {
             if (playerName == "")
             {
@@ -319,45 +319,48 @@ namespace Backend.Hub.Controllers
                 {
                     Player = player
                 };
-                JoinLobbyByCode(code, joinLobbyByCodeOptions);
+                return await JoinLobbyByCode(code, joinLobbyByCodeOptions);
             }
-            else if (lobbyID != null && code == null)
+
+            if (lobbyID == null || code != null) return false;
+            var joinLobbyByIdOptions = new JoinLobbyByIdOptions
             {
-                var joinLobbyByIdOptions = new JoinLobbyByIdOptions
-                {
-                    Player = player
-                };
-                JoinLobbyByID(lobbyID, joinLobbyByIdOptions);
-            }
+                Player = player
+            };
+            return await JoinLobbyByID(lobbyID, joinLobbyByIdOptions);
         }
 
-        private async void JoinLobbyByCode(string code, JoinLobbyByCodeOptions joinLobbyByCodeOptions)
+        private async Task<bool> JoinLobbyByCode(string code, JoinLobbyByCodeOptions joinLobbyByCodeOptions)
         {
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByCodeAsync(code, joinLobbyByCodeOptions);
                 ChangePlayerNameIfTheSameIsPresent(joinLobbyByCodeOptions.Player.Data[PlayerName].Value);
                 Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
+                return true;
             }
             catch (LobbyServiceException e)
             {
                 Toast.Show("Cannot join to lobby. Try again.");
                 Debug.LogError(e);
+                return false;
             }
         }
 
-        private async void JoinLobbyByID(string lobbyID, JoinLobbyByIdOptions joinLobbyByIdOptions)
+        private async Task<bool> JoinLobbyByID(string lobbyID, JoinLobbyByIdOptions joinLobbyByIdOptions)
         {
             try
             {
                 _joinedLobby = await Lobbies.Instance.JoinLobbyByIdAsync(lobbyID, joinLobbyByIdOptions);
                 ChangePlayerNameIfTheSameIsPresent(joinLobbyByIdOptions.Player.Data[PlayerName].Value);
                 Debug.Log($"\nJoined '{_joinedLobby.Name}' lobby.");
+                return true;
             }
             catch (LobbyServiceException e)
             {
                 Toast.Show("Cannot join to lobby. Try again.");
                 Debug.LogError(e);
+                return false;
             }
         }
 
@@ -405,12 +408,12 @@ namespace Backend.Hub.Controllers
             return _joinedLobby.Players;
         }
 
-        public Task LeaveLobby()
+        public async Task<bool> LeaveLobby()
         {
-            return GetPlayersListInLobby().Count <= 1 ? HandleDeleteLobby() : HandleLeaveLobby();
+            return GetPlayersListInLobby().Count <= 1 ? await HandleDeleteLobby() : await HandleLeaveLobby();
         }
 
-        private async Task HandleLeaveLobby()
+        private async Task<bool> HandleLeaveLobby()
         {
             Debug.Log("Leaving lobby");
             try
@@ -428,11 +431,12 @@ namespace Backend.Hub.Controllers
             }
 
             Debug.Log($"Lobby state: {_joinedLobby}");
+            return true;
         }
 
-        private async Task HandleDeleteLobby()
+        private async Task<bool> HandleDeleteLobby()
         {
-            if (!IsLobbyHost()) return;
+            if (!IsLobbyHost()) return await HandleLeaveLobby();
             Debug.Log("Deleting lobby");
             try
             {
@@ -448,6 +452,7 @@ namespace Backend.Hub.Controllers
             }
 
             Debug.Log($"Lobby state: {_joinedLobby}");
+            return true;
         }
 
         public async Task<bool> StartGame()
