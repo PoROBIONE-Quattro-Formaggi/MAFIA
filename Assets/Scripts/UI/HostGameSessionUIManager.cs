@@ -7,6 +7,7 @@ namespace UI
         private void OnEnable()
         {
             ScreenChanger.Instance.ChangeToHostGameScreen();
+            //XD
         }
     }
 }

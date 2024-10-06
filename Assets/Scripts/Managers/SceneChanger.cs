@@ -13,7 +13,7 @@ namespace Managers
 
         public static void ChangeToMainScene()
         {
-            ChangeSceneTo(Scenes.MainScene);
+            ChangeSceneTo(Scenes.HubScene);
         }
 
         public static void ChangeToGameScene()
