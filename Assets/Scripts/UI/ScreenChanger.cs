@@ -5,6 +5,10 @@ namespace UI
 {
     public class ScreenChanger : MonoBehaviour
     {
+        // TODO: implement state transitions between screens (await server response when necessary etc.)
+        
+        // TODO: implement sharedCurrentActiveScreen variable -> change screen based on this (only screen changer can change this) 
+        
         public static ScreenChanger Instance { get; private set; }
         public GameObject screensParent;
         private string _lastScreenName;
