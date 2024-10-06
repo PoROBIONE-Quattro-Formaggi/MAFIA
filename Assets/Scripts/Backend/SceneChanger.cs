@@ -2,7 +2,7 @@ using DataStorage;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Managers
+namespace Backend
 {
     public class SceneChanger : MonoBehaviour
     {

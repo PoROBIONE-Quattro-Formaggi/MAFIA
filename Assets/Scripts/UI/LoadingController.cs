@@ -1,3 +1,5 @@
+using Backend;
+using Backend.Hub.Controllers;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using UnityEngine;
@@ -28,9 +30,9 @@ namespace UI
                 case >= 20:
                     CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
                     NetworkCommunicationManager.Instance.LeaveRelay();
-                    LobbyManager.Instance.IsGameEnded = true;
-                    LobbyManager.Instance.IsCurrentlyInGame = false;
-                    await LobbyManager.Instance.LeaveLobby();
+                    LobbyController.Instance.IsGameEnded = true;
+                    LobbyController.Instance.IsCurrentlyInGame = false;
+                    await LobbyController.Instance.LeaveLobby();
                     SceneChanger.ChangeToMainScene();
                     Toast.Show("This road leads to nowhere. Going back.");
                     return;

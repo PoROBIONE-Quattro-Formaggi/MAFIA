@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Backend;
+using Backend.Hub.Controllers;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using Unity.Collections;
@@ -105,13 +107,13 @@ namespace Managers
             else if (isHost == 1)
             {
                 Debug.Log("[GameSessionManager] Starting game as a host (creating Relay)");
-                if (RelayManager.Instance.CreateRelay()) return;
+                if (RelayController.Instance.CreateRelay()) return;
                 Toast.Show("Cannot create the game");
                 SceneChanger.ChangeToMainScene();
             }
             else
             {
-                if (await RelayManager.JoinRelay(joinCode))
+                if (await RelayController.JoinRelay(joinCode))
                 {
                     // PlayerPrefs.SetString(PpKeys.KeyStartGame, "0");
                     // PlayerPrefs.Save();
@@ -135,7 +137,7 @@ namespace Managers
             }
             else
             {
-                if (await RelayManager.JoinRelay(joinCode))
+                if (await RelayController.JoinRelay(joinCode))
                 {
                     Debug.Log("[GameSessionManager] Joining to the Relay");
                     NetworkCommunicationManager.Instance.EmergencyEndGameServerRpc();

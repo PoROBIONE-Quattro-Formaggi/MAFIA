@@ -72,12 +72,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 911689838805741521}
-  - {fileID: 7181516926396715391}
-  - {fileID: 1242116327044158401}
-  - {fileID: 888278026013207260}
-  - {fileID: 7006624452353517158}
   - {fileID: 7886491097451300261}
+  - {fileID: 888278026013207260}
+  - {fileID: 1242116327044158401}
+  - {fileID: 7181516926396715391}
+  - {fileID: 911689838805741521}
+  - {fileID: 7006624452353517158}
   - {fileID: 4911021495116008617}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 888278026013207260}
   - component: {fileID: 120730415749129723}
   m_Layer: 0
-  m_Name: Relay Manager
+  m_Name: Relay Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -181,7 +181,7 @@ GameObject:
   - component: {fileID: 7886491097451300261}
   - component: {fileID: 5509593760490172326}
   m_Layer: 0
-  m_Name: Lobby Manager
+  m_Name: Lobby Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -270,7 +270,7 @@ GameObject:
   - component: {fileID: 7181516926396715391}
   - component: {fileID: 1915943961155791625}
   m_Layer: 0
-  m_Name: Authentication Manager
+  m_Name: Authentication Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

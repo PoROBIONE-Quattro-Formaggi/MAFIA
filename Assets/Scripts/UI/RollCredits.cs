@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Backend.Hub.Controllers;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -47,11 +48,11 @@ namespace UI
 
         private void WaitForLobby()
         {
-            _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
+            _maxPlayers = LobbyController.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
 
             // Display town name
-            subtitle.text = "FROM " + LobbyManager.Instance.GetLobbyName().ToUpper();
+            subtitle.text = "FROM " + LobbyController.Instance.GetLobbyName().ToUpper();
 
             _isLobbyReady = true;
             CancelInvoke(nameof(WaitForLobby));
@@ -68,7 +69,7 @@ namespace UI
 
             // SPAWN NAME OBJECTS FOR ALL NAMES
             if (!_isLobbyReady) return;
-            var playerNames = LobbyManager.Instance.GetPlayersNamesInLobby();
+            var playerNames = LobbyController.Instance.GetPlayersNamesInLobby();
             foreach (var playerName in playerNames)
             {
                 var nameObj = Instantiate(textPrefab, namesParent.transform);

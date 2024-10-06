@@ -2,6 +2,7 @@ using Managers;
 using TMPro;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using Backend.Hub.Controllers;
 
 namespace UI
 {
@@ -22,13 +23,13 @@ namespace UI
 
         public async void StartGame()
         {
-            await LobbyManager.Instance.StartGame();
+            await LobbyController.Instance.StartGame();
         }
 
         public void CopyCode()
         {
-            CopyToClipboard(LobbyManager.Instance.GetLobbyCode());
-            information.text = "CODE COPIED - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
+            CopyToClipboard(LobbyController.Instance.GetLobbyCode());
+            information.text = "CODE COPIED - <mspace=1em>" + LobbyController.Instance.GetLobbyCode();
         }
 
         private void OnEnable()
@@ -39,11 +40,11 @@ namespace UI
 
         private void WaitForLobby()
         {
-            _maxPlayers = LobbyManager.Instance.GetMaxPlayers();
+            _maxPlayers = LobbyController.Instance.GetMaxPlayers();
             if (_maxPlayers == 0) return;
 
             // Display lobby code
-            information.text = "TOWN CODE - <mspace=1em>" + LobbyManager.Instance.GetLobbyCode();
+            information.text = "TOWN CODE - <mspace=1em>" + LobbyController.Instance.GetLobbyCode();
 
             CancelInvoke(nameof(WaitForLobby));
         }

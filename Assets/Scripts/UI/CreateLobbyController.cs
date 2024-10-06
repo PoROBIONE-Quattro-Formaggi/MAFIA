@@ -1,4 +1,5 @@
 using System.Text;
+using Backend.Hub.Controllers;
 using DataStorage;
 using Managers;
 using TMPro;
@@ -55,8 +56,8 @@ namespace UI
 
         private void OnEnable()
         {
-            LobbyManager.Instance.IsGameEnded = false;
-            LobbyManager.Instance.IsCurrentlyInGame = false;
+            LobbyController.Instance.IsGameEnded = false;
+            LobbyController.Instance.IsCurrentlyInGame = false;
         }
 
         private void AdjustCreateDisplay(float preferredWidth)
@@ -236,7 +237,7 @@ namespace UI
         public async void OnCreateLobbyClicked()
         {
             var playersInt = int.Parse(populationInputField.text);
-            var isLobbyCreated = await LobbyManager.Instance.CreateLobbyAsync("Narrator",
+            var isLobbyCreated = await LobbyController.Instance.CreateLobbyAsync("Narrator",
                 townNameInputField.text.Trim(), playersInt,
                 _isPrivate, "");
             if (isLobbyCreated)

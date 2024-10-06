@@ -11,27 +11,15 @@ using Unity.Services.Lobbies.Models;
 using UnityEngine;
 using Random = System.Random;
 
-namespace Managers
+namespace Backend.Hub.Controllers
 {
-    public class LobbyManager : MonoBehaviour
+    public class LobbyController : MonoBehaviour
     {
-        public static LobbyManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<LobbyManager>();
-                }
-
-                return _instance;
-            }
-        }
+        public static LobbyController Instance { get; private set; }
 
         public bool IsCurrentlyInGame { get; set; }
         public bool IsGameEnded { get; set; }
 
-        private static LobbyManager _instance;
         private Lobby _hostLobby;
         private Lobby _joinedLobby;
         private string _playerName;
@@ -44,11 +32,11 @@ namespace Managers
         private const float HeartbeatPeriod = 15f;
         private const string PlayerName = "PlayerName";
 
-        private void Awake()
+        public void Initialize()
         {
-            if (_instance == null)
+            if (Instance == null)
             {
-                _instance = this;
+                Instance = this;
                 transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
             }
@@ -56,10 +44,7 @@ namespace Managers
             {
                 Destroy(gameObject);
             }
-        }
 
-        private void Start()
-        {
             InvokeRepeating(nameof(HandleLobbyHeartbeatAndHostLobbyPoll), 0f, 0.1f);
             InvokeRepeating(nameof(HandleLobbyPollForUpdates), 0f, 0.1f);
         }
@@ -479,7 +464,7 @@ namespace Managers
             string relayCode;
             try
             {
-                relayCode = await RelayManager.Instance.GetRelayCode(maxClientsNum);
+                relayCode = await RelayController.Instance.GetRelayCode(maxClientsNum);
             }
             catch (Exception e)
             {

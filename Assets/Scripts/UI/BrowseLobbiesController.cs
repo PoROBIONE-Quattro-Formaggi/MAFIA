@@ -1,3 +1,4 @@
+using Backend.Hub.Controllers;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -26,7 +27,7 @@ namespace UI
             }
 
 
-            var lobbies = await LobbyManager.GetLobbiesList();
+            var lobbies = await LobbyController.GetLobbiesList();
             var parentHeight = lobbyButtonsParent.GetComponent<RectTransform>().sizeDelta.y;
 
             for (var i = 0; i < lobbies.Count && i <= parentHeight / 96 - 1; i++)

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Backend;
+using Backend.Hub.Controllers;
 using DataStorage;
 using Third_Party.Toast_UI.Scripts;
 using UI;
@@ -146,7 +148,7 @@ namespace Managers
         {
             if (IsHost) return;
             Debug.Log("On client disconnected called");
-            LobbyManager.Instance.IsCurrentlyInGame = false;
+            LobbyController.Instance.IsCurrentlyInGame = false;
             if (!PlayerData.IsAlive)
             {
                 FinaliseLeavingRelay();
@@ -207,7 +209,7 @@ namespace Managers
         public void LeaveRelay()
         {
             PlayerData.IsAlive = false;
-            LobbyManager.Instance.IsCurrentlyInGame = false;
+            LobbyController.Instance.IsCurrentlyInGame = false;
             KillMeServerRpc();
             if (NetworkManager.Singleton.IsConnectedClient)
             {
@@ -219,11 +221,11 @@ namespace Managers
 
         private static async void FinaliseLeavingRelay()
         {
-            LobbyManager.Instance.IsGameEnded = true;
+            LobbyController.Instance.IsGameEnded = true;
             GameSessionManager.Instance.ClearAllDataForEndGame();
-            if (LobbyManager.Instance.GetLobbyName() != "")
+            if (LobbyController.Instance.GetLobbyName() != "")
             {
-                await LobbyManager.Instance.LeaveLobby();
+                await LobbyController.Instance.LeaveLobby();
             }
 
             SceneChanger.ChangeToMainScene();

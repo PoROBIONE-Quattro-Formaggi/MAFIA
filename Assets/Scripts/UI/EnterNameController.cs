@@ -1,4 +1,5 @@
 using System.Text;
+using Backend.Hub.Controllers;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
@@ -25,8 +26,8 @@ namespace UI
 
         private void OnEnable()
         {
-            LobbyManager.Instance.IsGameEnded = false;
-            LobbyManager.Instance.IsCurrentlyInGame = false;
+            LobbyController.Instance.IsGameEnded = false;
+            LobbyController.Instance.IsCurrentlyInGame = false;
         }
 
 

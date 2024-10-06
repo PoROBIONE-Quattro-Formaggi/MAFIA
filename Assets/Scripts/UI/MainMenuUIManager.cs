@@ -1,3 +1,4 @@
+using Backend.Hub.Controllers;
 using Managers;
 using TMPro;
 using UnityEngine;
@@ -66,7 +67,7 @@ namespace UI
             Debug.Log($"lobbyID: {lobbyID}, code: {_lobbyToJoinCode}, playerName: {_playerName}");
             var lobbyCode = _lobbyToJoinCode;
             var playerName = _playerName;
-            LobbyManager.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
+            LobbyController.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
             // Resetting value if player exits and reenters the other lobby
             _lobbyToJoinCode = null;
             InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
@@ -74,15 +75,15 @@ namespace UI
 
         private void WaitForLobbyToJoin()
         {
-            if (!LobbyManager.Instance.IsLobbyJoined()) return;
+            if (!LobbyController.Instance.IsLobbyJoined()) return;
             ScreenChanger.Instance.ChangeToLobbyPlayerScreen();
             CancelInvoke(nameof(WaitForLobbyToJoin));
         }
 
         public void LeaveLobby()
         {
-            LobbyManager.Instance.LeaveLobby();
-            if (LobbyManager.Instance.IsLobbyHost())
+            LobbyController.Instance.LeaveLobby();
+            if (LobbyController.Instance.IsLobbyHost())
             {
                 ScreenChanger.Instance.ChangeToCreateLobbyScreen();
             }

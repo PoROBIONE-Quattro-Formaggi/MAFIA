@@ -1,3 +1,4 @@
+using Backend.Hub.Controllers;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
@@ -24,9 +25,9 @@ namespace UI
 
         public async void GoToLobbyClicked()
         {
-            if (LobbyManager.Instance.IsLobbyHost())
+            if (LobbyController.Instance.IsLobbyHost())
             {
-                if (!await LobbyManager.Instance.EndGame())
+                if (!await LobbyController.Instance.EndGame())
                 {
                     Toast.Show("Cannot end the game. Try again.");
                     return;

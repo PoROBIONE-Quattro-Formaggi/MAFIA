@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DataStorage;
+using Managers;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
 using Unity.Networking.Transport.Relay;
@@ -9,34 +10,22 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using UnityEngine;
 
-namespace Managers
+namespace Backend.Hub.Controllers
 {
-    public class RelayManager : MonoBehaviour
+    public class RelayController : MonoBehaviour
     {
-        public static RelayManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = FindObjectOfType<RelayManager>();
-                }
+        public static RelayController Instance { get; private set; }
 
-                return _instance;
-            }
-        }
-
-        private static RelayManager _instance;
         private Allocation _createdAllocation;
         private RelayServerData _relayServerData;
 
         private string _joinCode;
 
-        private void Awake()
+        public void Initialize()
         {
-            if (_instance == null)
+            if (Instance == null)
             {
-                _instance = this;
+                Instance = this;
                 transform.SetParent(null);
                 DontDestroyOnLoad(gameObject);
             }
@@ -45,6 +34,7 @@ namespace Managers
                 Destroy(gameObject);
             }
         }
+
 
         public async Task<string> GetRelayCode(int maxClientsNum)
         {
