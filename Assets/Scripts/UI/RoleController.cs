@@ -1,3 +1,5 @@
+using Backend;
+using Backend.Hub.Controllers;
 using Managers;
 using Third_Party.Toast_UI.Scripts;
 using TMPro;
@@ -44,7 +46,7 @@ namespace UI
             {
                 case >= 10:
                     CancelInvoke(nameof(EmergencyGoToMainMenuIfApplicable));
-                    await LobbyManager.Instance.LeaveLobby();
+                    await LobbyController.Instance.LeaveLobby();
                     SceneChanger.ChangeToMainScene();
                     Toast.Show("Your identity has been stolen. Create a new one.");
                     return;
