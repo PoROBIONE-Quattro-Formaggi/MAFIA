@@ -57,7 +57,7 @@ namespace UI
         }
 
 
-        public void HandleJoinLobbyClicked(string lobbyID)
+        public async void HandleJoinLobbyClicked(string lobbyID)
         {
             if (lobbyID == "id")
             {
@@ -67,7 +67,7 @@ namespace UI
             Debug.Log($"lobbyID: {lobbyID}, code: {_lobbyToJoinCode}, playerName: {_playerName}");
             var lobbyCode = _lobbyToJoinCode;
             var playerName = _playerName;
-            LobbyController.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
+            await LobbyController.Instance.JoinLobby(lobbyID: lobbyID, code: lobbyCode, playerName: playerName);
             // Resetting value if player exits and reenters the other lobby
             _lobbyToJoinCode = null;
             InvokeRepeating(nameof(WaitForLobbyToJoin), 0f, 0.1f);
@@ -80,9 +80,9 @@ namespace UI
             CancelInvoke(nameof(WaitForLobbyToJoin));
         }
 
-        public void LeaveLobby()
+        public async void LeaveLobby()
         {
-            LobbyController.Instance.LeaveLobby();
+            await LobbyController.Instance.LeaveLobby();
             if (LobbyController.Instance.IsLobbyHost())
             {
                 ScreenChanger.Instance.ChangeToCreateLobbyScreen();

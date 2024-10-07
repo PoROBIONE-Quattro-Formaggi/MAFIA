@@ -9,19 +9,6 @@ namespace Backend.Hub.Managers
 {
     public class HubBackendManager : MonoBehaviour
     {
-        // TODO HubBackendManager for initialisation and communication:
-        // - Get/Set players in lobby
-        // - Get player number
-        // - etc.
-        // FOR PLAYER:
-        // - Save/Get player name
-        // - Get lobbies
-        // - Join 'by code'
-        // - Join 'chosen lobby'
-        // FOR HOST:
-        // - Save/Get lobby data (town name, population etc.)
-        // - 'start game clicked' -> Game Relay
-
         [SerializeField] private NetworkManagerSpawner networkManagerSpawner;
         [SerializeField] private LobbyController lobbyController;
         [SerializeField] private RelayController relayController;
@@ -54,14 +41,12 @@ namespace Backend.Hub.Managers
         }
 
         public async Task<bool> CreateLobbyAsync(
-            string playerName,
             string lobbyName,
             int maxPlayersInt,
-            bool isPrivate,
-            string cityName
+            bool isPrivate
         )
         {
-            return await lobbyController.CreateLobbyAsync(playerName, lobbyName, maxPlayersInt, isPrivate, cityName);
+            return await lobbyController.CreateLobbyAsync("Narrator", lobbyName, maxPlayersInt, isPrivate, "");
         }
 
         public async Task<List<Lobby>> GetLobbiesList()
